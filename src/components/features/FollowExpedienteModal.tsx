@@ -103,7 +103,7 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     className="w-full flex-row justify-center"
                 >
-                    <View className="w-full max-w-[500px] overflow-hidden rounded-t-[36px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-100 dark:border-white/5 shadow-2xl pb-10 px-6 pt-6">
+                    <View className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-100 dark:border-white/5 shadow-2xl pb-10 px-6 pt-6">
                         {/* Handle */}
                         <View className="items-center mb-6">
                             <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />
