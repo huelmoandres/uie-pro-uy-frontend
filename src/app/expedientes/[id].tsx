@@ -3,13 +3,14 @@ import {
     Pressable,
     Text,
     View,
+    Modal,
 } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useExpedienteDetail } from '@hooks';
 import { ExpedienteService } from '@services';
 import { ConfirmationModal, Skeleton, PageContainer } from '@components/ui';
-import { MovementItem } from '@components/features';
+import { MovementItem, AgendaWebView } from '@components/features';
 import { ScrollView } from 'react-native';
 import {
     Trash2,
@@ -34,6 +35,7 @@ export default function ExpedienteDetailScreen() {
     const queryClient = useQueryClient();
     const { id } = useLocalSearchParams();
     const [showUnfollowModal, setShowUnfollowModal] = useState(false);
+    const [showAgenda, setShowAgenda] = useState(false);
 
     // Movements: filter + pagination state
     const [decreeFilter, setDecreeFilter] = useState<'all' | 'decree' | 'no-decree'>('all');
@@ -221,6 +223,17 @@ export default function ExpedienteDetailScreen() {
                     </View>
                 </View>
 
+                {/* Agenda CTA */}
+                <Pressable
+                    className="mb-6 flex-row items-center justify-center gap-3 rounded-[20px] border border-accent/30 bg-accent/10 p-4 active:opacity-70"
+                    onPress={() => setShowAgenda(true)}
+                >
+                    <Calendar size={18} color="#B89146" />
+                    <Text className="font-sans-bold text-sm text-accent uppercase tracking-widest">
+                        Agendar Hora
+                    </Text>
+                </Pressable>
+
                 {/* Vertical Timeline Preview (Refined Stats) */}
                 <View className="mb-8 flex-row gap-4">
                     <View className="flex-1 rounded-[24px] bg-white p-5 border border-slate-100 shadow-premium dark:bg-white/5 dark:border-white/5">
@@ -382,6 +395,33 @@ export default function ExpedienteDetailScreen() {
                 onConfirm={handleUnfollow}
                 onCancel={() => setShowUnfollowModal(false)}
             />
+
+            {/* Agenda Judicial Modal */}
+            <Modal
+                visible={showAgenda}
+                animationType="slide"
+                presentationStyle="fullScreen"
+                statusBarTranslucent={false}
+                onRequestClose={() => setShowAgenda(false)}
+            >
+                <AgendaWebView
+                    iue={item.iue}
+                    sede={item.sede}
+                    onClose={() => setShowAgenda(false)}
+                    onBookingComplete={(payload) => {
+                        setShowAgenda(false);
+                        if (payload.success) {
+                            Toast.show({
+                                type: 'success',
+                                text1: '¡Turno agendado!',
+                                text2: payload.confirmationCode
+                                    ? `Código: ${payload.confirmationCode}`
+                                    : 'Tu turno fue registrado exitosamente.',
+                            });
+                        }
+                    }}
+                />
+            </Modal>
         </View>
     );
 }
