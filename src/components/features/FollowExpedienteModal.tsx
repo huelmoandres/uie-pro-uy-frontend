@@ -101,7 +101,7 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
 
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    className="w-full flex-row justify-center"
+                    className="w-full"
                 >
                     <View className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-100 dark:border-white/5 shadow-2xl pb-10 px-6 pt-6">
                         {/* Handle */}
