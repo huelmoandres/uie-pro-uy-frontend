@@ -61,7 +61,39 @@ function buildAutoFillOficinaStep(): string {
 }
 
 /**
- * STEP 2 — Focus tracker
+ * STEP 2 — Auto-select "Oficina de Gestión Centralizada (OFGECEN)"
+ * After typing "oficina" in the search field, the site populates a SELECT
+ * with matching offices. This step waits for that option to appear and
+ * selects it automatically.
+ */
+function buildSelectOficinaStep(): string {
+    return `
+    (function autoSelectOfgecen() {
+        var SELECT_ID  = 'W0006W0014vOFICINAID';
+        var MATCH_TEXT = 'OFGECEN'; // unique substring in the target option
+        var attempts   = 0;
+        var interval   = setInterval(function() {
+            attempts++;
+            var select = document.getElementById(SELECT_ID);
+            if (select && select.options && select.options.length > 1) {
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].text.indexOf(MATCH_TEXT) !== -1) {
+                        select.selectedIndex = i;
+                        select.dispatchEvent(new Event('input',  { bubbles: true }));
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        sendToApp('INPUT_FOCUSED', { fieldName: select.name || '', fieldId: SELECT_ID });
+                        clearInterval(interval);
+                        break;
+                    }
+                }
+            }
+            if (attempts > 33) clearInterval(interval); // 10s timeout
+        }, 300);
+    })();`;
+}
+
+/**
+ * STEP 3 — Focus tracker
  * Notifies the app whenever an input, select or textarea receives focus.
  * Useful for future smart-fill triggers and UX analytics.
  */
@@ -112,6 +144,8 @@ export function buildInjectedScript(data: IueData): string {
     ${buildBridgeHelperStep()}
 
     ${buildAutoFillOficinaStep()}
+
+    ${buildSelectOficinaStep()}
 
     ${buildFocusTrackerStep()}
 
