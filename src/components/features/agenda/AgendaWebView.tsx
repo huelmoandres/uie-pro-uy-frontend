@@ -24,6 +24,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from '@components/ui/ToastConfig';
 import { X, Calendar, AlertCircle, ExternalLink } from 'lucide-react-native';
 import { useAgendaBridge } from '@hooks/useAgendaBridge';
 import type { FormSubmittedPayload, DateSelectedPayload } from '@app-types/agenda.types';
@@ -157,6 +159,7 @@ export function AgendaWebView({
                         <Text className="font-sans text-sm text-slate-400">Cancelar</Text>
                     </Pressable>
                 </View>
+                <Toast config={toastConfig} />
             </SafeAreaView>
         );
     }
@@ -249,6 +252,7 @@ export function AgendaWebView({
                     style={{ flex: 1 }}
                 />
             )}
+            <Toast config={toastConfig} />
         </SafeAreaView>
     );
 }
