@@ -92,7 +92,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         {/* Expediente detail */}
         <Stack.Screen
-          name="expedientes"
+          name="expedientes/[id]"
           options={{ headerShown: false }}
         />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
