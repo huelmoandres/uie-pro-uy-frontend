@@ -19,9 +19,9 @@ import {
     Pressable,
     ActivityIndicator,
     StatusBar,
-    SafeAreaView,
     Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { X, Calendar, AlertCircle, ExternalLink } from 'lucide-react-native';
 import { useAgendaBridge } from '@hooks/useAgendaBridge';
