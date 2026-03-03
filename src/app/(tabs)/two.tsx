@@ -32,7 +32,7 @@ export default function ProfileScreen() {
             <User size={48} color="#B89146" />
           </View>
           <Text className="text-2xl font-sans-bold text-slate-900 dark:text-white">
-            {user?.email?.split('@')[0] || 'Abogado'}
+            {user?.name || user?.email?.split('@')[0] || 'Abogado'}
           </Text>
           <Text className="text-sm font-sans text-slate-500 mt-1">{user?.email}</Text>
 
