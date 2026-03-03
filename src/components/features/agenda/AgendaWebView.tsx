@@ -17,6 +17,7 @@ import {
     View,
     Text,
     Pressable,
+    TouchableOpacity,
     ActivityIndicator,
     StatusBar,
     Platform,
@@ -31,7 +32,7 @@ import type { FormSubmittedPayload, DateSelectedPayload } from '@app-types/agend
 // Constants
 // ──────────────────────────────────────────────────────────
 
-const AGENDA_BASE_URL = 'https://agenda.poderjudicial.uy';
+const AGENDA_BASE_URL = 'https://agenda.poderjudicial.gub.uy';
 
 // ──────────────────────────────────────────────────────────
 // Native WebView — lazy conditional require
@@ -167,8 +168,11 @@ export function AgendaWebView({
         <SafeAreaView className="flex-1 bg-white dark:bg-[#0B1120]">
             <StatusBar barStyle="dark-content" />
 
-            {/* Header */}
-            <View className="flex-row items-center justify-between border-b border-slate-100 bg-white px-4 py-3 dark:border-white/5 dark:bg-primary">
+            {/* Header — elevated above WebView with zIndex */}
+            <View
+                className="flex-row items-center justify-between border-b border-slate-100 bg-white px-4 py-3 dark:border-white/5 dark:bg-primary"
+                style={{ zIndex: 10, elevation: 10 }}
+            >
                 <View className="flex-row items-center gap-3 flex-1 mr-4">
                     <View className="h-9 w-9 items-center justify-center rounded-[12px] bg-accent/10">
                         <Calendar size={18} color="#B89146" />
@@ -186,14 +190,24 @@ export function AgendaWebView({
                     {isLoading && (
                         <ActivityIndicator size="small" color="#B89146" style={{ marginRight: 4 }} />
                     )}
-                    <Pressable
+                    {/* TouchableOpacity is more reliable inside WebView contexts */}
+                    <TouchableOpacity
                         onPress={onClose}
-                        className="h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 active:opacity-70"
+                        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                        activeOpacity={0.7}
+                        style={{
+                            height: 36,
+                            width: 36,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 18,
+                            backgroundColor: 'rgba(100, 116, 139, 0.12)',
+                        }}
                         accessibilityLabel="Cerrar agenda"
                         accessibilityRole="button"
                     >
-                        <X size={16} color="#64748B" />
-                    </Pressable>
+                        <X size={18} color="#64748B" />
+                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -226,8 +240,8 @@ export function AgendaWebView({
                     onLoadEnd={() => setIsLoading(false)}
                     onError={() => { setIsLoading(false); setHasError(true); }}
                     onHttpError={() => { setIsLoading(false); setHasError(true); }}
-                    onNavigationStateChange={() => { /* future: track nav */ }}
-                    originWhitelist={['https://agenda.poderjudicial.uy', 'about:blank']}
+                    // Security: allow the agenda domain and any potential redirects
+                    originWhitelist={['https://*.poderjudicial.gub.uy', 'https://*.poderjudicial.uy', 'about:blank', 'https://*']}
                     cacheEnabled={Platform.OS === 'ios'}
                     javaScriptEnabled={true}
                     domStorageEnabled={true}
