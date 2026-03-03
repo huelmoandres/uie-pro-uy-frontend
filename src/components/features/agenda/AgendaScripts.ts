@@ -15,7 +15,6 @@ import type { IueData } from '@app-types/agenda.types';
  * and sets up `window.ReactNativeWebView.postMessage` listeners for input events.
  */
 export function buildInjectedScript(data: IueData): string {
-    // Serialize safely — never trust raw string interpolation with user data
     const jsonData = JSON.stringify(data);
 
     return `
@@ -34,7 +33,28 @@ export function buildInjectedScript(data: IueData): string {
         }
     }
 
-    // 3. Notify the app whenever an input gains focus
+    // 3. Auto-fill: wait for the search field to appear and fill with "oficina"
+    //    Uses polling every 300ms (max 10s) since the SPA may render fields late.
+    var SEARCH_FIELD_ID = 'W0006W0014vBUSQUEDAOFICINA';
+    var fillAttempts = 0;
+    var fillInterval = setInterval(function() {
+        fillAttempts++;
+        var field = document.getElementById(SEARCH_FIELD_ID);
+        if (field && !field.value) {
+            field.value = 'oficina';
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+            field.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+            clearInterval(fillInterval);
+            sendToApp('INPUT_FOCUSED', { fieldName: field.name || '', fieldId: field.id || '' });
+        }
+        // Stop polling after 10 seconds to avoid memory leaks
+        if (fillAttempts > 33) {
+            clearInterval(fillInterval);
+        }
+    }, 300);
+
+    // 4. Notify the app whenever an input gains focus
     document.addEventListener('focusin', function(event) {
         var target = event.target;
         if (target && (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA')) {
@@ -45,7 +65,7 @@ export function buildInjectedScript(data: IueData): string {
         }
     }, true);
 
-    // 4. Notify the app on detected form submissions
+    // 5. Notify the app on detected form submissions
     document.addEventListener('submit', function(event) {
         var form = event.target;
         sendToApp('FORM_SUBMITTED', {
