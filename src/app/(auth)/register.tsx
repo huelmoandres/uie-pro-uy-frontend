@@ -73,9 +73,36 @@ export default function RegisterScreen() {
             </View>
 
             {/* Form Card (Rule 12: SM) */}
-            <View className="flex-1 px-8">
+            <View className="flex-1 px-2">
                 <View className="overflow-hidden rounded-[40px] bg-white p-8 border border-slate-100 dark:bg-primary dark:border-white/5 shadow-premium dark:shadow-premium-dark">
                     <View>
+                        <View className="mb-5">
+                            <Text className="mb-2 ml-1 text-[10px] font-sans-bold uppercase tracking-[1.5px] text-accent">
+                                Nombre Completo
+                            </Text>
+                            <Controller
+                                control={control}
+                                name="name"
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <TextInput
+                                        className={`rounded-2xl bg-slate-50 border ${errors.name ? 'border-danger' : 'border-slate-200'} px-5 py-2.5 font-sans text-sm text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:border-accent`}
+                                        placeholder="Ej: Juan Pérez"
+                                        placeholderTextColor="#94A3B8"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value || ''}
+                                        autoCapitalize="words"
+                                        editable={!isLoading}
+                                    />
+                                )}
+                            />
+                            {errors.name && (
+                                <Text className="mt-1 ml-1 text-[10px] font-sans-semi text-danger">
+                                    {errors.name.message}
+                                </Text>
+                            )}
+                        </View>
+
                         <View className="mb-5">
                             <Text className="mb-2 ml-1 text-[10px] font-sans-bold uppercase tracking-[1.5px] text-accent">
                                 Correo Electrónico
