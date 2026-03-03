@@ -205,7 +205,6 @@ const styles = StyleSheet.create({
     overlay: {
         flex: 1,
         justifyContent: 'flex-end',
-        alignItems: 'center',
     },
     backdropDim: {
         flex: 1,
