@@ -83,6 +83,13 @@ function buildSelectOficinaStep(): string {
                         select.dispatchEvent(new Event('change', { bubbles: true }));
                         sendToApp('INPUT_FOCUSED', { fieldName: select.name || '', fieldId: SELECT_ID });
                         clearInterval(interval);
+                        // Guide the user on what to do next
+                        setTimeout(function() {
+                            sendToApp('GUIDANCE_NEEDED', {
+                                step: 'SELECT_TRAMITE',
+                                message: 'Seleccioná el tipo de trámite y luego elegí una fecha disponible.'
+                            });
+                        }, 800);
                         break;
                     }
                 }

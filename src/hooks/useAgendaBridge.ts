@@ -9,6 +9,8 @@
 
 import { useCallback, useMemo } from 'react';
 import { WebViewMessageEvent } from 'react-native-webview';
+import Toast from 'react-native-toast-message';
+import * as Haptics from 'expo-haptics';
 import { buildInjectedScript } from '@components/features/agenda/AgendaScripts';
 import type {
     IueData,
@@ -18,6 +20,7 @@ import type {
     DateSelectedPayload,
     FormSubmittedPayload,
     WebViewErrorPayload,
+    GuidanceNeededPayload,
 } from '@app-types/agenda.types';
 
 // ──────────────────────────────────────────────────────────
@@ -29,6 +32,7 @@ type KnownPayloads = {
     DATE_SELECTED: DateSelectedPayload;
     FORM_SUBMITTED: FormSubmittedPayload;
     NAVIGATION_STATE_CHANGE: Record<string, unknown>;
+    GUIDANCE_NEEDED: GuidanceNeededPayload;
     ERROR: WebViewErrorPayload;
 };
 
@@ -93,6 +97,18 @@ export function useAgendaBridge({
                 }
                 case 'FORM_SUBMITTED': {
                     onFormSubmitted?.(parsed.payload as FormSubmittedPayload);
+                    break;
+                }
+                case 'GUIDANCE_NEEDED': {
+                    const guidance = parsed.payload as GuidanceNeededPayload;
+                    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                    Toast.show({
+                        type: 'info',
+                        text1: '📋 Acción requerida',
+                        text2: guidance.message,
+                        visibilityTime: 5000,
+                        position: 'bottom',
+                    });
                     break;
                 }
                 case 'ERROR': {

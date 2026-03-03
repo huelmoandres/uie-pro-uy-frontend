@@ -15,6 +15,7 @@ export type WebViewMessageType =
     | 'FORM_SUBMITTED'
     | 'DATE_SELECTED'
     | 'NAVIGATION_STATE_CHANGE'
+    | 'GUIDANCE_NEEDED'
     | 'ERROR';
 
 /** Generic typed wrapper for every message from the WebView. */
@@ -49,6 +50,11 @@ export interface WebViewErrorPayload {
     code: number;
     description: string;
     url: string;
+}
+
+export interface GuidanceNeededPayload {
+    message: string;
+    step: string; // e.g. 'SELECT_TRAMITE', 'SELECT_DATE'
 }
 
 // ──────────────────────────────────────────────────────────
