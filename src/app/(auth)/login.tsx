@@ -60,7 +60,7 @@ export default function LoginScreen() {
                     <Scale size={32} color="#B89146" />
                 </View>
                 <Text className="text-3xl font-sans-bold text-center text-slate-900 dark:text-white tracking-tight">UIE Pro Uy</Text>
-                <Text className="text-sm font-sans text-center text-slate-500 mt-2">Gestión Judicial de Alta Gama</Text>
+                <Text className="text-sm font-sans text-center text-slate-600 mt-2">Gestión Judicial de Alta Gama</Text>
             </View>
 
             {/* Form Card (Rule 12: SM) */}
@@ -123,21 +123,21 @@ export default function LoginScreen() {
                         </View>
 
                         <Pressable
-                            className="items-center justify-center rounded-full bg-accent py-3 shadow-lg shadow-accent/40 active:scale-[0.98] active:bg-accent-dark disabled:opacity-50"
+                            className="items-center justify-center rounded-full bg-accent py-4 shadow-lg shadow-accent/40 active:scale-[0.98] active:bg-accent-dark disabled:opacity-50"
                             onPress={handleSubmit(onSubmit)}
                             disabled={isLoading}
                         >
-                            <Text className="text-xs font-sans-bold uppercase tracking-[2px] text-white">
-                                {isLoading ? 'Ingresando...' : 'INGRESAR'}
+                            <Text className="text-sm font-sans-bold uppercase tracking-[1px] text-white">
+                                {isLoading ? 'Ingresando...' : 'Ingresar'}
                             </Text>
                         </Pressable>
                     </View>
                 </View>
 
-                <View className="mt-10 flex-row justify-center pb-12">
-                    <Text className="font-sans text-sm text-slate-400">¿No tenés cuenta? </Text>
+                <View className="mt-10 flex-row justify-center pb-12 px-10">
+                    <Text className="font-sans text-sm text-slate-600">¿No tenés cuenta? </Text>
                     <Pressable onPress={() => router.push('/(auth)/register')}>
-                        <Text className="font-sans-bold text-sm text-accent">Registrate</Text>
+                        <Text className="font-sans-bold text-sm text-accent-dark">Registrate</Text>
                     </Pressable>
                 </View>
             </View>

@@ -130,6 +130,90 @@ function buildSubmitListenerStep(): string {
     }, true);`;
 }
 
+/**
+ * STEP 4 — Auto-fill personal data in Step 2 of the form
+ * Identifies "Datos del Interesado" fields and fills them with user profile data.
+ */
+function buildAutoFillPersonalDataStep(): string {
+    return `
+    (function autoFillPersonalData() {
+        if (!window.IUE_DATA) return;
+        var data = window.IUE_DATA.userData || {};
+        var session = window.IUE_DATA.sessionState || {};
+        
+        // Selector mappings for the "Datos del Interesado" (Step 2)
+        // Prioritize sessionState (user manual changes) over profile data
+        var FIELDS = {
+            'W0006W0014vRESERVANOMBRE':      session['W0006W0014vRESERVANOMBRE'] || data.name,
+            'W0006W0014vRESERVACORREO':      session['W0006W0014vRESERVACORREO'] || data.email,
+            'W0006W0014vRESERVATELEFONO':    session['W0006W0014vRESERVATELEFONO'] || data.phone,
+            'W0006W0014vRESERVADOCUMENTO':   session['W0006W0014vRESERVADOCUMENTO'] || data.cedula,
+            'W0006W0014vRESERVADESCRIPCION': session['W0006W0014vRESERVADESCRIPCION'] || (window.IUE_DATA.iues || []).join(', ')
+        };
+
+        var attempts = 0;
+        var step2Notified = false;
+        // Search for up to 2 minutes (240 * 500ms) since user must select date first
+        var interval = setInterval(function() {
+            attempts++;
+            var filledCount = 0;
+            var targetCount = 0;
+            
+            for (var id in FIELDS) {
+                var val = FIELDS[id];
+                if (!val) continue;
+                targetCount++;
+                
+                var field = document.getElementById(id) || document.querySelector('[id*="' + id + '"]');
+                // Only fill if the field exists and is empty or contains a default '0'
+                if (field) {
+                    if (!step2Notified) {
+                        sendToApp('STEP_COMPLETED', { step: 'DATOS_PERSONALES' });
+                        step2Notified = true;
+                    }
+                    var currentValue = (field.value || '').trim();
+                    if (!currentValue || currentValue === '0' || currentValue.length < 1) {
+                        field.focus();
+                        field.value = ''; // Force clear
+                        field.value = val;
+                        field.dispatchEvent(new Event('input',   { bubbles: true }));
+                        field.dispatchEvent(new Event('change',  { bubbles: true }));
+                        field.dispatchEvent(new Event('blur',    { bubbles: true }));
+                        field.blur();
+                    }
+                    filledCount++;
+                }
+            }
+            
+            // If we found and filled all available fields, or after 120s, stop
+            if ((targetCount > 0 && filledCount >= targetCount) || attempts > 240) {
+                clearInterval(interval);
+            }
+        }, 500);
+    })();`;
+}
+
+/**
+ * STEP 5 — Input Persistence
+ * Listens for 'input' events on all relevant fields and sends their current
+ * value back to the app so they can be restored if the view resets.
+ */
+function buildInputPersistenceStep(): string {
+    return `
+    document.addEventListener('input', function(event) {
+        var t = event.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) {
+            if (t.id && t.id.indexOf('RESERVA') !== -1) {
+                sendToApp('INPUT_CHANGED', { 
+                    fieldId: t.id, 
+                    fieldName: t.name || '', 
+                    value: t.value || '' 
+                });
+            }
+        }
+    }, true);`;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Public composer
 // ─────────────────────────────────────────────────────────────────────────────
@@ -154,6 +238,10 @@ export function buildInjectedScript(data: IueData): string {
 
     ${buildSelectOficinaStep()}
 
+    ${buildAutoFillPersonalDataStep()}
+
+    ${buildInputPersistenceStep()}
+
     ${buildFocusTrackerStep()}
 
     ${buildSubmitListenerStep()}
@@ -174,8 +262,8 @@ export const PRE_FILL_IUE_SCRIPT = `
 (function() {
     if (!window.IUE_DATA) { true; return; }
     var field = document.querySelector('[name="iue"], [id*="iue"], [id*="IUE"]');
-    if (field && !field.value) {
-        field.value = window.IUE_DATA.iue;
+    if (field && !field.value && window.IUE_DATA.iues && window.IUE_DATA.iues.length > 0) {
+        field.value = window.IUE_DATA.iues[0]; // Fill first IUE in the specific IUE field
         field.dispatchEvent(new Event('input',  { bubbles: true }));
         field.dispatchEvent(new Event('change', { bubbles: true }));
     }

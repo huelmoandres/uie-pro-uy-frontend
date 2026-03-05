@@ -9,7 +9,7 @@ import { router, Stack } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
 import { useForm, Controller } from 'react-hook-form';
-import { Scale, ChevronLeft } from 'lucide-react-native';
+import { Scale, ChevronLeft, Info } from 'lucide-react-native';
 import { useAuth } from '@context/AuthContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterFormData } from '@schemas/auth.schema';
@@ -34,7 +34,9 @@ export default function RegisterScreen() {
     const onSubmit = async (data: RegisterFormData) => {
         setIsLoading(true);
         try {
-            await signUp(data);
+            // Remove confirmPassword before sending to API (Rule 12: Backend doesn't want it)
+            const { confirmPassword, ...registerData } = data;
+            await signUp(registerData);
             void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             router.replace('/(tabs)');
         } catch (error) {
@@ -131,6 +133,67 @@ export default function RegisterScreen() {
                             )}
                         </View>
 
+                        <View className="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-100 dark:bg-white/5 dark:border-white/10 flex-row items-center">
+                            <Info size={16} color="#B89146" />
+                            <Text className="ml-3 flex-1 text-[11px] font-sans text-slate-700 leading-relaxed">
+                                Tu teléfono y cédula son fundamentales para <Text className="font-sans-bold text-accent">agendar hora</Text> de forma automática en el sistema judicial.
+                            </Text>
+                        </View>
+
+                        <View className="mb-5">
+                            <Text className="mb-2 ml-1 text-[10px] font-sans-bold uppercase tracking-[1.5px] text-accent">
+                                WhatsApp / Teléfono
+                            </Text>
+                            <Controller
+                                control={control}
+                                name="phone"
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <TextInput
+                                        className={`rounded-2xl bg-slate-50 border ${errors.phone ? 'border-danger' : 'border-slate-200'} px-5 py-2.5 font-sans text-sm text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:border-accent`}
+                                        placeholder="99123456"
+                                        placeholderTextColor="#94A3B8"
+                                        onBlur={onBlur}
+                                        onChangeText={(text) => onChange(text.replace(/[^0-9]/g, ''))}
+                                        value={value || ''}
+                                        keyboardType="phone-pad"
+                                        editable={!isLoading}
+                                    />
+                                )}
+                            />
+                            {errors.phone && (
+                                <Text className="mt-1 ml-1 text-[10px] font-sans-semi text-danger">
+                                    {errors.phone.message}
+                                </Text>
+                            )}
+                        </View>
+
+                        <View className="mb-5">
+                            <Text className="mb-2 ml-1 text-[10px] font-sans-bold uppercase tracking-[1.5px] text-accent">
+                                Cédula de Identidad
+                            </Text>
+                            <Controller
+                                control={control}
+                                name="cedula"
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <TextInput
+                                        className={`rounded-2xl bg-slate-50 border ${errors.cedula ? 'border-danger' : 'border-slate-200'} px-5 py-2.5 font-sans text-sm text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:border-accent`}
+                                        placeholder="12345678"
+                                        placeholderTextColor="#94A3B8"
+                                        onBlur={onBlur}
+                                        onChangeText={(text) => onChange(text.replace(/[^0-9]/g, ''))}
+                                        value={value || ''}
+                                        keyboardType="number-pad"
+                                        editable={!isLoading}
+                                    />
+                                )}
+                            />
+                            {errors.cedula && (
+                                <Text className="mt-1 ml-1 text-[10px] font-sans-semi text-danger">
+                                    {errors.cedula.message}
+                                </Text>
+                            )}
+                        </View>
+
                         <View className="mb-5">
                             <Text className="mb-2 ml-1 text-[10px] font-sans-bold uppercase tracking-[1.5px] text-accent">
                                 Contraseña
@@ -186,21 +249,21 @@ export default function RegisterScreen() {
                         </View>
 
                         <Pressable
-                            className="items-center justify-center rounded-full bg-accent py-3 shadow-lg shadow-accent/40 active:scale-[0.98] active:bg-accent-dark disabled:opacity-50"
+                            className="items-center justify-center rounded-full bg-accent py-4 shadow-lg shadow-accent/40 active:scale-[0.98] active:bg-accent-dark disabled:opacity-50"
                             onPress={handleSubmit(onSubmit)}
                             disabled={isLoading}
                         >
-                            <Text className="text-xs font-sans-bold uppercase tracking-[2px] text-white">
-                                {isLoading ? 'Registrando...' : 'CREAR CUENTA'}
+                            <Text className="text-sm font-sans-bold uppercase tracking-[1px] text-white">
+                                {isLoading ? 'Registrando...' : 'Crear Cuenta'}
                             </Text>
                         </Pressable>
                     </View>
                 </View>
 
-                <View className="mt-10 flex-row justify-center pb-12">
-                    <Text className="font-sans text-sm text-slate-400">¿Ya tenés cuenta? </Text>
+                <View className="mt-10 flex-row justify-center pb-12 px-10">
+                    <Text className="font-sans text-sm text-slate-600">¿Ya tenés cuenta? </Text>
                     <Pressable onPress={() => router.push('/(auth)/login')}>
-                        <Text className="font-sans-bold text-sm text-accent">Ingresá acá</Text>
+                        <Text className="font-sans-bold text-sm text-accent-dark">Ingresá acá</Text>
                     </Pressable>
                 </View>
             </View>

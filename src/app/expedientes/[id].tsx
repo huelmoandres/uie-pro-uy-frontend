@@ -405,7 +405,7 @@ export default function ExpedienteDetailScreen() {
                 onRequestClose={() => setShowAgenda(false)}
             >
                 <AgendaWebView
-                    iue={item.iue}
+                    iues={[item.iue]}
                     sede={item.sede}
                     onClose={() => setShowAgenda(false)}
                     onBookingComplete={(payload) => {

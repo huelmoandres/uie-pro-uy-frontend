@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "845953059871",
+    "project_id": "iue-pro-uy",
+    "storage_bucket": "iue-pro-uy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:845953059871:android:5aff5e978885e453b0992a",
+        "android_client_info": {
+          "package_name": "com.iueprouy.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBox9Ua1Q7Fb16zfH8AS_PTReakTJPqSU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

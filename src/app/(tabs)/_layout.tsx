@@ -1,0 +1,69 @@
+import React from 'react';
+import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
+import { Home, User, Scale } from 'lucide-react-native';
+import Colors from '@/constants/Colors';
+import { useColorScheme } from '@/components/base/useColorScheme';
+
+/**
+ * Premium Tab Layout
+ * Replaces generic names with "Inicio" and "Mi Perfil".
+ * Uses Lucide icons for a refined, modern look.
+ */
+export default function TabLayout() {
+  const colorScheme = useColorScheme();
+  const activeColor = Colors[colorScheme].tint;
+  const inactiveColor = Colors[colorScheme].tabIconDefault;
+
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: activeColor,
+        tabBarInactiveTintColor: inactiveColor,
+        headerShown: false, // We use custom headers in screens
+        tabBarStyle: {
+          backgroundColor: Colors[colorScheme].background,
+          borderTopWidth: 1,
+          borderTopColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : '#F1F5F9',
+          height: Platform.OS === 'ios' ? 88 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+          paddingTop: 10,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        tabBarLabelStyle: {
+          fontFamily: 'Inter_600SemiBold',
+          fontSize: 10,
+          letterSpacing: 0.5,
+          marginTop: 4,
+        },
+      }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Expedientes',
+          tabBarIcon: ({ color, focused }) => (
+            <Home
+              size={22}
+              color={color}
+              strokeWidth={focused ? 2.5 : 2}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="two"
+        options={{
+          title: 'Mi Perfil',
+          tabBarIcon: ({ color, focused }) => (
+            <User
+              size={22}
+              color={color}
+              strokeWidth={focused ? 2.5 : 2}
+            />
+          ),
+        }}
+      />
+    </Tabs>
+  );
+}

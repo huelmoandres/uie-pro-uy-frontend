@@ -35,13 +35,18 @@ export const Skeleton = ({ width, height, borderRadius = 8, className }: Skeleto
     }));
 
     return (
-        <Animated.View
-            style={[
-                { width: width as any, height: height as any, borderRadius },
-                animatedStyle,
-            ]}
-            className={`bg-slate-200 dark:bg-slate-700/50 ${className || ''}`}
-        />
+        <View
+            className={`overflow-hidden bg-slate-200 dark:bg-slate-700/50 ${className || ''}`}
+            style={{ width: width as any, height: height as any, borderRadius }}
+        >
+            <Animated.View
+                style={[
+                    StyleSheet.absoluteFill,
+                    animatedStyle,
+                    { backgroundColor: 'rgba(255, 255, 255, 0.4)' }
+                ]}
+            />
+        </View>
     );
 };
 

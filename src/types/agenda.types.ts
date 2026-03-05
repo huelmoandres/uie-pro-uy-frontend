@@ -12,10 +12,12 @@
 /** All supported message types the WebView can emit. */
 export type WebViewMessageType =
     | 'INPUT_FOCUSED'
+    | 'INPUT_CHANGED'
     | 'FORM_SUBMITTED'
     | 'DATE_SELECTED'
     | 'NAVIGATION_STATE_CHANGE'
     | 'GUIDANCE_NEEDED'
+    | 'STEP_COMPLETED'
     | 'ERROR';
 
 /** Generic typed wrapper for every message from the WebView. */
@@ -32,6 +34,12 @@ export interface WebViewMessage<TPayload = Record<string, unknown>> {
 export interface InputFocusedPayload {
     fieldName: string;
     fieldId: string;
+}
+
+export interface InputChangedPayload {
+    fieldId: string;
+    fieldName: string;
+    value: string;
 }
 
 export interface DateSelectedPayload {
@@ -63,6 +71,14 @@ export interface GuidanceNeededPayload {
 
 /** Data the app passes to the web agenda form via injected JS. */
 export interface IueData {
-    iue: string;
+    iues: string[];
     sede: string;
+    userData?: {
+        name: string | null;
+        email: string;
+        phone: string | null;
+        cedula: string | null;
+    };
+    /** Temporary data stored across sessions (persisted during current agenda flow) */
+    sessionState?: Record<string, string>;
 }

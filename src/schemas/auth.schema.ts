@@ -21,6 +21,14 @@ export const registerSchema = z
             .string("Campo requerido")
             .min(1, 'El correo electrónico es obligatorio')
             .email('Ingresá un correo electrónico válido'),
+        phone: z
+            .string()
+            .regex(/^[0-9]*$/, 'Solo se permiten números')
+            .optional(),
+        cedula: z
+            .string()
+            .regex(/^[0-9]*$/, 'Solo se permiten números')
+            .optional(),
         password: z
             .string("Campo requerido")
             .min(1, 'La contraseña es obligatoria')
@@ -34,8 +42,24 @@ export const registerSchema = z
         path: ['confirmPassword'],
     });
 
+export const updateProfileSchema = z.object({
+    name: z
+        .string("Campo requerido")
+        .min(1, 'El nombre es obligatorio')
+        .min(2, 'El nombre debe tener al menos 2 caracteres'),
+    phone: z
+        .string()
+        .regex(/^[0-9]*$/, 'Solo se permiten números')
+        .optional(),
+    cedula: z
+        .string()
+        .regex(/^[0-9]*$/, 'Solo se permiten números')
+        .optional(),
+});
+
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
+export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;
 
 // ─── Expediente Schema ─────────────────────────────────────────────────────
 

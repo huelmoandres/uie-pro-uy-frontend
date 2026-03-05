@@ -11,7 +11,9 @@ export interface IUser {
     id: string;
     email: string;
     role: string;
-    name?: string;
+    name: string | null;
+    phone: string | null;
+    cedula: string | null;
 }
 
 export interface ILoginRequest {
@@ -23,6 +25,14 @@ export interface IRegisterRequest {
     email: string;
     password: string;
     name?: string;
+    phone?: string;
+    cedula?: string;
+}
+
+export interface IUpdateUserRequest {
+    name?: string;
+    phone?: string;
+    cedula?: string;
 }
 
 export interface ILoginResponse extends IAuthTokens {

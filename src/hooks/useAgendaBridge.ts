@@ -7,16 +7,18 @@
  * ai-rules.md: No `any`. Hooks in camelCase. Logic out of components.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { WebViewMessageEvent } from 'react-native-webview';
 import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
+import { useAuth } from '@context/AuthContext';
 import { buildInjectedScript } from '@components/features/agenda/AgendaScripts';
 import type {
     IueData,
     WebViewMessage,
     WebViewMessageType,
     InputFocusedPayload,
+    InputChangedPayload,
     DateSelectedPayload,
     FormSubmittedPayload,
     WebViewErrorPayload,
@@ -29,15 +31,17 @@ import type {
 
 type KnownPayloads = {
     INPUT_FOCUSED: InputFocusedPayload;
+    INPUT_CHANGED: InputChangedPayload;
     DATE_SELECTED: DateSelectedPayload;
     FORM_SUBMITTED: FormSubmittedPayload;
     NAVIGATION_STATE_CHANGE: Record<string, unknown>;
     GUIDANCE_NEEDED: GuidanceNeededPayload;
+    STEP_COMPLETED: { step: string };
     ERROR: WebViewErrorPayload;
 };
 
 interface UseAgendaBridgeOptions {
-    iue: string;
+    iues: string[];
     sede: string;
     /** Called when the web form is successfully submitted. */
     onFormSubmitted?: (payload: FormSubmittedPayload) => void;
@@ -57,14 +61,30 @@ interface UseAgendaBridgeReturn {
 // ──────────────────────────────────────────────────────────
 
 export function useAgendaBridge({
-    iue,
+    iues,
     sede,
     onFormSubmitted,
     onDateSelected,
 }: UseAgendaBridgeOptions): UseAgendaBridgeReturn {
-    const iueData: IueData = useMemo(() => ({ iue, sede }), [iue, sede]);
+    const { user } = useAuth();
+    const [sessionState, setSessionState] = useState<Record<string, string>>({});
 
-    /** Memoized injection script — only rebuilt if iue/sede changes. */
+    const iueData: IueData = useMemo(() => {
+        const data = {
+            iues,
+            sede,
+            userData: user ? {
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                cedula: user.cedula,
+            } : undefined,
+            sessionState,
+        };
+        return data;
+    }, [iues, sede, user, sessionState]);
+
+    /** Memoized injection script — only rebuilt if iueData changes. */
     const injectedJS = useMemo(() => buildInjectedScript(iueData), [iueData]);
 
     const handleMessage = useCallback(
@@ -82,13 +102,14 @@ export function useAgendaBridge({
                 return;
             }
 
-            if (__DEV__) {
-                console.log(`[AgendaBridge] 📨 ${parsed.type}`, parsed.payload);
-            }
-
             switch (parsed.type) {
                 case 'INPUT_FOCUSED': {
                     // Logged above in dev mode. Could trigger haptics here.
+                    break;
+                }
+                case 'INPUT_CHANGED': {
+                    const { fieldId, value } = parsed.payload as InputChangedPayload;
+                    setSessionState(prev => ({ ...prev, [fieldId]: value }));
                     break;
                 }
                 case 'DATE_SELECTED': {
@@ -107,8 +128,24 @@ export function useAgendaBridge({
                         text1: '📋 Acción requerida',
                         text2: guidance.message,
                         visibilityTime: 5000,
-                        position: 'bottom',
+                        position: 'top',
+                        topOffset: 110,
                     });
+                    break;
+                }
+                case 'STEP_COMPLETED': {
+                    const { step } = parsed.payload as { step: string };
+                    if (step === 'DATOS_PERSONALES') {
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        Toast.show({
+                            type: 'success',
+                            text1: '✅ Datos precargados',
+                            text2: 'Revisá tus datos y seleccioná la hora del turno.',
+                            visibilityTime: 4000,
+                            position: 'top',
+                            topOffset: 110,
+                        });
+                    }
                     break;
                 }
                 case 'ERROR': {

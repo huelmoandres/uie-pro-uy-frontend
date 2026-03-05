@@ -60,7 +60,7 @@ const isWebViewAvailable = NativeWebView !== null;
 // ──────────────────────────────────────────────────────────
 
 interface AgendaWebViewProps {
-    iue: string;
+    iues: string[];
     sede: string;
     onClose: () => void;
     onBookingComplete?: (payload: FormSubmittedPayload) => void;
@@ -72,7 +72,7 @@ interface AgendaWebViewProps {
 // ──────────────────────────────────────────────────────────
 
 export function AgendaWebView({
-    iue,
+    iues,
     sede,
     onClose,
     onBookingComplete,
@@ -94,14 +94,20 @@ export function AgendaWebView({
     }, []);
 
     const { injectedJS, handleMessage } = useAgendaBridge({
-        iue,
+        iues,
         sede,
         onFormSubmitted: handleFormSubmitted,
         onDateSelected: handleDateSelected,
     });
 
+    // Use first IUE for the URL generation if applicable
+    const primaryIue = iues[0] || '';
     const targetUrl = urlOverride
-        ?? `${AGENDA_BASE_URL}/?iue=${encodeURIComponent(iue)}&sede=${encodeURIComponent(sede)}`;
+        ?? `${AGENDA_BASE_URL}/?iue=${encodeURIComponent(primaryIue)}&sede=${encodeURIComponent(sede)}`;
+
+    const headerTitle = iues.length > 1
+        ? `${iues.length} Expedientes`
+        : iues[0] || 'Agendar';
 
     // ── Expo Go fallback ──────────────────────────────────
     if (!isWebViewAvailable) {
@@ -119,7 +125,7 @@ export function AgendaWebView({
                                 Agenda Judicial
                             </Text>
                             <Text className="text-sm font-sans-bold text-slate-900 dark:text-white" numberOfLines={1}>
-                                Agendar Hora — {iue}
+                                Agendar Hora — {headerTitle}
                             </Text>
                         </View>
                     </View>
@@ -185,7 +191,7 @@ export function AgendaWebView({
                             Agenda Judicial
                         </Text>
                         <Text className="text-sm font-sans-bold text-slate-900 dark:text-white" numberOfLines={1}>
-                            Agendar Hora — {iue}
+                            Agendar Hora — {headerTitle}
                         </Text>
                     </View>
                 </View>
@@ -252,7 +258,7 @@ export function AgendaWebView({
                     style={{ flex: 1 }}
                 />
             )}
-            <Toast config={toastConfig} />
+            <Toast config={toastConfig} topOffset={110} />
         </SafeAreaView>
     );
 }

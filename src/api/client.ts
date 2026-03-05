@@ -6,6 +6,10 @@ import { router } from 'expo-router';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
 
+if (__DEV__) {
+    console.log('[API Client] Base URL:', API_URL);
+}
+
 export const SECURE_STORE_KEYS = {
     ACCESS_TOKEN: 'judicial_access_token',
     REFRESH_TOKEN: 'judicial_refresh_token',

@@ -4,13 +4,16 @@ import {
   Text,
   TextInput,
   View,
+  Modal,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useAuth } from '@context/AuthContext';
 import { useExpedientes, useDebounce } from '@hooks';
-import { Search, LogOut, RefreshCw, FolderOpen, SlidersHorizontal, Plus } from 'lucide-react-native';
+import { Search, LogOut, RefreshCw, FolderOpen, SlidersHorizontal, Plus, Calendar as CalendarIcon, X } from 'lucide-react-native';
 import { ConfirmationModal, Skeleton, PageContainer, Paginator } from '@components/ui';
-import { ExpedienteCard, FollowExpedienteModal, ExpedientesFilterModal } from '@components/features';
+import { ExpedienteCard, FollowExpedienteModal, ExpedientesFilterModal, AgendaWebView } from '@components/features';
+import * as Haptics from 'expo-haptics';
+import Toast from 'react-native-toast-message';
 import type { IExpediente, IExpedientesQuery } from '@app-types/expediente.types';
 
 export function ExpedienteSkeleton() {
@@ -38,6 +41,8 @@ export default function ExpedientesScreen() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [selectedIues, setSelectedIues] = useState<string[]>([]);
+  const [showBulkAgenda, setShowBulkAgenda] = useState(false);
   const [queryParams, setQueryParams] = useState<IExpedientesQuery>({
     page: 1,
     limit: 20,
@@ -64,6 +69,34 @@ export default function ExpedientesScreen() {
     setShowLogoutModal(false);
     await signOut();
   }, [signOut]);
+
+  const toggleSelection = useCallback((iue: string) => {
+    setSelectedIues(prev => {
+      const isSelected = prev.includes(iue);
+      if (isSelected) {
+        return prev.filter(id => id !== iue);
+      }
+      if (prev.length >= 5) {
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        Toast.show({
+          type: 'info',
+          text1: 'Límite alcanzado',
+          text2: 'Solo podés seleccionar hasta 5 expedientes.',
+        });
+        return prev;
+      }
+      return [...prev, iue];
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIues([]);
+  }, []);
+
+  const handleBulkAgenda = useCallback(() => {
+    if (selectedIues.length === 0) return;
+    setShowBulkAgenda(true);
+  }, [selectedIues]);
 
   const expedientes = data?.data ?? [];
 
@@ -141,7 +174,14 @@ export default function ExpedientesScreen() {
           <FlashList
             data={expedientes}
             keyExtractor={(item: IExpediente) => item.iue}
-            renderItem={({ item }: { item: IExpediente }) => <ExpedienteCard item={item} />}
+            renderItem={({ item }: { item: IExpediente }) => (
+              <ExpedienteCard
+                item={item}
+                isSelected={selectedIues.includes(item.iue)}
+                isSelectionMode={selectedIues.length > 0}
+                onSelect={toggleSelection}
+              />
+            )}
             // @ts-ignore
             estimatedItemSize={180}
             contentContainerStyle={{ paddingTop: 24, paddingBottom: 0 }}
@@ -151,23 +191,64 @@ export default function ExpedientesScreen() {
         )}
       </PageContainer>
 
-      {/* Fixed Paginator at the bottom */}
-      {data?.meta && expedientes.length > 0 && (
-        <View className="bg-white dark:bg-primary border-t border-slate-100 dark:border-white/5 pb-2 pt-1 z-10">
-          <Paginator
-            currentPage={data.meta.currentPage}
-            totalPages={data.meta.totalPages}
-            pageSize={data.meta.itemsPerPage}
-            totalItems={data.meta.totalItems}
-            onPageChange={(p) => setQueryParams(prev => ({ ...prev, page: p }))}
-            onPageSizeChange={(s) => setQueryParams(prev => ({ ...prev, limit: s, page: 1 }))}
-          />
-        </View>
-      )}
+      {/* Selection Bar & Paginator Container */}
+      <View className="bg-white dark:bg-primary border-t border-slate-200/60 dark:border-white/10 z-10 pb-safe px-5 pt-3">
+        {selectedIues.length > 0 ? (
+          <View>
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <View className="bg-accent px-2.5 py-1 rounded-lg mr-3 shadow-sm shadow-accent/20">
+                  <Text className="font-sans-bold text-xs text-white">
+                    {selectedIues.length}
+                  </Text>
+                </View>
+                <Text className="font-sans-bold text-[13px] text-slate-900 dark:text-white">
+                  {selectedIues.length === 1 ? 'Seleccionado' : 'Seleccionados'}
+                </Text>
+              </View>
+
+              <Pressable
+                onPress={handleBulkAgenda}
+                className="flex-row items-center gap-2 rounded-xl bg-accent px-6 py-3 shadow-md shadow-accent/20 active:scale-[0.96]"
+              >
+                <CalendarIcon size={16} color="#FFFFFF" strokeWidth={2.5} />
+                <Text className="font-sans-bold text-xs uppercase tracking-wider text-white">
+                  Agendar
+                </Text>
+              </Pressable>
+            </View>
+
+            <View className="items-center mt-3">
+              <Pressable
+                onPress={clearSelection}
+                className="active:opacity-40 py-2"
+                hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
+              >
+                <Text className="font-sans-bold text-[10px] uppercase tracking-[2px] text-slate-400 dark:text-slate-500">
+                  Desmarcar todo
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          data?.meta && expedientes.length > 0 && (
+            <View className="pt-1">
+              <Paginator
+                currentPage={data.meta.currentPage}
+                totalPages={data.meta.totalPages}
+                pageSize={data.meta.itemsPerPage}
+                totalItems={data.meta.totalItems}
+                onPageChange={(p) => setQueryParams(prev => ({ ...prev, page: p }))}
+                onPageSizeChange={(s) => setQueryParams(prev => ({ ...prev, limit: s, page: 1 }))}
+              />
+            </View>
+          )
+        )}
+      </View>
 
       {/* Floating Action Button */}
       <Pressable
-        className={`absolute right-6 h-10 w-10 items-center justify-center rounded-full bg-accent shadow-2xl shadow-black/40 active:scale-[0.92] active:bg-[#8C6D2E] z-20 ${(data?.meta && expedientes.length > 0) ? 'bottom-[120px]' : 'bottom-6'}`}
+        className={`absolute right-6 h-10 w-10 items-center justify-center rounded-full bg-accent shadow-2xl shadow-black/40 active:scale-[0.92] active:bg-[#8C6D2E] z-20 ${(data?.meta && expedientes.length > 0) ? 'top-[180px]' : 'top-[180px]'}`}
         onPress={() => setShowFollowModal(true)}
         style={{ elevation: 20 }}
       >
@@ -187,6 +268,32 @@ export default function ExpedientesScreen() {
         onClose={() => setShowFilterModal(false)}
         onApply={(filters) => setQueryParams({ ...filters, page: 1 })}
       />
+
+      {/* Bulk Agenda Modal */}
+      <Modal
+        visible={showBulkAgenda}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setShowBulkAgenda(false)}
+      >
+        <AgendaWebView
+          iues={selectedIues}
+          // Use the sede from the first selected expediente
+          sede={expedientes.find(e => e.iue === selectedIues[0])?.sede || ''}
+          onClose={() => setShowBulkAgenda(false)}
+          onBookingComplete={(payload) => {
+            setShowBulkAgenda(false);
+            if (payload.success) {
+              clearSelection();
+              Toast.show({
+                type: 'success',
+                text1: '¡Turno agendado!',
+                text2: 'Tu turno múltiple fue registrado exitosamente.',
+              });
+            }
+          }}
+        />
+      </Modal>
 
       {/* Logout Modal */}
       <ConfirmationModal
