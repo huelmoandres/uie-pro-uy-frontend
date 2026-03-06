@@ -4,3 +4,4 @@ export * from './useNotifications';
 export * from './useDebounce';
 export * from './useAppUpdates';
 export * from './useAgendaBridge';
+export * from './useAuthMutations';

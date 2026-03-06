@@ -2,17 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { AuthService } from '@services';
 import { SECURE_STORE_KEYS, setGlobalSignOut } from '@api/client';
-import type { IUser, ILoginRequest, IRegisterRequest } from '@app-types/auth.types';
+import type { IUser } from '@app-types/auth.types';
 
 interface AuthContextData {
     user: IUser | null;
     token: string | null;
     isLoading: boolean;
     isAuthenticated: boolean;
-    signIn: (data: ILoginRequest) => Promise<void>;
-    signUp: (data: IRegisterRequest) => Promise<void>;
     signOut: () => Promise<void>;
-    updateUserState: (user: IUser) => void;
+    updateUserState: (user: IUser | null, newToken?: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -43,34 +41,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
-    const signIn = async (data: ILoginRequest) => {
-        const response = await AuthService.login(data);
-        await SecureStore.setItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN, response.accessToken);
-        setToken(response.accessToken);
-
-        // Fetch full user profile after login
-        const userData = await AuthService.getCurrentUser();
-        setUser(userData);
-    };
-
-    const signUp = async (data: IRegisterRequest) => {
-        const response = await AuthService.register(data);
-        await SecureStore.setItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN, response.accessToken);
-        setToken(response.accessToken);
-
-        // Fetch full user profile after registration
-        const userData = await AuthService.getCurrentUser();
-        setUser(userData);
-    };
-
     const signOut = async () => {
         await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
         setToken(null);
         setUser(null);
     };
 
-    const updateUserState = (updatedUser: IUser) => {
+    const updateUserState = (updatedUser: IUser | null, newToken?: string | null) => {
         setUser(updatedUser);
+        if (newToken !== undefined) {
+            setToken(newToken);
+        }
     };
 
     return (
@@ -80,8 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 token,
                 isLoading,
                 isAuthenticated: !!token,
-                signIn,
-                signUp,
                 signOut,
                 updateUserState,
             }}

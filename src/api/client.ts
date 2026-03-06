@@ -49,6 +49,8 @@ apiClient.interceptors.request.use(
 // ─── Response Interceptor ────────────────────────────────────────────────────
 // Captures 401 Unauthorized responses, clears stored tokens, and redirects to login.
 
+let isLoggingOut = false;
+
 apiClient.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
@@ -56,14 +58,18 @@ apiClient.interceptors.response.use(
             error.config?.url?.includes('auth/register');
 
         if (error.response?.status === 401 && !isAuthRequest) {
-            if (globalSignOut) {
-                // Let React State handle the secure store wipe and redirect natively
-                await globalSignOut();
-            } else {
-                // Fallback if context is not mounted
-                await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
-                await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
-                router.replace('/(auth)/login');
+            if (!isLoggingOut) {
+                isLoggingOut = true;
+                if (globalSignOut) {
+                    await globalSignOut();
+                } else {
+                    await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
+                    await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+                    router.replace('/(auth)/login');
+                }
+                setTimeout(() => {
+                    isLoggingOut = false;
+                }, 2000);
             }
         }
         return Promise.reject(error);

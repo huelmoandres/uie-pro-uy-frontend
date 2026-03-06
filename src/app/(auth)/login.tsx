@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
 import { useForm, Controller } from 'react-hook-form';
 import { Scale } from 'lucide-react-native';
-import { useAuth } from '@context/AuthContext';
+import { useLoginMutation } from '@hooks/useAuthMutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginFormData } from '@schemas/auth.schema';
 import { PageContainer } from '@components/ui';
@@ -21,8 +21,7 @@ import { PageContainer } from '@components/ui';
  * Follows Rule 12 (SM default).
  */
 export default function LoginScreen() {
-    const { signIn } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
+    const { mutateAsync: loginMutation, isPending: isLoading } = useLoginMutation();
 
     const {
         control,
@@ -33,9 +32,8 @@ export default function LoginScreen() {
     });
 
     const onSubmit = async (data: LoginFormData) => {
-        setIsLoading(true);
         try {
-            await signIn(data);
+            await loginMutation(data);
             void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             router.replace('/(tabs)');
         } catch (error) {
@@ -45,8 +43,6 @@ export default function LoginScreen() {
                 text1: 'Error de ingreso',
                 text2: 'Credenciales inválidas o error de red.',
             });
-        } finally {
-            setIsLoading(false);
         }
     };
 

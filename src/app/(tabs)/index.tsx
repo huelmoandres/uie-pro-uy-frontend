@@ -174,6 +174,7 @@ export default function ExpedientesScreen() {
           <FlashList
             data={expedientes}
             keyExtractor={(item: IExpediente) => item.iue}
+            extraData={selectedIues}
             renderItem={({ item }: { item: IExpediente }) => (
               <ExpedienteCard
                 item={item}

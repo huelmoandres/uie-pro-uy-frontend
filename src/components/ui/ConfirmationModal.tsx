@@ -71,11 +71,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 <View className="w-[88%] max-w-[360px] overflow-hidden rounded-[32px] bg-white dark:bg-[#0B1120] border border-slate-100 dark:border-white/5 shadow-2xl">
                     <View className="p-8 items-center">
                         {/* Status Icon Wrapper */}
-                        <View className={`mb-6 h-16 w-16 items-center justify-center rounded-[22px] ${type === 'danger' ? 'bg-red-500/10' : 'bg-[#B89146]/10'}`}>
+                        <View className={`mb-6 h-16 w-16 items-center justify-center rounded-[22px] ${type === 'danger' ? 'bg-danger/10' : 'bg-accent/10'}`}>
                             {type === 'danger' ? (
                                 <AlertTriangle size={32} color="#EF4444" />
                             ) : (
-                                <Info size={32} color="#B89146" />
+                                <Info size={32} color="#C5A059" />
                             )}
                         </View>
 
@@ -106,10 +106,10 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                         <View className="w-[1px] bg-slate-100 dark:bg-white/5" />
 
                         <Pressable
-                            className={`flex-1 items-center justify-center py-5 active:opacity-90 ${type === 'danger' ? 'bg-red-500/5' : 'bg-[#B89146]/5'}`}
+                            className={`flex-1 items-center justify-center py-5 active:opacity-90 ${type === 'danger' ? 'bg-danger/5' : 'bg-accent/5'}`}
                             onPress={onConfirm}
                         >
-                            <Text className={`font-sans-bold text-sm uppercase tracking-wider ${type === 'danger' ? 'text-red-500' : 'text-[#B89146]'}`}>
+                            <Text className={`font-sans-bold text-sm uppercase tracking-wider ${type === 'danger' ? 'text-danger' : 'text-accent'}`}>
                                 {confirmText}
                             </Text>
                         </Pressable>

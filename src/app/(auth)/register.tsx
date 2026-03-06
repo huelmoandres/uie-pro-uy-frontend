@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
 import { useForm, Controller } from 'react-hook-form';
 import { Scale, ChevronLeft, Info } from 'lucide-react-native';
-import { useAuth } from '@context/AuthContext';
+import { useRegisterMutation } from '@hooks/useAuthMutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterFormData } from '@schemas/auth.schema';
 import { PageContainer } from '@components/ui';
@@ -20,8 +20,7 @@ import { PageContainer } from '@components/ui';
  * Consistent with LoginScreen aesthetics and Rule 12 (SM).
  */
 export default function RegisterScreen() {
-    const { signUp } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
+    const { mutateAsync: registerMutation, isPending: isLoading } = useRegisterMutation();
 
     const {
         control,
@@ -32,11 +31,10 @@ export default function RegisterScreen() {
     });
 
     const onSubmit = async (data: RegisterFormData) => {
-        setIsLoading(true);
         try {
-            // Remove confirmPassword before sending to API (Rule 12: Backend doesn't want it)
+            // Remove confirmPassword before sending to API
             const { confirmPassword, ...registerData } = data;
-            await signUp(registerData);
+            await registerMutation(registerData);
             void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             router.replace('/(tabs)');
         } catch (error) {
@@ -46,8 +44,6 @@ export default function RegisterScreen() {
                 text1: 'Error de registro',
                 text2: 'No se pudo crear la cuenta. Intentá con otro correo.',
             });
-        } finally {
-            setIsLoading(false);
         }
     };
 
