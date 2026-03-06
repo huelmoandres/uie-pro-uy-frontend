@@ -12,9 +12,11 @@ import { AuthProvider, useAuth } from '@context/AuthContext';
 import { QueryProvider } from '@providers/QueryProvider';
 import { useNotifications } from '@hooks/useNotifications';
 import { useAppUpdates } from '@hooks/useAppUpdates';
+import { useRestoreColorScheme } from '@hooks/useAppColorScheme';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@components/ui/ToastConfig';
 import { LoadingOverlay } from '@components/shared/LoadingOverlay';
+import { HeaderBackButton } from '@components/shared/HeaderBackButton';
 
 import {
   Inter_400Regular,
@@ -40,18 +42,19 @@ export default function RootLayout() {
   });
 
   const { isChecking, isDownloading } = useAppUpdates();
+  const isThemeReady = useRestoreColorScheme();
 
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
   useEffect(() => {
-    if (loaded && !isChecking) {
+    if (loaded && !isChecking && isThemeReady) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, isChecking]);
+  }, [loaded, isChecking, isThemeReady]);
 
-  if (!loaded || isChecking) {
+  if (!loaded || isChecking || !isThemeReady) {
     return null;
   }
 
@@ -83,9 +86,32 @@ function RootLayoutNav() {
 
   const inAuthGroup = segments[0] === '(auth)';
 
+  const isDark = colorScheme === 'dark';
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <Stack
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: isDark ? '#0B1120' : '#FFFFFF',
+            borderBottomWidth: 1,
+            borderBottomColor: isDark
+              ? 'rgba(255,255,255,0.05)'
+              : '#F1F5F9',
+          } as any,
+          headerTitleStyle: {
+            fontFamily: 'Inter_600SemiBold',
+            fontSize: 16,
+            color: isDark ? '#F8FAFC' : '#0F172A',
+          },
+          headerTitleAlign: 'center',
+          headerShadowVisible: false,
+          headerBackTitle: '',
+          headerBackVisible: false,
+          headerLeft: ({ canGoBack }) =>
+            canGoBack ? <HeaderBackButton /> : null,
+        }}
+      >
         {/* Protected area */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         {/* Auth flow */}
@@ -95,6 +121,7 @@ function RootLayoutNav() {
           name="expedientes/[id]"
           options={{ headerShown: false }}
         />
+        <Stack.Screen name="notifications" />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         <Stack.Screen name="+not-found" />
       </Stack>

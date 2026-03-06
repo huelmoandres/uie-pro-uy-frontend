@@ -15,7 +15,7 @@ export default function ProfileScreen() {
 
   const menuItems = [
     { icon: Settings, label: 'Configuración', color: '#64748B', route: '/settings' },
-    { icon: Bell, label: 'Notificaciones', color: '#64748B', route: null },
+    { icon: Bell, label: 'Notificaciones', color: '#64748B', route: '/notifications' },
     { icon: Shield, label: 'Privacidad', color: '#64748B', route: '/privacy' },
     { icon: HelpCircle, label: 'Ayuda y Soporte', color: '#64748B', route: '/support' },
   ];
@@ -37,7 +37,7 @@ export default function ProfileScreen() {
           <Text className="text-sm font-sans text-slate-500 mt-1">{user?.email}</Text>
 
           <View className="mt-4 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/20">
-            <Text className="text-[10px] font-sans-bold text-accent uppercase tracking-widest">Socio Premium</Text>
+            <Text className="text-[10px] font-sans-bold text-accent uppercase tracking-widest">ABOGADO/A</Text>
           </View>
         </View>
 

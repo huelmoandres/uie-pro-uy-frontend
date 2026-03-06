@@ -26,7 +26,7 @@ const PolicySection: React.FC<PolicySectionProps> = ({ title, description, icon:
 export default function PrivacyScreen() {
     return (
         <View className="flex-1 bg-background-light dark:bg-background-dark">
-            <Stack.Screen options={{ title: 'Privacidad', headerBackTitle: '' }} />
+            <Stack.Screen options={{ title: 'Privacidad' }} />
 
             <ScrollView
                 className="flex-1"

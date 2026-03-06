@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Linking } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Stack } from 'expo-router';
-import { ChevronDown, ChevronUp, Mail, ExternalLink, HelpCircle } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, HelpCircle, MessageSquare } from 'lucide-react-native';
+import { PageContainer } from '@components/ui';
+import { ContactSupportModal } from '@components/features';
 
 interface FaqItem {
     question: string;
@@ -22,48 +24,50 @@ const FAQS: FaqItem[] = [
         answer: 'Es normal. Algunos tribunales aún no digitalizan el contenido completo del decreto o solo suben el título "Mero Trámite". Si tocás el evento para ver el decreto y dice "El texto no está disponible", significa que no fue cargado en el sistema original.',
     },
     {
-        question: '¿Puedo agregar expdientes nuevos si no soy el abogado patrocinante?',
+        question: '¿Puedo agregar expedientes nuevos si no soy el abogado patrocinante?',
         answer: 'Sí. Podés agregar cualquier expediente público usando el botón "+" en la parte inferior de la lista de Expedientes y escribiendo su IUE.',
-    }
+    },
 ];
 
 export default function SupportScreen() {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
+    const [modalVisible, setModalVisible] = useState(false);
 
     const toggleAccordion = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
     };
 
-    const handleEmailSupport = () => {
-        Linking.openURL('mailto:soporte@judicialconnector.com.uy?subject=Consulta%20desde%20la%20App');
-    };
-
     return (
-        <View className="flex-1 bg-background-light dark:bg-background-dark">
-            <Stack.Screen options={{ title: 'Soporte y Ayuda', headerBackTitle: '' }} />
-            <ScrollView className="flex-1">
+        <>
+            <PageContainer>
+                <Stack.Screen options={{ title: 'Soporte y Ayuda' }} />
 
-                {/* Contact Banner */}
+                {/* ── Banner ──────────────────────────────────────────────── */}
                 <View className="p-4 pt-6">
-                    <View className="rounded-[24px] bg-primary p-5 shadow-premium-dark relative overflow-hidden">
+                    <View className="rounded-[24px] bg-primary p-6 shadow-premium-dark relative overflow-hidden">
                         <View className="absolute -right-4 -top-4 opacity-10">
                             <HelpCircle size={100} color="#FFFFFF" />
                         </View>
-                        <Text className="mb-1 text-lg font-sans-bold text-white">¿Necesitás ayuda?</Text>
-                        <Text className="mb-4 text-[13px] font-sans text-slate-300">
-                            Estamos acá para asistirte. Escribinos directamente y te responderemos a la brevedad.
+                        <Text className="mb-1 text-lg font-sans-bold text-white">
+                            ¿Necesitás ayuda?
+                        </Text>
+                        <Text className="text-[13px] font-sans text-slate-300 mb-5 leading-relaxed">
+                            Nuestro equipo está disponible para ayudarte con cualquier consulta
+                            sobre la plataforma.
                         </Text>
                         <Pressable
-                            onPress={handleEmailSupport}
-                            className="flex-row items-center self-start rounded-xl bg-accent px-4 py-2.5 active:scale-[0.98] active:bg-[#8C6D2E]"
+                            onPress={() => setModalVisible(true)}
+                            className="flex-row items-center self-start gap-2 rounded-full bg-accent px-5 py-3 active:bg-[#8C6D2E] active:scale-[0.97]"
                         >
-                            <Mail size={16} color="#FFFFFF" />
-                            <Text className="font-sans-bold text-white text-[13px] ml-2">Enviar Mensaje</Text>
+                            <MessageSquare size={16} color="#FFFFFF" />
+                            <Text className="text-sm font-sans-bold uppercase tracking-[1.5px] text-white">
+                                Enviar mensaje
+                            </Text>
                         </Pressable>
                     </View>
                 </View>
 
-                {/* FAQ Section */}
+                {/* ── FAQ ─────────────────────────────────────────────────── */}
                 <View className="p-4">
                     <Text className="ml-2 mb-3 text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
                         Preguntas Frecuentes
@@ -80,8 +84,9 @@ export default function SupportScreen() {
                                         onPress={() => toggleAccordion(index)}
                                         className="flex-row items-center justify-between p-4 active:bg-slate-50 dark:active:bg-white/5"
                                     >
-                                        <Text className={`flex-1 pr-4 font-sans-semi text-[14px] leading-tight ${isOpen ? 'text-accent' : 'text-slate-800 dark:text-slate-200'
-                                            }`}>
+                                        <Text
+                                            className={`flex-1 pr-4 font-sans-semi text-[14px] leading-tight ${isOpen ? 'text-accent' : 'text-slate-800 dark:text-slate-200'}`}
+                                        >
                                             {faq.question}
                                         </Text>
                                         {isOpen ? (
@@ -102,8 +107,12 @@ export default function SupportScreen() {
                         })}
                     </View>
                 </View>
+            </PageContainer>
 
-            </ScrollView>
-        </View>
+            <ContactSupportModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+            />
+        </>
     );
 }

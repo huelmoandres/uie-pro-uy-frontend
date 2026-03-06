@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
-import { useColorScheme } from 'nativewind';
-import { Monitor, Moon, Sun, Check, User as UserIcon, Phone, CreditCard, ChevronRight, Save, X } from 'lucide-react-native';
+import { useAppColorScheme } from '@hooks/useAppColorScheme';
+import { Monitor, Moon, Sun, Check, User as UserIcon, Phone, CreditCard, Save, X } from 'lucide-react-native';
 import { useAuth } from '@context/AuthContext';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,7 @@ import * as Haptics from 'expo-haptics';
 
 export default function SettingsScreen() {
     const { user, updateUserState } = useAuth();
-    const { colorScheme, setColorScheme } = useColorScheme();
+    const { colorScheme, setColorScheme } = useAppColorScheme();
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -72,7 +72,7 @@ export default function SettingsScreen() {
 
     return (
         <View className="flex-1 bg-background-light dark:bg-background-dark">
-            <Stack.Screen options={{ title: 'Configuración', headerBackTitle: '' }} />
+            <Stack.Screen options={{ title: 'Configuración' }} />
             <ScrollView className="flex-1">
                 <View className="p-4 pt-6">
                     {/* User Profile Section */}
@@ -220,7 +220,7 @@ export default function SettingsScreen() {
                             return (
                                 <Pressable
                                     key={option.value}
-                                    onPress={() => setColorScheme(option.value)}
+                                    onPress={() => void setColorScheme(option.value)}
                                     className={`flex-row items-center justify-between p-4 active:bg-slate-50 dark:active:bg-white/5 ${index !== options.length - 1 ? 'border-b border-slate-50 dark:border-white/5' : ''
                                         }`}
                                 >
