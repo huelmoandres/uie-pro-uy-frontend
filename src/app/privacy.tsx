@@ -172,7 +172,7 @@ export default function PrivacyScreen() {
                             'Expo / EAS — distribución de la app y actualizaciones OTA.',
                             'Apple Push Notification Service (APNs) / Firebase Cloud Messaging (FCM) — envío de notificaciones push.',
                             'OpenAI y Google Gemini — procesamiento de texto para resúmenes IA (solo bajo demanda).',
-                            'Ferozo SMTP — envío de correos transaccionales (ej. mensajes de soporte).',
+                            'Brevo SMTP — envío de correos transaccionales (ej. mensajes de soporte, recuperación de contraseña).',
                             'Poder Judicial del Uruguay (SOAP) — fuente oficial de datos de expedientes.',
                         ]}
                     />

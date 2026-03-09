@@ -81,6 +81,11 @@ const FAQS: FaqItem[] = [
         question: '¿Qué muestra el Dashboard?',
         answer: 'El Dashboard ofrece una vista general de todos tus expedientes: total de movimientos, etapas procesales detectadas, actividad reciente y estadísticas agregadas. Accedé desde el ícono de gráfico en la barra inferior.',
     },
+    // ── Cuenta y contraseña ───────────────────────────────────────────────
+    {
+        question: '¿Olvidé mi contraseña, cómo la recupero?',
+        answer: 'En la pantalla de inicio de sesión, tocá "¿Olvidaste tu contraseña?". Ingresá tu email y te enviaremos un código de 6 dígitos. El código expira en 15 minutos. Si no lo recibís, revisá la carpeta de spam.',
+    },
 ];
 
 export default function SupportScreen() {
