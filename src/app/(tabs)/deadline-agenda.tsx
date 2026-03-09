@@ -61,9 +61,10 @@ function buildSections(items: IAgendaItem[]): AgendaSection[] {
     for (const item of items) {
         if (item.status === 'CLOSED') {
             buckets.closed.push(item);
-        } else if (item.status === 'EXPIRED') {
+        } else if (item.status === 'EXPIRED' || item.daysRemaining < 0) {
+            // daysRemaining < 0 catches OPEN items whose cron expiry hasn't run yet
             buckets.expired.push(item);
-        } else if (item.daysRemaining <= 0) {
+        } else if (item.daysRemaining === 0) {
             buckets.today.push(item);
         } else if (item.daysRemaining <= 7) {
             buckets.this_week.push(item);

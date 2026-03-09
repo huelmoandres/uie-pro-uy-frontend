@@ -9,7 +9,7 @@ import {
     View,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { AlertCircle, CheckCircle2, Clock, CreditCard, FileText, Sparkles, X } from 'lucide-react-native';
+import { AlertCircle, CheckCircle2, Clock, CreditCard, FileText, Scissors, Sparkles, X } from 'lucide-react-native';
 import type { IDecree, IDecreeSummary } from '@app-types/expediente.types';
 import { stripHtml } from '@utils/formatters';
 import { DeadlineBadge } from './DeadlineBadge';
@@ -203,6 +203,16 @@ function SummaryCard({ summary }: { summary: IDecreeSummary }) {
                     </Text>
                 )}
             </View>
+
+            {/* Truncation warning */}
+            {summary.textTruncated && (
+                <View className="mx-4 mb-2 flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 px-3 py-2 border border-amber-200/60 dark:border-amber-500/20">
+                    <Scissors size={11} color="#D97706" />
+                    <Text className="flex-1 text-[11px] font-sans text-amber-700 dark:text-amber-400">
+                        El decreto es muy largo. El resumen se basa en los primeros 15 000 caracteres.
+                    </Text>
+                </View>
+            )}
 
             {/* Summary text */}
             <View className="px-4 pb-3">

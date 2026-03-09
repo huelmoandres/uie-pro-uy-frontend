@@ -46,6 +46,7 @@ export interface IDecreeSummary {
     actionDescription: string | null;
     generatedAt: string | null;
     fromCache: boolean;
+    textTruncated: boolean;
 }
 
 export interface IDecree {
