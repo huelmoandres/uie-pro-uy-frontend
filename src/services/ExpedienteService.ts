@@ -5,6 +5,7 @@ import {
     unfollowExpediente,
     pinExpediente,
     updateExpedienteNotes,
+    getExpedienteFollowData,
 } from '@api/expedientes.api';
 import type {
     IExpediente,
@@ -47,5 +48,11 @@ export class ExpedienteService {
 
     static async updateNotes(iue: string, notes: string | null): Promise<void> {
         return await updateExpedienteNotes(iue, notes);
+    }
+
+    static async getFollowData(
+        iue: string,
+    ): Promise<{ isPinned: boolean; notes: string | null } | null> {
+        return await getExpedienteFollowData(iue);
     }
 }

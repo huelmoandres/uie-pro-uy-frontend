@@ -46,12 +46,13 @@ export default function ExpedienteDetailScreen() {
     const [notesEditing, setNotesEditing] = useState(false);
     const notesInputRef = useRef<TextInput>(null);
 
-    const { mutation: notesMutation, getCachedNotes } = useExpedienteNotes(iue);
-    const displayNotes = notesText !== null ? notesText : getCachedNotes();
+    const { mutation: notesMutation, notes: savedNotes } = useExpedienteNotes(iue);
+    // While editing, show the in-progress text; otherwise show what's saved in DB.
+    const displayNotes = notesText !== null ? notesText : (savedNotes ?? '');
 
     const handleSaveNotes = useCallback(() => {
         notesMutation.mutate(displayNotes || null, {
-            onSuccess: () => setNotesEditing(false),
+            onSuccess: () => { setNotesEditing(false); setNotesText(null); },
         });
     }, [notesMutation, displayNotes]);
 

@@ -59,3 +59,16 @@ export async function pinExpediente(iue: string, isPinned: boolean): Promise<voi
 export async function updateExpedienteNotes(iue: string, notes: string | null): Promise<void> {
     await apiClient.patch(`/expedientes/${encodeURIComponent(iue)}/follow`, { notes });
 }
+
+/**
+ * Fetches the current user's follow data (isPinned, notes) for a single expediente.
+ * Returns null if the user is not following it.
+ */
+export async function getExpedienteFollowData(
+    iue: string,
+): Promise<{ isPinned: boolean; notes: string | null } | null> {
+    const { data } = await apiClient.get<{ isPinned: boolean; notes: string | null } | null>(
+        `/expedientes/${encodeURIComponent(iue)}/follow`,
+    );
+    return data;
+}
