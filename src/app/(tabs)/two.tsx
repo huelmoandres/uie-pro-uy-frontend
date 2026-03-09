@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Pressable, Text, View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@context/AuthContext';
-import { PageContainer, ConfirmationModal } from '@components/ui';
-import { User, LogOut, ChevronRight, Settings, Bell, Shield, HelpCircle, LayoutDashboard } from 'lucide-react-native';
+import { PageContainer, ConfirmationModal, InfoButton } from '@components/ui';
+import { User, LogOut, ChevronRight, Settings, Bell, Shield, HelpCircle } from 'lucide-react-native';
+import { INFO_HINTS } from '@/constants/InfoHints';
 
 /**
  * Premium Profile Screen (Tab Two)
@@ -14,7 +15,6 @@ export default function ProfileScreen() {
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', color: '#64748B', route: '/dashboard' },
     { icon: Settings, label: 'Configuración', color: '#64748B', route: '/settings' },
     { icon: Bell, label: 'Notificaciones', color: '#64748B', route: '/notifications' },
     { icon: Shield, label: 'Privacidad', color: '#64748B', route: '/privacy' },
@@ -28,17 +28,24 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Header */}
-        <View className="items-center mb-10">
-          <View className="h-24 w-24 rounded-[32px] bg-primary items-center justify-center shadow-premium-dark border border-white/10 mb-4">
-            <User size={48} color="#B89146" />
-          </View>
-          <Text className="text-2xl font-sans-bold text-slate-900 dark:text-white">
-            {user?.name || user?.email?.split('@')[0] || 'Abogado'}
-          </Text>
-          <Text className="text-sm font-sans text-slate-500 mt-1">{user?.email}</Text>
+        <View className="items-center mb-10 px-6">
+          <View className="w-full max-w-[320px]">
+            <View className="flex-row justify-end mb-2">
+              <InfoButton title={INFO_HINTS.perfilInfo.title} description={INFO_HINTS.perfilInfo.description} size={18} />
+            </View>
+            <View className="items-center">
+              <View className="h-24 w-24 rounded-[32px] bg-primary items-center justify-center shadow-premium-dark border border-white/10 mb-4">
+                <User size={48} color="#B89146" />
+              </View>
+              <Text className="text-2xl font-sans-bold text-slate-900 dark:text-white">
+                {user?.name || user?.email?.split('@')[0] || 'Abogado'}
+              </Text>
+              <Text className="text-sm font-sans text-slate-500 mt-1">{user?.email}</Text>
 
-          <View className="mt-4 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/20">
-            <Text className="text-[10px] font-sans-bold text-accent uppercase tracking-widest">ABOGADO/A</Text>
+              <View className="mt-4 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/20">
+                <Text className="text-[10px] font-sans-bold text-accent uppercase tracking-widest">ABOGADO/A</Text>
+              </View>
+            </View>
           </View>
         </View>
 

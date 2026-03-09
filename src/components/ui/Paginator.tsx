@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react-native';
 
 export interface PaginatorProps {
@@ -34,8 +34,8 @@ export const Paginator: React.FC<PaginatorProps> = React.memo(({
     const endIndex = Math.min(validCurrentPage * pageSize, safeTotalItems);
 
     return (
-        <View className="pt-2 px-2">
-            <View className={`flex-row items-center justify-between px-4 ${safeTotalPages > 1 ? 'mb-3' : ''}`}>
+        <View className="py-2">
+            <View className={`flex-row items-center justify-between ${safeTotalPages > 1 ? 'mb-3' : ''}`}>
                 <Text className="text-[11px] font-sans-semi text-slate-400 tracking-wider">
                     Mostrando <Text className="font-sans-bold">{startIndex}</Text> al <Text className="font-sans-bold">{endIndex}</Text> de <Text className="font-sans-bold">{safeTotalItems}</Text>
                 </Text>
@@ -63,7 +63,7 @@ export const Paginator: React.FC<PaginatorProps> = React.memo(({
 
             {/* Pagination Controls */}
             {safeTotalPages > 1 && (
-                <View className="flex-row items-center justify-between bg-slate-50 border border-slate-100 dark:bg-white/5 dark:border-white/10 rounded-2xl p-1 mx-2">
+                <View className="flex-row items-center justify-between bg-slate-50 border border-slate-100 dark:bg-white/5 dark:border-white/10 rounded-2xl p-1">
                     <Pressable
                         disabled={validCurrentPage === 1}
                         onPress={() => onPageChange(validCurrentPage - 1)}

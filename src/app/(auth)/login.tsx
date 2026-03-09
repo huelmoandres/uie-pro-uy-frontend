@@ -116,6 +116,14 @@ export default function LoginScreen() {
                                     {errors.password.message}
                                 </Text>
                             )}
+                            <Pressable
+                                onPress={() => router.push('/(auth)/forgot-password')}
+                                className="mt-2 self-end"
+                            >
+                                <Text className="text-[11px] font-sans-semi text-accent">
+                                    ¿Olvidaste tu contraseña?
+                                </Text>
+                            </Pressable>
                         </View>
 
                         <Pressable

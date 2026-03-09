@@ -38,6 +38,32 @@ if (Notifications) {
 }
 
 /**
+ * Requests push notification permissions and registers the device token.
+ * Called from NotificationPermissionModal after the user taps "Activar".
+ */
+export async function requestAndRegisterNotifications(): Promise<void> {
+    if (isExpoGo || !Notifications || !Device.isDevice) return;
+    if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('expedientes', {
+            name: 'Expedientes Judiciales',
+            importance: (Notifications as any).AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#1E3A5F',
+        });
+    }
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') return;
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    if (!projectId) return;
+    try {
+        const token = await Notifications.getExpoPushTokenAsync({ projectId });
+        await apiClient.post('/users/me/push-token', { token: token.data });
+    } catch (error) {
+        console.error('[Notifications] Failed to register token:', error);
+    }
+}
+
+/**
  * Hook for notification registration, foreground display, and tap navigation.
  * Handles both foreground taps and cold-start taps (app was closed).
  */
@@ -83,41 +109,11 @@ export function useNotifications() {
     }, []);
 
     async function registerForPushNotifications() {
-        if (!Device.isDevice || !Notifications) {
-            return;
-        }
-
-        if (Platform.OS === 'android') {
-            await Notifications.setNotificationChannelAsync('expedientes', {
-                name: 'Expedientes Judiciales',
-                importance: (Notifications as any).AndroidImportance.MAX,
-                vibrationPattern: [0, 250, 250, 250],
-                lightColor: '#1E3A5F',
-            });
-        }
-
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-        }
-
-        if (finalStatus !== 'granted') {
-            return;
-        }
-
-        const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-        if (projectId) {
-            try {
-                const token = await Notifications.getExpoPushTokenAsync({ projectId });
-                console.log('[Notifications] Token acquired:', token.data);
-                await apiClient.post('/users/me/push-token', { token: token.data });
-                console.log('[Notifications] Token saved to remote server.');
-            } catch (error) {
-                console.error('[Notifications] Failed to get push token:', error);
-            }
+        if (!Device.isDevice || !Notifications) return;
+        const { status } = await Notifications.getPermissionsAsync();
+        // Only silently register if already granted (pre-prompt handled by NotificationPermissionModal)
+        if (status === 'granted') {
+            await requestAndRegisterNotifications();
         }
     }
 }

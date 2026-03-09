@@ -12,6 +12,8 @@ import { BlurView } from 'expo-blur';
 import { AlertCircle, CheckCircle2, Clock, CreditCard, FileText, Scissors, Sparkles, X } from 'lucide-react-native';
 import type { IDecree, IDecreeSummary } from '@app-types/expediente.types';
 import { stripHtml } from '@utils/formatters';
+import { InfoButton } from '@components/ui';
+import { INFO_HINTS } from '@/constants/InfoHints';
 import { DeadlineBadge } from './DeadlineBadge';
 import { useDecreeSummary } from '@hooks/useDecreeSummary';
 import axios from 'axios';
@@ -128,6 +130,7 @@ export const DecreeViewer = React.memo(({ decree }: Props) => {
                             {canSummarize && (
                                 <View className="mb-5">
                                     {!summary && !isSummarizing && !summaryError && (
+                                        <View className="flex-row items-center gap-2">
                                         <Pressable
                                             onPress={handleSummarize}
                                             className="flex-row items-center gap-2 self-start rounded-xl border border-violet-400/30 bg-violet-50 dark:bg-violet-500/10 px-4 py-2.5 active:opacity-70"
@@ -137,6 +140,8 @@ export const DecreeViewer = React.memo(({ decree }: Props) => {
                                                 Resumir con IA
                                             </Text>
                                         </Pressable>
+                                        <InfoButton title={INFO_HINTS.resumenIA.title} description={INFO_HINTS.resumenIA.description} size={14} />
+                                        </View>
                                     )}
 
                                     {isSummarizing && (
@@ -194,9 +199,10 @@ function SummaryCard({ summary }: { summary: IDecreeSummary }) {
             {/* Card header */}
             <View className="flex-row items-center gap-2 px-4 pt-4 pb-2">
                 <Sparkles size={13} color="#7C3AED" />
-                <Text className="text-[10px] font-sans-bold uppercase tracking-[1.5px] text-violet-700 dark:text-violet-400">
+                <Text className="text-[10px] font-sans-bold uppercase tracking-[1.5px] text-violet-700 dark:text-violet-400 flex-1">
                     Resumen IA
                 </Text>
+                <InfoButton title={INFO_HINTS.resumenIA.title} description={INFO_HINTS.resumenIA.description} size={12} />
                 {summary.fromCache && (
                     <Text className="ml-auto text-[10px] font-sans text-slate-400 dark:text-slate-500">
                         guardado

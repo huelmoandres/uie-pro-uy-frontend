@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import {
     ActivityIndicator,
     Pressable,
+    RefreshControl,
     Text,
     View,
     Modal,
@@ -13,13 +14,13 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useExpedienteDetail, useExpedienteNotes, useExportPdf } from '@hooks';
 import { ExpedienteService } from '@services';
-import { ConfirmationModal, Skeleton, PageContainer } from '@components/ui';
+import { ConfirmationModal, Skeleton, PageContainer, InfoButton } from '@components/ui';
+import { INFO_HINTS } from '@/constants/InfoHints';
 import { MovementItem, AgendaWebView, InternalGroupItem, CaseStageBadge, ActivityStatusBadge } from '@components/features';
 import { ScrollView } from 'react-native';
 import {
     Trash2,
     ChevronLeft,
-    RefreshCw,
     Scale,
     Calendar,
     MapPin,
@@ -74,9 +75,10 @@ function NotesEditor({ iue, initialNotes }: { iue: string; initialNotes: string 
     return (
         <View className="mb-8">
             <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-[10px] font-sans-bold uppercase tracking-[2.5px] text-slate-400">
+                <Text className="text-[10px] font-sans-bold uppercase tracking-[2.5px] text-slate-400 flex-1">
                     Mis Notas
                 </Text>
+                <InfoButton title={INFO_HINTS.misNotas.title} description={INFO_HINTS.misNotas.description} size={14} />
                 {!editing && (
                     <Pressable onPress={handleEdit} hitSlop={8} className="flex-row items-center gap-1.5">
                         <Pencil size={12} color="#B89146" />
@@ -285,16 +287,22 @@ export default function ExpedienteDetailScreen() {
                         </Text>
                         <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">{item.iue}</Text>
                     </View>
-                    <Pressable
-                        className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 dark:bg-white/5 active:scale-90"
-                        onPress={handleRefresh}
-                    >
-                        <RefreshCw size={18} color={isRefetching ? '#B89146' : '#64748B'} />
-                    </Pressable>
+                    <View className="h-10 w-10" />
                 </View>
             </View>
 
-            <PageContainer scrollable={true} withHeader={true} className="pt-6">
+            <PageContainer
+                scrollable={true}
+                withHeader={true}
+                className="pt-6"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefetching}
+                        onRefresh={() => void refetch()}
+                        tintColor="#B89146"
+                    />
+                }
+            >
                 {/* Main Info Card */}
                 <View className="mb-6 overflow-hidden rounded-[32px] bg-white p-6 border border-slate-100 shadow-premium dark:bg-primary/50 dark:border-white/5 dark:shadow-premium-dark">
                     <View className="mb-5 flex-row items-center">
@@ -408,9 +416,12 @@ export default function ExpedienteDetailScreen() {
                 {/* ── Movements Timeline ─────────────────────────────── */}
                 <View className="mb-8">
                     <View className="flex-row items-center justify-between mb-4">
-                        <Text className="text-[10px] font-sans-bold uppercase tracking-[2.5px] text-slate-400">
-                            Historial de Movimientos
-                        </Text>
+                        <View className="flex-row items-center gap-2 flex-1">
+                            <Text className="text-[10px] font-sans-bold uppercase tracking-[2.5px] text-slate-400">
+                                Historial de Movimientos
+                            </Text>
+                            <InfoButton title={INFO_HINTS.timeline.title} description={INFO_HINTS.timeline.description} size={14} />
+                        </View>
                         <View className="flex-row items-center gap-1 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-full">
                             <History size={10} color="#94A3B8" />
                             <Text className="text-[10px] font-sans-semi text-slate-400">

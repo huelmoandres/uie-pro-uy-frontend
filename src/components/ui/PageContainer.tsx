@@ -8,6 +8,7 @@ interface PageContainerProps extends ViewProps {
     scrollable?: boolean;
     withHeader?: boolean;
     keyboardAware?: boolean;
+    refreshControl?: React.ReactElement;
 }
 
 /**

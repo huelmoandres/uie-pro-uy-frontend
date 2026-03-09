@@ -67,7 +67,7 @@ export default function NotificationsScreen() {
     const masterEnabled = prefs?.pushEnabled ?? true;
 
     return (
-        <PageContainer>
+        <PageContainer scrollable>
             <Stack.Screen options={{ title: 'Notificaciones' }} />
 
             <View className="p-4 pt-6">

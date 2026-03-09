@@ -19,7 +19,8 @@ import Animated, {
 import { CalendarClock, AlertTriangle, CheckCircle, ChevronDown } from 'lucide-react-native';
 import { useDeadlineAgenda } from '@hooks/useDeadlineAgenda';
 import { AgendaItemCard } from '@components/features';
-import { PageContainer } from '@components/ui';
+import { PageContainer, InfoButton } from '@components/ui';
+import { INFO_HINTS } from '@/constants/InfoHints';
 import type { IAgendaItem, AgendaSection } from '@app-types/deadline-agenda.types';
 
 // Enable LayoutAnimation on Android
@@ -123,7 +124,7 @@ export default function DeadlineAgendaScreen() {
                     <View className="h-10 w-10 items-center justify-center rounded-[14px] bg-accent/10">
                         <CalendarClock size={20} color="#B89146" />
                     </View>
-                    <View>
+                    <View className="flex-1">
                         <Text className="text-[10px] font-sans-bold uppercase tracking-[2px] text-slate-400">
                             LegalTech
                         </Text>
@@ -131,6 +132,7 @@ export default function DeadlineAgendaScreen() {
                             Agenda Procesal
                         </Text>
                     </View>
+                    <InfoButton title={INFO_HINTS.agendaProcesal.title} description={INFO_HINTS.agendaProcesal.description} size={18} />
                 </View>
                 <Text className="text-[13px] font-sans text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
                     Plazos detectados automáticamente en decretos de tus expedientes.

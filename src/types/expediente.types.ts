@@ -156,4 +156,5 @@ export interface IExpedientesQuery {
     status?: FollowStatus;
     orderBy?: ExpedienteOrderByField;
     order?: 'asc' | 'desc';
+    onlyPinned?: boolean;
 }

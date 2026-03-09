@@ -70,7 +70,9 @@ apiClient.interceptors.response.use(
             originalConfig?.url?.includes('/auth/login') ||
             originalConfig?.url?.includes('/auth/register') ||
             originalConfig?.url?.includes('/auth/refresh') ||
-            originalConfig?.url?.includes('/auth/logout');
+            originalConfig?.url?.includes('/auth/logout') ||
+            originalConfig?.url?.includes('/auth/forgot-password') ||
+            originalConfig?.url?.includes('/auth/reset-password');
 
         if (error.response?.status !== 401 || isAuthEndpoint || originalConfig?._retry) {
             return Promise.reject(error);

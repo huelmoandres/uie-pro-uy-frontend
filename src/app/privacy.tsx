@@ -1,27 +1,70 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
-import { ShieldAlert, Lock, EyeOff, Server, FileText } from 'lucide-react-native';
+import {
+    ShieldAlert,
+    Lock,
+    EyeOff,
+    Server,
+    FileText,
+    Bell,
+    Sparkles,
+    Trash2,
+    Globe,
+    UserCheck,
+    StickyNote,
+    Mail,
+} from 'lucide-react-native';
 
-interface PolicySectionProps {
-    title: string;
-    description: string;
-    icon: React.ElementType;
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function Divider() {
+    return <View className="h-px bg-slate-100 dark:bg-white/5 mb-6 ml-11" />;
 }
 
-const PolicySection: React.FC<PolicySectionProps> = ({ title, description, icon: Icon }) => (
-    <View className="mb-6">
-        <View className="flex-row items-center mb-3">
-            <View className="h-8 w-8 items-center justify-center rounded-xl bg-accent/10 mr-3">
-                <Icon size={16} color="#B89146" />
-            </View>
-            <Text className="text-[15px] font-sans-bold text-slate-900 dark:text-white flex-1">{title}</Text>
+function Bullet({ text }: { text: string }) {
+    return (
+        <View className="flex-row items-start gap-2 mb-1.5">
+            <View className="mt-[7px] h-1.5 w-1.5 rounded-full bg-accent/60 shrink-0" />
+            <Text className="flex-1 text-[13px] font-sans leading-relaxed text-slate-600 dark:text-slate-400">
+                {text}
+            </Text>
         </View>
-        <Text className="text-sm font-sans leading-relaxed text-slate-600 dark:text-slate-400 pl-11">
-            {description}
-        </Text>
-    </View>
-);
+    );
+}
+
+interface SectionProps {
+    number: string;
+    title: string;
+    icon: React.ElementType;
+    description?: string;
+    bullets?: string[];
+}
+
+function PolicySection({ number, title, icon: Icon, description, bullets }: SectionProps) {
+    return (
+        <View className="mb-6">
+            <View className="flex-row items-center mb-3">
+                <View className="h-8 w-8 items-center justify-center rounded-xl bg-accent/10 mr-3 shrink-0">
+                    <Icon size={16} color="#B89146" />
+                </View>
+                <Text className="text-[15px] font-sans-bold text-slate-900 dark:text-white flex-1">
+                    {number}. {title}
+                </Text>
+            </View>
+            <View className="pl-11">
+                {description && (
+                    <Text className="text-[13px] font-sans leading-relaxed text-slate-600 dark:text-slate-400 mb-2">
+                        {description}
+                    </Text>
+                )}
+                {bullets?.map((b, i) => <Bullet key={i} text={b} />)}
+            </View>
+        </View>
+    );
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function PrivacyScreen() {
     return (
@@ -30,9 +73,10 @@ export default function PrivacyScreen() {
 
             <ScrollView
                 className="flex-1"
-                contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+                contentContainerStyle={{ padding: 20, paddingBottom: 48 }}
                 showsVerticalScrollIndicator={false}
             >
+                {/* Hero */}
                 <View className="items-center mb-8 px-4">
                     <View className="h-20 w-20 rounded-[28px] bg-primary items-center justify-center shadow-premium-dark border border-white/10 mb-5 relative">
                         <View className="absolute inset-0 items-center justify-center opacity-10">
@@ -43,46 +87,135 @@ export default function PrivacyScreen() {
                     <Text className="text-2xl font-sans-bold text-slate-900 dark:text-white text-center mb-2">
                         Política de Privacidad
                     </Text>
-                    <Text className="text-sm font-sans text-slate-500 text-center leading-relaxed">
-                        Tu privacidad y la seguridad de tus datos son nuestra máxima prioridad. Conocé cómo protegemos tu información.
+                    <Text className="text-[13px] font-sans text-slate-500 dark:text-slate-400 text-center leading-relaxed">
+                        Tu privacidad y la seguridad de tus datos son nuestra máxima prioridad. Leé cómo recopilamos, usamos y protegemos tu información.
                     </Text>
                 </View>
 
+                {/* Sections card */}
                 <View className="bg-white dark:bg-primary/50 rounded-[32px] p-6 border border-slate-100 dark:border-white/5 shadow-premium dark:shadow-premium-dark">
 
                     <PolicySection
+                        number="1"
                         icon={EyeOff}
-                        title="1. Uso de la Información"
-                        description="Los expedientes (IUEs) que seguís mediante nuestra plataforma se almacenan de manera segura para poder notificarte de nuevos movimientos de forma automatizada. No compartimos, vendemos, ni alquilamos tu información a terceros."
+                        title="Información que recopilamos"
+                        description="Para brindarte el servicio, almacenamos únicamente los datos estrictamente necesarios:"
+                        bullets={[
+                            'Dirección de correo electrónico y nombre para identificar tu cuenta.',
+                            'Los números de IUE (expedientes) que decidís seguir.',
+                            'Metadatos de movimientos y decretos obtenidos del Poder Judicial.',
+                            'Notas personales que ingresás voluntariamente sobre cada expediente.',
+                            'Token de notificaciones push de tu dispositivo para enviarte alertas.',
+                            'Preferencias de notificaciones que configurás en la app.',
+                        ]}
                     />
-
-                    <View className="h-[1px] bg-slate-100 dark:bg-white/5 mb-6 ml-11" />
+                    <Divider />
 
                     <PolicySection
+                        number="2"
                         icon={Server}
-                        title="2. Sincronización con Rincón Judicial"
-                        description="Actuamos como un canal en tiempo real. Consultamos los servicios públicos del Poder Judicial (SOAP) bajo demanda y almacenamos los metadatos relevantes únicamente para optimizar la velocidad de la app y tu experiencia de lectura."
+                        title="Sincronización con el Poder Judicial"
+                        description="Actuamos como intermediario transparente con los servicios públicos del Poder Judicial (SOAP). Los datos que consultamos son de carácter público y están disponibles en el portal oficial. Los almacenamos temporalmente para mejorar la velocidad de respuesta y tu experiencia de lectura. No modificamos ni alteramos en ningún caso la información oficial."
                     />
-
-                    <View className="h-[1px] bg-slate-100 dark:bg-white/5 mb-6 ml-11" />
+                    <Divider />
 
                     <PolicySection
+                        number="3"
                         icon={Lock}
-                        title="3. Seguridad de tus Credenciales"
-                        description="Tus credenciales de acceso se almacenan localmente en tu dispositivo bajo canales encriptados (Secure Store) y utilizamos tokens temporales para comunicarnos con el servidor central, minimizando posibles riesgos de intercepción."
+                        title="Seguridad de tus credenciales"
+                        bullets={[
+                            'Tu contraseña se almacena hasheada con bcrypt — nunca en texto plano.',
+                            'Los tokens de acceso se guardan en Secure Store (encriptado a nivel del sistema operativo).',
+                            'Usamos tokens JWT de corta duración con renovación automática.',
+                            'Todas las comunicaciones se realizan por HTTPS/TLS.',
+                        ]}
                     />
-
-                    <View className="h-[1px] bg-slate-100 dark:bg-white/5 mb-6 ml-11" />
+                    <Divider />
 
                     <PolicySection
-                        icon={FileText}
-                        title="4. Tus Derechos"
-                        description="En cualquier momento podés darte de baja del sistema o dejar de seguir expedientes (Unfollow). Al hacerlo, se cortará inmediatamente la comunicación asociada a los mismos desde tu cuenta."
+                        number="4"
+                        icon={Sparkles}
+                        title="Uso de Inteligencia Artificial"
+                        description="La función 'Resumir con IA' envía el texto del decreto seleccionado a servicios externos de inteligencia artificial para generar un resumen. Antes de usar esta función, considerá que:"
+                        bullets={[
+                            'El texto del decreto se transmite a proveedores de IA (OpenAI / Google Gemini) únicamente cuando vos lo solicitás.',
+                            'No enviamos datos personales del expediente (nombre de partes, etc.), solo el texto del decreto.',
+                            'Los resúmenes generados se almacenan en nuestros servidores para evitar reprocesar el mismo decreto.',
+                            'Los resúmenes son orientativos y no constituyen asesoramiento jurídico.',
+                            'Si el decreto contiene información confidencial o reservada, te recomendamos no usar esta función.',
+                        ]}
+                    />
+                    <Divider />
+
+                    <PolicySection
+                        number="5"
+                        icon={Bell}
+                        title="Notificaciones push"
+                        description="Si otorgás permiso de notificaciones, tu token de dispositivo se almacena en nuestros servidores para poder enviarte alertas. Podés revocar este permiso en cualquier momento desde la configuración de tu dispositivo o desde Mi Perfil → Notificaciones en la app. Al desactivar las notificaciones se elimina tu token de nuestros registros."
+                    />
+                    <Divider />
+
+                    <PolicySection
+                        number="6"
+                        icon={StickyNote}
+                        title="Notas personales"
+                        description="Las notas que agregás a tus expedientes son de uso exclusivamente personal. Solo vos podés verlas — no las compartimos con terceros, no las usamos para análisis estadísticos, y se eliminan automáticamente si dejás de seguir el expediente o cerrás tu cuenta."
+                    />
+                    <Divider />
+
+                    <PolicySection
+                        number="7"
+                        icon={Globe}
+                        title="Servicios de terceros"
+                        description="La app integra los siguientes servicios externos para funcionar correctamente:"
+                        bullets={[
+                            'Expo / EAS — distribución de la app y actualizaciones OTA.',
+                            'Apple Push Notification Service (APNs) / Firebase Cloud Messaging (FCM) — envío de notificaciones push.',
+                            'OpenAI y Google Gemini — procesamiento de texto para resúmenes IA (solo bajo demanda).',
+                            'Ferozo SMTP — envío de correos transaccionales (ej. mensajes de soporte).',
+                            'Poder Judicial del Uruguay (SOAP) — fuente oficial de datos de expedientes.',
+                        ]}
+                    />
+                    <Divider />
+
+                    <PolicySection
+                        number="8"
+                        icon={Trash2}
+                        title="Retención y eliminación de datos"
+                        bullets={[
+                            'Podés dejar de seguir un expediente en cualquier momento; sus datos dejan de sincronizarse.',
+                            'Podés solicitar la eliminación completa de tu cuenta y todos sus datos escribiéndonos a través de Soporte.',
+                            'Los datos de expedientes sin actividad por más de 12 meses pueden ser eliminados automáticamente de nuestros servidores.',
+                            'Los resúmenes de IA guardados se eliminan junto con tu cuenta.',
+                        ]}
+                    />
+                    <Divider />
+
+                    <PolicySection
+                        number="9"
+                        icon={UserCheck}
+                        title="Tus derechos"
+                        description="En cualquier momento tenés derecho a:"
+                        bullets={[
+                            'Acceder a todos los datos que tenemos asociados a tu cuenta.',
+                            'Rectificar información incorrecta (nombre, correo).',
+                            'Solicitar la eliminación completa de tu cuenta.',
+                            'Revocar los permisos de notificaciones push.',
+                            'Exportar tus expedientes en formato PDF.',
+                        ]}
+                    />
+                    <Divider />
+
+                    <PolicySection
+                        number="10"
+                        icon={Mail}
+                        title="Contacto"
+                        description="Para cualquier consulta sobre esta política, ejercer tus derechos o reportar un problema de privacidad, podés contactarnos a través de la sección Soporte dentro de la app o directamente a nuestro correo de soporte. Respondemos en un plazo máximo de 5 días hábiles."
                     />
 
                 </View>
 
-                <Text className="mt-8 text-center text-[11px] font-sans text-slate-400">
+                <Text className="mt-6 text-center text-[11px] font-sans text-slate-400">
                     Última actualización: Marzo 2026
                 </Text>
             </ScrollView>

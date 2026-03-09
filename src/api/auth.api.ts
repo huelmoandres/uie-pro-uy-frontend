@@ -35,6 +35,20 @@ export async function logout(refreshToken: string): Promise<void> {
 }
 
 /**
+ * Solicita un código OTP al email para recuperar contraseña.
+ */
+export async function forgotPassword(email: string): Promise<void> {
+    await apiClient.post('/auth/forgot-password', { email });
+}
+
+/**
+ * Restablece la contraseña con el OTP recibido por email.
+ */
+export async function resetPassword(email: string, otp: string, newPassword: string): Promise<void> {
+    await apiClient.post('/auth/reset-password', { email, otp, newPassword });
+}
+
+/**
  * Gets the current authenticated user's profile.
  */
 export async function getMe(): Promise<IUser> {

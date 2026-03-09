@@ -10,7 +10,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/components/base/useColorScheme';
 import { AuthProvider, useAuth } from '@context/AuthContext';
 import { QueryProvider } from '@providers/QueryProvider';
-import { useNotifications } from '@hooks/useNotifications';
+import { useNotifications, requestAndRegisterNotifications } from '@hooks/useNotifications';
 import { useAppUpdates } from '@hooks/useAppUpdates';
 import { useRestoreColorScheme } from '@hooks/useAppColorScheme';
 import Toast from 'react-native-toast-message';
@@ -19,6 +19,7 @@ import { LoadingOverlay } from '@components/shared/LoadingOverlay';
 import { AppLoadingScreen } from '@components/shared/AppLoadingScreen';
 import { NetworkBanner } from '@components/shared/NetworkBanner';
 import { HeaderBackButton } from '@components/shared/HeaderBackButton';
+import { NotificationPermissionModal } from '@components/shared/NotificationPermissionModal';
 
 import {
   Inter_400Regular,
@@ -142,6 +143,11 @@ function RootLayoutNav() {
 
       {/* Global network connectivity banner */}
       <NetworkBanner />
+
+      {/* Notification permission pre-prompt — only shown to authenticated users */}
+      {isAuthenticated && (
+        <NotificationPermissionModal onRequestPermission={requestAndRegisterNotifications} />
+      )}
     </ThemeProvider>
   );
 }

@@ -7,10 +7,10 @@ import {
   Modal,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { useAuth } from '@context/AuthContext';
 import { useExpedientes, useDebounce, usePinExpediente } from '@hooks';
-import { Search, LogOut, RefreshCw, FolderOpen, SlidersHorizontal, Plus, Calendar as CalendarIcon } from 'lucide-react-native';
-import { ConfirmationModal, Skeleton, PageContainer, Paginator } from '@components/ui';
+import { Search, RefreshCw, FolderOpen, SlidersHorizontal, Plus, Calendar as CalendarIcon, Star } from 'lucide-react-native';
+import { Skeleton, PageContainer, Paginator, InfoButton } from '@components/ui';
+import { INFO_HINTS } from '@/constants/InfoHints';
 import { ExpedienteCard, FollowExpedienteModal, ExpedientesFilterModal, AgendaWebView } from '@components/features';
 import * as Haptics from 'expo-haptics';
 import Toast from 'react-native-toast-message';
@@ -35,10 +35,11 @@ export function ExpedienteSkeleton() {
   );
 }
 
+type TabFilter = 'all' | 'pinned';
+
 export default function ExpedientesScreen() {
-  const { signOut } = useAuth();
   const [searchText, setSearchText] = useState('');
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabFilter>('all');
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedIues, setSelectedIues] = useState<string[]>([]);
@@ -62,6 +63,16 @@ export default function ExpedientesScreen() {
     });
   }, [debouncedSearch]);
 
+  const handleTabChange = useCallback((tab: TabFilter) => {
+    setActiveTab(tab);
+    setSelectedIues([]);
+    setQueryParams((prev) => ({
+      ...prev,
+      page: 1,
+      onlyPinned: tab === 'pinned' ? true : undefined,
+    }));
+  }, []);
+
   const handleRefresh = useCallback(() => {
     void refetch();
   }, [refetch]);
@@ -69,11 +80,6 @@ export default function ExpedientesScreen() {
   const handlePin = useCallback((iue: string, isPinned: boolean) => {
     pinMutation.mutate({ iue, isPinned });
   }, [pinMutation]);
-
-  const handleLogout = useCallback(async () => {
-    setShowLogoutModal(false);
-    await signOut();
-  }, [signOut]);
 
   const toggleSelection = useCallback((iue: string) => {
     setSelectedIues(prev => {
@@ -118,7 +124,7 @@ export default function ExpedientesScreen() {
       {/* Premium Header */}
       <View className="border-b border-slate-100 bg-white px-5 pb-4 pt-14 dark:bg-primary dark:border-white/5">
         <View className="flex-row items-center justify-between">
-          <View>
+          <View className="flex-1">
             <Text className="text-[10px] font-sans-bold uppercase tracking-[2px] text-accent">
               Mi Monitor
             </Text>
@@ -126,15 +132,10 @@ export default function ExpedientesScreen() {
               Expedientes
             </Text>
           </View>
-          <Pressable
-            className="h-9 w-9 items-center justify-center rounded-[12px] bg-slate-50 dark:bg-white/5 active:scale-[0.9] active:bg-slate-100"
-            onPress={() => setShowLogoutModal(true)}
-          >
-            <LogOut size={18} color="#64748B" />
-          </Pressable>
+          <InfoButton title={INFO_HINTS.expedientesList.title} description={INFO_HINTS.expedientesList.description} size={18} />
         </View>
 
-        {/* Search & Filter bar */}
+        {/* Search & Filter & Add bar */}
         <View className="mt-5 flex-row gap-2.5">
           <View className="flex-1 h-11 flex-row items-center rounded-xl border border-slate-100 bg-slate-50 px-3.5 dark:border-white/10 dark:bg-white/5">
             <Search size={16} color="#94A3B8" />
@@ -148,14 +149,64 @@ export default function ExpedientesScreen() {
             />
           </View>
           <Pressable
-            className="h-11 w-11 items-center justify-center rounded-xl bg-accent shadow-sm shadow-accent/20 active:scale-[0.95] relative"
+            className="h-11 w-11 items-center justify-center rounded-xl bg-accent shadow-sm shadow-accent/20 active:scale-[0.95]"
+            onPress={() => setShowFollowModal(true)}
+          >
+            <Plus size={18} color="#FFFFFF" strokeWidth={2.5} />
+          </Pressable>
+          <Pressable
+            className="h-11 w-11 items-center justify-center rounded-xl bg-slate-100 dark:bg-white/10 active:scale-[0.95] relative"
             onPress={() => setShowFilterModal(true)}
           >
-            <SlidersHorizontal size={18} color="#FFFFFF" />
+            <SlidersHorizontal size={18} color="#64748B" />
             {(queryParams.sede || queryParams.anio) && (
               <View className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-danger border border-white dark:border-primary" />
             )}
           </Pressable>
+        </View>
+
+        {/* Todos / Favoritos tabs */}
+        <View className="mt-4 flex-row items-center gap-2">
+          <Pressable
+            onPress={() => handleTabChange('all')}
+            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${
+              activeTab === 'all'
+                ? 'bg-primary border-primary'
+                : 'bg-transparent border-slate-200 dark:border-white/10'
+            }`}
+          >
+            <Text className={`text-[12px] font-sans-semi ${activeTab === 'all' ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+              Todos
+            </Text>
+            {data?.meta?.totalItems !== undefined && activeTab === 'all' && (
+              <View className="bg-white/20 rounded-full px-1.5 py-0.5">
+                <Text className="text-[10px] font-sans-bold text-white">{data.meta.totalItems}</Text>
+              </View>
+            )}
+          </Pressable>
+          <Pressable
+            onPress={() => handleTabChange('pinned')}
+            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${
+              activeTab === 'pinned'
+                ? 'bg-accent border-accent'
+                : 'bg-transparent border-slate-200 dark:border-white/10'
+            }`}
+          >
+            <Star
+              size={11}
+              color={activeTab === 'pinned' ? '#FFFFFF' : '#B89146'}
+              fill={activeTab === 'pinned' ? '#FFFFFF' : 'transparent'}
+            />
+            <Text className={`text-[12px] font-sans-semi ${activeTab === 'pinned' ? 'text-white' : 'text-accent'}`}>
+              Favoritos
+            </Text>
+            {data?.meta?.totalItems !== undefined && activeTab === 'pinned' && (
+              <View className="bg-white/20 rounded-full px-1.5 py-0.5">
+                <Text className="text-[10px] font-sans-bold text-white">{data.meta.totalItems}</Text>
+              </View>
+            )}
+          </Pressable>
+          <InfoButton title={INFO_HINTS.todosFavoritos.title} description={INFO_HINTS.todosFavoritos.description} size={14} />
         </View>
       </View>
 
@@ -177,11 +228,23 @@ export default function ExpedientesScreen() {
           </View>
         ) : expedientes.length === 0 ? (
           <View className="flex-1 items-center justify-center pt-20">
-            <FolderOpen size={48} color="#94A3B8" />
-            <Text className="mt-4 font-sans-semi text-slate-500">No hay expedientes</Text>
-            <Text className="mt-2 text-[12px] font-sans text-slate-400">
-              Presioná el botón + para agregar uno
-            </Text>
+            {activeTab === 'pinned' ? (
+              <>
+                <Star size={48} color="#B89146" fill="transparent" />
+                <Text className="mt-4 font-sans-semi text-slate-500">No tenés favoritos</Text>
+                <Text className="mt-2 text-[12px] font-sans text-slate-400 text-center px-8">
+                  Presioná la estrella ★ en un expediente para marcarlo como favorito
+                </Text>
+              </>
+            ) : (
+              <>
+                <FolderOpen size={48} color="#94A3B8" />
+                <Text className="mt-4 font-sans-semi text-slate-500">No hay expedientes</Text>
+                <Text className="mt-2 text-[12px] font-sans text-slate-400">
+                  Presioná el botón + para agregar uno
+                </Text>
+              </>
+            )}
           </View>
         ) : (
           <FlashList
@@ -207,7 +270,7 @@ export default function ExpedientesScreen() {
       </PageContainer>
 
       {/* Selection Bar & Paginator Container */}
-      <View className="bg-white dark:bg-primary border-t border-slate-200/60 dark:border-white/10 z-10 pb-safe px-5 pt-3">
+      <View className="bg-white dark:bg-primary border-t border-slate-200/60 dark:border-white/10 z-10 px-5 pt-3 pb-4">
         {selectedIues.length > 0 ? (
           <View>
             <View className="flex-row items-center justify-between">
@@ -261,15 +324,6 @@ export default function ExpedientesScreen() {
         )}
       </View>
 
-      {/* Floating Action Button */}
-      <Pressable
-        className={`absolute right-6 h-10 w-10 items-center justify-center rounded-full bg-accent shadow-2xl shadow-black/40 active:scale-[0.92] active:bg-[#8C6D2E] z-20 ${(data?.meta && expedientes.length > 0) ? 'top-[180px]' : 'top-[180px]'}`}
-        onPress={() => setShowFollowModal(true)}
-        style={{ elevation: 20 }}
-      >
-        <Plus size={16} color="#FFFFFF" strokeWidth={2.5} />
-      </Pressable>
-
       {/* Follow Expediente Modal */}
       <FollowExpedienteModal
         visible={showFollowModal}
@@ -310,16 +364,6 @@ export default function ExpedientesScreen() {
         />
       </Modal>
 
-      {/* Logout Modal */}
-      <ConfirmationModal
-        visible={showLogoutModal}
-        title="Cerrar Sesión"
-        description="¿Estás seguro que deseás salir de tu cuenta?"
-        confirmText="Salir"
-        onConfirm={handleLogout}
-        onCancel={() => setShowLogoutModal(false)}
-        type="danger"
-      />
     </View>
   );
 }

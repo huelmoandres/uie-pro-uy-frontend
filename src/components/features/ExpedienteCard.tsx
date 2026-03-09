@@ -90,7 +90,7 @@ export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, o
             {/* Main content */}
             <View className="flex-row">
                 <View className="flex-1">
-                    <Text className="mb-1.5 text-[15px] font-sans-bold leading-tight text-slate-900 dark:text-white" numberOfLines={2}>
+                    <Text className="mb-1.5 text-[13px] font-sans-bold leading-tight text-slate-900 dark:text-white" numberOfLines={2}>
                         {stripHtml(item.caratula) || 'Sin carátula registrada'}
                     </Text>
 
@@ -120,8 +120,8 @@ export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, o
                     </Text>
                 </View>
 
-                <View className="flex-row items-center rounded-lg bg-slate-50 px-2.5 py-1 dark:bg-slate-800/30">
-                    <Calendar size={11} color="#94A3B8" className="mr-1.5" />
+                <View className="flex-row items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1 dark:bg-slate-800/30">
+                    <Calendar size={11} color="#94A3B8" />
                     <Text className="text-[10px] font-sans-bold text-slate-500 dark:text-slate-400">{item.anio}</Text>
                 </View>
             </View>

@@ -11,7 +11,7 @@
     "scheme": "expedientes",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/icon.png",
+      "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#1E3A5F"
     },

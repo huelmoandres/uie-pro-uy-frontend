@@ -8,7 +8,7 @@ import {
     View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Stack, router } from 'expo-router';
+import { router } from 'expo-router';
 import {
     LayoutDashboard,
     AlertTriangle,
@@ -143,8 +143,6 @@ export default function DashboardScreen() {
 
     return (
         <PageContainer withHeader={false}>
-            <Stack.Screen options={{ title: 'Dashboard' }} />
-
             <ScrollView
                 contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 48 }}
                 showsVerticalScrollIndicator={false}

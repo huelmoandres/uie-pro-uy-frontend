@@ -150,15 +150,23 @@ export function buildExpedientePdf(expediente: IExpediente): string {
 <meta name="color-scheme" content="light">
 <style>
   :root { color-scheme: light; }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 
   body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 11px;
     color: #1E293B;
-    background: #fff;
+    background: #ffffff;
     padding: 44px 48px 36px;
     line-height: 1.5;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* ── Header ── */
@@ -191,7 +199,7 @@ export function buildExpedientePdf(expediente: IExpediente): string {
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #94A3B8;
+    color: #64748B;
     margin-bottom: 4px;
   }
   .iue-value {
@@ -221,7 +229,7 @@ export function buildExpedientePdf(expediente: IExpediente): string {
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #94A3B8;
+    color: #64748B;
     margin-bottom: 5px;
   }
   .caratula-text {
@@ -251,7 +259,7 @@ export function buildExpedientePdf(expediente: IExpediente): string {
     font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: #94A3B8;
+    color: #64748B;
     margin-bottom: 4px;
   }
   .meta-value {
@@ -300,7 +308,7 @@ export function buildExpedientePdf(expediente: IExpediente): string {
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: #94A3B8;
+    color: #64748B;
   }
 
   /* ── Generic block ── */
@@ -310,9 +318,9 @@ export function buildExpedientePdf(expediente: IExpediente): string {
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #94A3B8;
+    color: #475569;
     padding-bottom: 7px;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid #CBD5E1;
     margin-bottom: 12px;
   }
 
@@ -344,6 +352,7 @@ export function buildExpedientePdf(expediente: IExpediente): string {
   }
   .mv-table thead tr {
     background: #1E3A5F;
+    background-color: #1E3A5F;
   }
   .th {
     padding: 9px 12px;
@@ -353,6 +362,7 @@ export function buildExpedientePdf(expediente: IExpediente): string {
     letter-spacing: 1.5px;
     text-transform: uppercase;
     color: #FFFFFF;
+    background-color: #1E3A5F;
     white-space: nowrap;
   }
   .td {
@@ -377,7 +387,7 @@ export function buildExpedientePdf(expediente: IExpediente): string {
     align-items: center;
   }
   .footer-brand { font-size: 9px; font-weight: 800; letter-spacing: 2px; color: #C5A059; }
-  .footer-meta  { font-size: 9px; color: #94A3B8; text-align: right; }
+  .footer-meta  { font-size: 9px; color: #64748B; text-align: right; }
 
   @media print {
     body { padding: 20px; }

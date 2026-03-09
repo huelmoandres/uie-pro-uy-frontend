@@ -11,21 +11,75 @@ interface FaqItem {
 }
 
 const FAQS: FaqItem[] = [
+    // ── Expedientes ──────────────────────────────────────────────────────
     {
         question: '¿Cómo sincronizo un expediente?',
-        answer: 'Para sincronizar un expediente manualmente, andá a la vista de detalles del expediente y presioná el botón "Sincronizar" en la esquina superior derecha o utilizá la acción flotante. El sistema consultará al Poder Judicial para traerte los últimos movimientos.',
+        answer: 'Andá al detalle del expediente y presioná el botón "Sincronizar" (ícono de recarga). El sistema consultará al Poder Judicial y traerá los últimos movimientos y decretos.',
     },
     {
-        question: '¿Cada cuánto se actualizan los expedientes?',
-        answer: 'Los expedientes se sincronizan de forma automática periódicamente en segundo plano. Sin embargo, en la lista principal podés ver hace cuánto fue la última sincronización en la esquina superior derecha de cada tarjeta.',
+        question: '¿Cada cuánto se actualizan los expedientes automáticamente?',
+        answer: 'Los expedientes se sincronizan en segundo plano de forma periódica. En cada tarjeta podés ver hace cuánto fue la última sincronización. También podés forzar una actualización manual desde el detalle.',
     },
+    {
+        question: '¿Puedo agregar expedientes aunque no sea el abogado patrocinante?',
+        answer: 'Sí. Podés seguir cualquier expediente público ingresando su IUE con el botón "+" en la lista principal. No se requiere ser parte del proceso.',
+    },
+    {
+        question: '¿Cómo marco un expediente como favorito?',
+        answer: 'En la lista de expedientes, presioná el ícono de estrella (★) en la tarjeta. Los expedientes marcados como favoritos aparecen primero en tu lista.',
+    },
+    {
+        question: '¿Cómo agrego notas personales a un expediente?',
+        answer: 'Ingresá al detalle del expediente, bajá hasta la sección "Mis Notas" y presioná "Agregar" o tocá el área de texto. Las notas se guardan automáticamente en tu cuenta y son visibles solo para vos.',
+    },
+    // ── Decretos e IA ────────────────────────────────────────────────────
     {
         question: 'El decreto aparece vacío, ¿qué hago?',
-        answer: 'Es normal. Algunos tribunales aún no digitalizan el contenido completo del decreto o solo suben el título "Mero Trámite". Si tocás el evento para ver el decreto y dice "El texto no está disponible", significa que no fue cargado en el sistema original.',
+        answer: 'Es normal en algunos juzgados que aún no digitalizan el texto completo. Si aparece "Sin texto disponible", significa que el Poder Judicial no subió el contenido al sistema original — no es un error de la app.',
     },
     {
-        question: '¿Puedo agregar expedientes nuevos si no soy el abogado patrocinante?',
-        answer: 'Sí. Podés agregar cualquier expediente público usando el botón "+" en la parte inferior de la lista de Expedientes y escribiendo su IUE.',
+        question: '¿Cómo funciona el resumen con IA?',
+        answer: 'Dentro del visor de un decreto, presioná "Resumir con IA". La app envía el texto al motor de inteligencia artificial que analiza el contenido y extrae un resumen ejecutivo, puntos clave y si requiere acción. El resultado se guarda para no re-procesar el mismo decreto.',
+    },
+    {
+        question: '¿El resumen con IA es confiable?',
+        answer: 'El resumen es orientativo y puede contener imprecisiones. Siempre revisá el texto original del decreto antes de tomar decisiones procesales. La IA es una herramienta de asistencia, no reemplaza el criterio profesional.',
+    },
+    // ── Agenda Procesal ──────────────────────────────────────────────────
+    {
+        question: '¿Qué es la Agenda Procesal?',
+        answer: 'La Agenda Procesal detecta automáticamente plazos legales dentro de los decretos de tus expedientes (por ejemplo, "plazo de 10 días hábiles"). Los organiza en secciones: Vencen hoy, Esta semana, Este mes, Más adelante y Vencidos.',
+    },
+    {
+        question: '¿Los plazos de la Agenda Procesal se crean solos?',
+        answer: 'Sí. Cada vez que se sincronizan nuevos movimientos con decretos, el sistema analiza el texto y extrae los plazos detectados automáticamente. También podés entrar a la Agenda Procesal para verlos actualizados.',
+    },
+    {
+        question: '¿Por qué algunos plazos ya aparecen vencidos?',
+        answer: 'Si la fecha de vencimiento ya pasó, el plazo se clasifica automáticamente como "Vencido". Esto puede ocurrir en expedientes importados que tenían decretos con plazos históricos.',
+    },
+    // ── Notificaciones ───────────────────────────────────────────────────
+    {
+        question: '¿Cómo activo las notificaciones push?',
+        answer: 'La primera vez que iniciás sesión, la app te pedirá permiso para enviar notificaciones. Si lo rechazaste, podés activarlas desde Configuración → Notificaciones de tu dispositivo, buscando IUE Pro.',
+    },
+    {
+        question: '¿Qué tipo de notificaciones recibo?',
+        answer: 'Recibís alertas cuando hay nuevos movimientos en los expedientes que seguís, y recordatorios de plazos procesales próximos a vencer. Podés configurar qué tipo de alertas querés recibir desde Mi Perfil → Notificaciones.',
+    },
+    {
+        question: 'Recibo notificaciones pero llegan a deshora, ¿es normal?',
+        answer: 'Las notificaciones se envían a las 8 a.m. y 8 p.m. (hora Uruguay). Si llegaran en horarios diferentes podría ser por un retraso en el servicio de mensajería push. Si persiste, contactanos.',
+    },
+    // ── Exportación PDF ──────────────────────────────────────────────────
+    {
+        question: '¿Puedo exportar un expediente a PDF?',
+        answer: 'Sí. En el detalle del expediente, bajá hasta la sección "Gestión del Expediente" y presioná "Exportar PDF". Se generará un documento con carátula, metadatos, partes, estadísticas e historial de movimientos. El archivo se nombra automáticamente con el número de IUE.',
+    },
+    // ── Dashboard ────────────────────────────────────────────────────────
+    {
+        question: '¿Qué muestra el Dashboard?',
+        answer: 'El Dashboard ofrece una vista general de todos tus expedientes: total de movimientos, etapas procesales detectadas, actividad reciente y estadísticas agregadas. Accedé desde el ícono de gráfico en la barra inferior.',
     },
 ];
 
@@ -39,7 +93,7 @@ export default function SupportScreen() {
 
     return (
         <>
-            <PageContainer>
+            <PageContainer scrollable>
                 <Stack.Screen options={{ title: 'Soporte y Ayuda' }} />
 
                 {/* ── Banner ──────────────────────────────────────────────── */}
