@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { AuthService } from '@services';
 import { SECURE_STORE_KEYS, setGlobalSignOut } from '@api/client';
+import { logout as apiLogout } from '@api/auth.api';
 import type { IUser } from '@app-types/auth.types';
 
 interface AuthContextData {
@@ -42,9 +43,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const signOut = async () => {
-        await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
-        setToken(null);
-        setUser(null);
+        try {
+            const refreshToken = await SecureStore.getItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+            if (refreshToken) {
+                await apiLogout(refreshToken);
+            }
+        } catch {
+            // Ignorar errores de red; lo importante es limpiar el estado local.
+        } finally {
+            await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
+            await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+            setToken(null);
+            setUser(null);
+        }
     };
 
     const updateUserState = (updatedUser: IUser | null, newToken?: string | null) => {

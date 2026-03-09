@@ -45,3 +45,17 @@ export async function unfollowExpediente(iue: string): Promise<void> {
 export async function syncExpediente(iue: string): Promise<void> {
     await apiClient.post(`/expedientes/${encodeURIComponent(iue)}/sync`);
 }
+
+/**
+ * Toggles the pin (favorite) status of a followed expediente.
+ */
+export async function pinExpediente(iue: string, isPinned: boolean): Promise<void> {
+    await apiClient.patch(`/expedientes/${encodeURIComponent(iue)}/follow`, { isPinned });
+}
+
+/**
+ * Updates the personal notes for a followed expediente.
+ */
+export async function updateExpedienteNotes(iue: string, notes: string | null): Promise<void> {
+    await apiClient.patch(`/expedientes/${encodeURIComponent(iue)}/follow`, { notes });
+}

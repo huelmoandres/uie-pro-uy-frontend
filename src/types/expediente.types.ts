@@ -120,6 +120,10 @@ export interface IExpediente {
     stage?: ICaseStageResult;
     prediction?: IActivityPrediction;
     parties?: ICaratulaComponents | null;
+    /** Marcado como favorito por el usuario autenticado (solo en listados). */
+    isPinned?: boolean;
+    /** Notas personales del usuario sobre este expediente. */
+    notes?: string | null;
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────

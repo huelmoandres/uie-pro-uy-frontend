@@ -1,13 +1,16 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
     Pressable,
     Text,
     View,
     Modal,
+    TextInput,
+    KeyboardAvoidingView,
+    Platform,
 } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { useExpedienteDetail } from '@hooks';
+import { useExpedienteDetail, useExpedienteNotes } from '@hooks';
 import { ExpedienteService } from '@services';
 import { ConfirmationModal, Skeleton, PageContainer } from '@components/ui';
 import { MovementItem, AgendaWebView, InternalGroupItem, CaseStageBadge, ActivityStatusBadge } from '@components/features';
@@ -23,6 +26,8 @@ import {
     History,
     FileText,
     Users,
+    StickyNote,
+    Check,
 } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
@@ -35,12 +40,30 @@ export default function ExpedienteDetailScreen() {
     const [showUnfollowModal, setShowUnfollowModal] = useState(false);
     const [showAgenda, setShowAgenda] = useState(false);
 
+    const iue = (id as string).replace(':', '/');
+
+    const [notesText, setNotesText] = useState<string | null>(null);
+    const [notesEditing, setNotesEditing] = useState(false);
+    const notesInputRef = useRef<TextInput>(null);
+
+    const { mutation: notesMutation, getCachedNotes } = useExpedienteNotes(iue);
+    const displayNotes = notesText !== null ? notesText : getCachedNotes();
+
+    const handleSaveNotes = useCallback(() => {
+        notesMutation.mutate(displayNotes || null, {
+            onSuccess: () => setNotesEditing(false),
+        });
+    }, [notesMutation, displayNotes]);
+
+    const handleStartEditNotes = useCallback(() => {
+        setNotesEditing(true);
+        setTimeout(() => notesInputRef.current?.focus(), 100);
+    }, []);
+
     const [decreeFilter, setDecreeFilter] = useState<'all' | 'decree' | 'no-decree'>('all');
     const [yearFilter, setYearFilter] = useState<number | null>(null);
     const [page, setPage] = useState(1);
     const PAGE_SIZE = 10;
-
-    const iue = (id as string).replace(':', '/');
 
     const { data, isLoading, isError, refetch, isRefetching } = useExpedienteDetail(iue);
 
@@ -387,6 +410,63 @@ export default function ExpedienteDetailScreen() {
                             )}
                         </View>
                     )}
+                </View>
+
+                {/* ── Notas personales ──────────────────────────────── */}
+                <View className="mb-8">
+                    <View className="flex-row items-center justify-between mb-4">
+                        <Text className="text-[10px] font-sans-bold uppercase tracking-[2.5px] text-slate-400">
+                            Mis Notas
+                        </Text>
+                        {!notesEditing ? (
+                            <Pressable onPress={handleStartEditNotes} hitSlop={8}>
+                                <Text className="text-[11px] font-sans-semi text-accent">Editar</Text>
+                            </Pressable>
+                        ) : (
+                            <Pressable
+                                onPress={handleSaveNotes}
+                                disabled={notesMutation.isPending}
+                                className="flex-row items-center gap-1 bg-accent/10 rounded-full px-3 py-1"
+                            >
+                                <Check size={12} color="#B89146" />
+                                <Text className="text-[11px] font-sans-semi text-accent">Guardar</Text>
+                            </Pressable>
+                        )}
+                    </View>
+                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+                        <Pressable
+                            onPress={handleStartEditNotes}
+                            className={`rounded-[24px] border p-4 min-h-[80px] ${
+                                notesEditing
+                                    ? 'border-accent/40 bg-accent/5 dark:bg-accent/10'
+                                    : 'border-slate-100 dark:border-white/5 bg-white dark:bg-primary/40'
+                            }`}
+                        >
+                            {notesEditing ? (
+                                <TextInput
+                                    ref={notesInputRef}
+                                    value={displayNotes}
+                                    onChangeText={setNotesText}
+                                    multiline
+                                    placeholder="Agregá notas personales sobre este expediente..."
+                                    placeholderTextColor="#94A3B8"
+                                    className="font-sans text-[13px] text-slate-700 dark:text-slate-300 leading-relaxed"
+                                    style={{ textAlignVertical: 'top', minHeight: 64 }}
+                                />
+                            ) : displayNotes ? (
+                                <Text className="font-sans text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    {displayNotes}
+                                </Text>
+                            ) : (
+                                <View className="flex-row items-center gap-2 opacity-50">
+                                    <StickyNote size={16} color="#94A3B8" />
+                                    <Text className="font-sans text-[13px] text-slate-400">
+                                        Sin notas. Tocá Editar para agregar.
+                                    </Text>
+                                </View>
+                            )}
+                        </Pressable>
+                    </KeyboardAvoidingView>
                 </View>
 
                 {/* Gestión */}

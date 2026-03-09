@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig, type AxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 
@@ -47,31 +47,80 @@ apiClient.interceptors.request.use(
 );
 
 // ─── Response Interceptor ────────────────────────────────────────────────────
-// Captures 401 Unauthorized responses, clears stored tokens, and redirects to login.
+// On 401: tries to refresh the access token once. If refresh fails, signs out.
 
-let isLoggingOut = false;
+let isRefreshing = false;
+let refreshQueue: Array<(token: string) => void> = [];
+
+async function performSignOut() {
+    await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
+    await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+    if (globalSignOut) {
+        await globalSignOut();
+    } else {
+        router.replace('/(auth)/login');
+    }
+}
 
 apiClient.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-        const isAuthRequest = error.config?.url?.includes('auth/login') ||
-            error.config?.url?.includes('auth/register');
+        const originalConfig = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+        const isAuthEndpoint =
+            originalConfig?.url?.includes('/auth/login') ||
+            originalConfig?.url?.includes('/auth/register') ||
+            originalConfig?.url?.includes('/auth/refresh') ||
+            originalConfig?.url?.includes('/auth/logout');
 
-        if (error.response?.status === 401 && !isAuthRequest) {
-            if (!isLoggingOut) {
-                isLoggingOut = true;
-                if (globalSignOut) {
-                    await globalSignOut();
-                } else {
-                    await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
-                    await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
-                    router.replace('/(auth)/login');
+        if (error.response?.status !== 401 || isAuthEndpoint || originalConfig?._retry) {
+            return Promise.reject(error);
+        }
+
+        // Primer intento de refresh
+        if (!isRefreshing) {
+            isRefreshing = true;
+            originalConfig._retry = true;
+
+            try {
+                const storedRefresh = await SecureStore.getItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+                if (!storedRefresh) {
+                    await performSignOut();
+                    return Promise.reject(error);
                 }
-                setTimeout(() => {
-                    isLoggingOut = false;
-                }, 2000);
+
+                const { data } = await axios.post<{ accessToken: string; refreshToken?: string }>(
+                    `${API_URL}/auth/refresh`,
+                    { refreshToken: storedRefresh },
+                );
+
+                await SecureStore.setItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN, data.accessToken);
+                if (data.refreshToken) {
+                    await SecureStore.setItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN, data.refreshToken);
+                }
+
+                // Notify queued requests
+                refreshQueue.forEach((cb) => cb(data.accessToken));
+                refreshQueue = [];
+
+                originalConfig.headers.Authorization = `Bearer ${data.accessToken}`;
+                return apiClient(originalConfig);
+            } catch {
+                refreshQueue = [];
+                await performSignOut();
+                return Promise.reject(error);
+            } finally {
+                isRefreshing = false;
             }
         }
-        return Promise.reject(error);
+
+        // Si ya hay un refresh en vuelo, encolar y esperar
+        return new Promise((resolve, reject) => {
+            refreshQueue.push((token: string) => {
+                originalConfig.headers.Authorization = `Bearer ${token}`;
+                resolve(apiClient(originalConfig));
+            });
+            // Timeout de seguridad para no bloquear indefinidamente
+            setTimeout(() => reject(error), 10_000);
+        });
     },
 );

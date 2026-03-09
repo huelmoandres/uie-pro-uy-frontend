@@ -9,3 +9,5 @@ export * from './useDeadlineAgenda';
 export * from './useDashboard';
 export * from './useDecreeSummary';
 export * from './useNetworkStatus';
+export * from './usePinExpediente';
+export * from './useExpedienteNotes';

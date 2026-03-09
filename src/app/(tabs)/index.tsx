@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   Pressable,
   Text,
@@ -8,8 +8,8 @@ import {
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useAuth } from '@context/AuthContext';
-import { useExpedientes, useDebounce } from '@hooks';
-import { Search, LogOut, RefreshCw, FolderOpen, SlidersHorizontal, Plus, Calendar as CalendarIcon, X } from 'lucide-react-native';
+import { useExpedientes, useDebounce, usePinExpediente } from '@hooks';
+import { Search, LogOut, RefreshCw, FolderOpen, SlidersHorizontal, Plus, Calendar as CalendarIcon } from 'lucide-react-native';
 import { ConfirmationModal, Skeleton, PageContainer, Paginator } from '@components/ui';
 import { ExpedienteCard, FollowExpedienteModal, ExpedientesFilterModal, AgendaWebView } from '@components/features';
 import * as Haptics from 'expo-haptics';
@@ -52,6 +52,7 @@ export default function ExpedientesScreen() {
 
   const debouncedSearch = useDebounce(searchText, 500);
   const { data, isLoading, isError, refetch, isRefetching } = useExpedientes(queryParams);
+  const pinMutation = usePinExpediente();
 
   useEffect(() => {
     setQueryParams((prev) => {
@@ -64,6 +65,10 @@ export default function ExpedientesScreen() {
   const handleRefresh = useCallback(() => {
     void refetch();
   }, [refetch]);
+
+  const handlePin = useCallback((iue: string, isPinned: boolean) => {
+    pinMutation.mutate({ iue, isPinned });
+  }, [pinMutation]);
 
   const handleLogout = useCallback(async () => {
     setShowLogoutModal(false);
@@ -98,7 +103,15 @@ export default function ExpedientesScreen() {
     setShowBulkAgenda(true);
   }, [selectedIues]);
 
-  const expedientes = data?.data ?? [];
+  // Sort pinned items first within the current page
+  const expedientes = useMemo(() => {
+    const raw = data?.data ?? [];
+    return [...raw].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return 0;
+    });
+  }, [data?.data]);
 
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
@@ -181,6 +194,7 @@ export default function ExpedientesScreen() {
                 isSelected={selectedIues.includes(item.iue)}
                 isSelectionMode={selectedIues.length > 0}
                 onSelect={toggleSelection}
+                onPin={handlePin}
               />
             )}
             // @ts-ignore

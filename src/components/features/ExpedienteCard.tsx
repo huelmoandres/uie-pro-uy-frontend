@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { FileText, Calendar, Clock, ChevronRight, Hash } from 'lucide-react-native';
+import { FileText, Calendar, Clock, ChevronRight, Hash, Star } from 'lucide-react-native';
 import type { IExpediente } from '@app-types/expediente.types';
 import { formatRelativeDate, stripHtml } from '@utils/formatters';
 
@@ -11,13 +11,14 @@ interface Props {
     isSelected?: boolean;
     isSelectionMode?: boolean;
     onSelect?: (iue: string) => void;
+    onPin?: (iue: string, isPinned: boolean) => void;
 }
 
 /**
  * Premium Expediente Card
  * Features depth, refined typography, and Lucide icons.
  */
-export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, onSelect }: Props) => {
+export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, onSelect, onPin }: Props) => {
     const handlePress = useCallback(() => {
         if (isSelectionMode) {
             onSelect?.(item.iue);
@@ -32,6 +33,11 @@ export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, o
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         }
     }, [isSelectionMode, item.iue, onSelect]);
+
+    const handlePin = useCallback(() => {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onPin?.(item.iue, !item.isPinned);
+    }, [item.iue, item.isPinned, onPin]);
 
     return (
         <Pressable
@@ -51,7 +57,7 @@ export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, o
                         {item.iue}
                     </Text>
                 </View>
-                <View className="flex-row items-center">
+                <View className="flex-row items-center gap-2">
                     {isSelectionMode ? (
                         <View className={`h-5 w-5 rounded-full border items-center justify-center ${isSelected ? 'bg-accent border-accent' : 'border-slate-300 dark:border-slate-600'
                             }`}>
@@ -59,6 +65,19 @@ export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, o
                         </View>
                     ) : (
                         <>
+                            {onPin && (
+                                <Pressable
+                                    onPress={handlePin}
+                                    hitSlop={8}
+                                    className="p-0.5"
+                                >
+                                    <Star
+                                        size={13}
+                                        color={item.isPinned ? '#B89146' : '#CBD5E1'}
+                                        fill={item.isPinned ? '#B89146' : 'transparent'}
+                                    />
+                                </Pressable>
+                            )}
                             <Clock size={10} color="#94A3B8" className="mr-1" />
                             <Text className="text-[9.5px] font-sans-semi text-slate-400 uppercase tracking-tight">
                                 {formatRelativeDate(item.lastSyncAt)}

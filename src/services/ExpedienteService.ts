@@ -2,7 +2,9 @@ import {
     getExpedientes,
     getExpedienteById,
     followExpediente,
-    unfollowExpediente
+    unfollowExpediente,
+    pinExpediente,
+    updateExpedienteNotes,
 } from '@api/expedientes.api';
 import type {
     IExpediente,
@@ -12,7 +14,8 @@ import type {
 
 export class ExpedienteService {
     /**
-     * Centralized query keys for TanStack Query
+     * Centralized query keys for TanStack Query.
+     * Always use these to avoid invalidation mismatches.
      */
     static readonly queryKeys = {
         all: ['expedientes'] as const,
@@ -30,11 +33,19 @@ export class ExpedienteService {
         return await getExpedienteById(id);
     }
 
-    static async unfollow(id: string): Promise<void> {
-        return await unfollowExpediente(id);
-    }
-
     static async follow(iue: string): Promise<void> {
         return await followExpediente(iue);
+    }
+
+    static async unfollow(iue: string): Promise<void> {
+        return await unfollowExpediente(iue);
+    }
+
+    static async pin(iue: string, isPinned: boolean): Promise<void> {
+        return await pinExpediente(iue, isPinned);
+    }
+
+    static async updateNotes(iue: string, notes: string | null): Promise<void> {
+        return await updateExpedienteNotes(iue, notes);
     }
 }
