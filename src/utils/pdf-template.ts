@@ -147,7 +147,9 @@ export function buildExpedientePdf(expediente: IExpediente): string {
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
+<meta name="color-scheme" content="light">
 <style>
+  :root { color-scheme: light; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {

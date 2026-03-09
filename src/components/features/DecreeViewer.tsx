@@ -190,7 +190,7 @@ export const DecreeViewer = React.memo(({ decree }: Props) => {
 
 function SummaryCard({ summary }: { summary: IDecreeSummary }) {
     return (
-        <View className="rounded-2xl border border-violet-400/20 bg-violet-50 dark:bg-violet-500/8 overflow-hidden">
+        <View className="rounded-2xl border border-violet-300/40 dark:border-violet-500/20 bg-violet-50 dark:bg-violet-950/60 overflow-hidden">
             {/* Card header */}
             <View className="flex-row items-center gap-2 px-4 pt-4 pb-2">
                 <Sparkles size={13} color="#7C3AED" />
@@ -238,7 +238,7 @@ function SummaryCard({ summary }: { summary: IDecreeSummary }) {
             {/* Action / Deadline badges */}
             <View className="flex-row flex-wrap gap-2 px-4 pb-4">
                 {summary.requiresAction && (
-                    <View className="flex-row items-center gap-1.5 rounded-lg bg-amber-100 dark:bg-amber-500/15 px-3 py-1.5">
+                    <View className="flex-row items-center gap-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 px-3 py-1.5">
                         <AlertCircle size={11} color="#D97706" />
                         <Text className="text-[11px] font-sans-bold text-amber-700 dark:text-amber-400">
                             {summary.actionDescription ?? 'Acción requerida'}
@@ -246,7 +246,7 @@ function SummaryCard({ summary }: { summary: IDecreeSummary }) {
                     </View>
                 )}
                 {summary.hasDeadline && !summary.requiresAction && (
-                    <View className="flex-row items-center gap-1.5 rounded-lg bg-sky-100 dark:bg-sky-500/15 px-3 py-1.5">
+                    <View className="flex-row items-center gap-1.5 rounded-lg bg-sky-100 dark:bg-sky-900/50 px-3 py-1.5">
                         <Clock size={11} color="#0284C7" />
                         <Text className="text-[11px] font-sans-bold text-sky-700 dark:text-sky-400">
                             Plazo detectado
@@ -254,7 +254,7 @@ function SummaryCard({ summary }: { summary: IDecreeSummary }) {
                     </View>
                 )}
                 {!summary.requiresAction && !summary.hasDeadline && (
-                    <View className="flex-row items-center gap-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-500/15 px-3 py-1.5">
+                    <View className="flex-row items-center gap-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1.5">
                         <CheckCircle2 size={11} color="#059669" />
                         <Text className="text-[11px] font-sans-bold text-emerald-700 dark:text-emerald-400">
                             Sin acción requerida

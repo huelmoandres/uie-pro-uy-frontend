@@ -136,7 +136,7 @@ export default function DeadlineAgendaScreen() {
                     Plazos detectados automáticamente en decretos de tus expedientes.
                 </Text>
                 {urgentCount > 0 && (
-                    <View className="mt-4 flex-row items-center gap-3 rounded-[18px] border border-red-200 bg-red-50 dark:border-red-800/40 dark:bg-red-900/15 px-4 py-3">
+                    <View className="mt-4 flex-row items-center gap-3 rounded-[18px] border border-red-200 bg-red-50 dark:border-red-800/40 dark:bg-red-900/20 px-4 py-3">
                         <AlertTriangle size={15} color="#EF4444" />
                         <Text className="text-[13px] font-sans-semi text-red-600 dark:text-red-400 flex-1">
                             {urgentCount} plazo{urgentCount !== 1 ? 's' : ''} vence{urgentCount !== 1 ? 'n' : ''} en los próximos 7 días
@@ -269,7 +269,7 @@ function CollapsibleSection({ section, expanded, onToggle }: CollapsibleSectionP
             {/* Section header — tappable */}
             <Pressable
                 onPress={onToggle}
-                className="flex-row items-center gap-2 mx-4 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/4 active:opacity-70 mb-2"
+                className="flex-row items-center gap-2 mx-4 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 active:opacity-70 mb-2"
             >
                 <Text className="text-[13px]">{section.emoji}</Text>
                 <Text className="text-[12px] font-sans-bold text-slate-700 dark:text-slate-200 flex-1">
