@@ -1,14 +1,12 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
-import { Home, User, Scale } from 'lucide-react-native';
+import { Home, User, CalendarClock } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/base/useColorScheme';
 
 /**
- * Premium Tab Layout
- * Replaces generic names with "Inicio" and "Mi Perfil".
- * Uses Lucide icons for a refined, modern look.
+ * Premium Tab Layout — three tabs: Expedientes, Agenda Procesal, Mi Perfil.
  */
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -20,7 +18,7 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: inactiveColor,
-        headerShown: false, // We use custom headers in screens
+        headerShown: false,
         tabBarStyle: {
           backgroundColor: Colors[colorScheme].background,
           borderTopWidth: 1,
@@ -43,11 +41,16 @@ export default function TabLayout() {
         options={{
           title: 'Expedientes',
           tabBarIcon: ({ color, focused }) => (
-            <Home
-              size={22}
-              color={color}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <Home size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="deadline-agenda"
+        options={{
+          title: 'Agenda',
+          tabBarIcon: ({ color, focused }) => (
+            <CalendarClock size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
@@ -56,11 +59,7 @@ export default function TabLayout() {
         options={{
           title: 'Mi Perfil',
           tabBarIcon: ({ color, focused }) => (
-            <User
-              size={22}
-              color={color}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <User size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />

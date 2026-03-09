@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 import { apiClient } from '../api/client';
+import { navigateToExpediente } from '@utils/navigation';
 
 // Detect if we are running in Expo Go (where notifications are restricted in SDK 53+)
 const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
@@ -37,8 +38,8 @@ if (Notifications) {
 }
 
 /**
- * Hook for notification registration and management.
- * Refactored to avoid state-driven layout re-renders.
+ * Hook for notification registration, foreground display, and tap navigation.
+ * Handles both foreground taps and cold-start taps (app was closed).
  */
 export function useNotifications() {
     const notificationListener = useRef<NotificationsType.EventSubscription | null>(null);
@@ -53,24 +54,27 @@ export function useNotifications() {
         // Run registration side-effect
         void registerForPushNotifications();
 
-        // Listen for notifications received while the app is in foreground
+        // ── Foreground notification received ──────────────────────────
         notificationListener.current = Notifications.addNotificationReceivedListener(
             (notification: any) => {
                 console.log('[Notifications] Received:', notification.request.identifier);
             },
         );
 
-        // Handle tap on notification → deep link to expediente detail
+        // ── User tapped a notification (app was open or backgrounded) ─
         responseListener.current = Notifications.addNotificationResponseReceivedListener(
             (response: any) => {
-                const data = response.notification.request.content.data as Record<string, unknown>;
-                const expedienteId = data?.expedienteId as string | undefined;
-
-                if (expedienteId) {
-                    router.push(`/expedientes/${expedienteId}`);
-                }
+                handleNotificationResponse(response);
             },
         );
+
+        // ── Cold start: app was fully closed when notification was tapped ─
+        void Notifications.getLastNotificationResponseAsync().then((response: any) => {
+            if (response) {
+                // Small delay to ensure the navigator is ready
+                setTimeout(() => handleNotificationResponse(response), 300);
+            }
+        });
 
         return () => {
             notificationListener.current?.remove();
@@ -109,13 +113,35 @@ export function useNotifications() {
             try {
                 const token = await Notifications.getExpoPushTokenAsync({ projectId });
                 console.log('[Notifications] Token acquired:', token.data);
-
-                // Persist token in backend so the user receives push notifications
                 await apiClient.post('/users/me/push-token', { token: token.data });
                 console.log('[Notifications] Token saved to remote server.');
             } catch (error) {
                 console.error('[Notifications] Failed to get push token:', error);
             }
         }
+    }
+}
+
+function handleNotificationResponse(response: any) {
+    const data = response?.notification?.request?.content?.data as Record<string, unknown> | undefined;
+    if (!data) return;
+
+    const type = data.type as string | undefined;
+    const iue = data.expedienteId as string | undefined;
+
+    // Type takes priority — DEADLINE_ALERT also carries expedienteId but should go to agenda.
+    if (type === 'DEADLINE_ALERT') {
+        router.push('/(tabs)/deadline-agenda' as any);
+        return;
+    }
+
+    if (type === 'EXPEDIENTE_UPDATE' && iue) {
+        navigateToExpediente(iue);
+        return;
+    }
+
+    // Fallback: if there's an IUE for any other type, go to the expediente.
+    if (iue) {
+        navigateToExpediente(iue);
     }
 }

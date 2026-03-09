@@ -5,3 +5,7 @@ export * from './useDebounce';
 export * from './useAppUpdates';
 export * from './useAgendaBridge';
 export * from './useAuthMutations';
+export * from './useDeadlineAgenda';
+export * from './useDashboard';
+export * from './useDecreeSummary';
+export * from './useNetworkStatus';

@@ -3,7 +3,7 @@
  * Single source of truth for all expediente-related types in the app.
  */
 
-// ─── Enum ────────────────────────────────────────────────────────────────────
+// ─── Enums ───────────────────────────────────────────────────────────────────
 
 export enum FollowStatus {
     PENDING = 'PENDING',
@@ -11,47 +11,115 @@ export enum FollowStatus {
     FINISHED = 'FINISHED',
 }
 
+export type MovementCategory = 'DECREE' | 'NOTIFICATION' | 'WRITING' | 'AUDIENCE' | 'INTERNAL';
+export type MovementPriority = 'LOW' | 'MEDIUM' | 'HIGH';
+export type CaseStage =
+    | 'FILING'
+    | 'PRELIMINARY'
+    | 'EVIDENCE'
+    | 'PLEADINGS'
+    | 'JUDGMENT'
+    | 'APPEAL'
+    | 'ENFORCEMENT';
+export type ActivityStatus = 'ACTIVE' | 'ON_TRACK' | 'DELAYED' | 'DORMANT' | 'UNKNOWN';
+export type DeadlineType = 'BUSINESS_DAYS' | 'CALENDAR_DAYS' | 'UNSPECIFIED';
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
+export interface IMovementClassification {
+    type: MovementCategory;
+    priority: MovementPriority;
+}
+
+export interface IDeadlineDetectionResult {
+    hasDeadline: boolean;
+    days?: number;
+    type?: DeadlineType;
+    detectedText?: string;
+}
+
+export interface IDecreeSummary {
+    summary: string;
+    highlights: string[];
+    hasDeadline: boolean;
+    requiresAction: boolean;
+    actionDescription: string | null;
+    generatedAt: string | null;
+    fromCache: boolean;
+}
+
 export interface IDecree {
-    /** Texto del decreto judicial. Null si está reservado. */
+    /** ID del decreto en la base de datos. Necesario para el endpoint de resumen IA. */
+    id: string;
     textoDecreto: string | null;
-    /** Indica si el decreto está marcado como reservado. */
     isReserved: boolean;
-    /** Número de decreto del SOAP (ej: "445/2026"). */
     nroDecreto: string | null;
+    deadline?: IDeadlineDetectionResult | null;
 }
 
 export interface IMovement {
-    /** Fecha del movimiento (ISO string). */
     fecha: string;
-    /** Tipo de movimiento (ej: "DECRETO"). */
     tipo: string;
-    /** Sede donde se generó el movimiento. */
     sede: string;
-    /** Número de orden dentro del expediente. */
     orden: number | null;
-    /** Decreto asociado. Null si no aplica. */
     decree: IDecree | null;
+    classification?: IMovementClassification;
+}
+
+export interface IInternalGroup {
+    type: 'INTERNAL_PROCESS';
+    count: number;
+    movements: IMovement[];
+}
+
+export type TimelineEntry = IMovement | IInternalGroup;
+
+export function isInternalGroup(entry: TimelineEntry): entry is IInternalGroup {
+    return (entry as IInternalGroup).type === 'INTERNAL_PROCESS';
+}
+
+export function flattenTimeline(entries: TimelineEntry[]): IMovement[] {
+    return entries.flatMap((e) => (isInternalGroup(e) ? e.movements : [e]));
+}
+
+export interface ICaseStageResult {
+    stage: CaseStage;
+    confidence: number;
+    detectedAt: string | null;
+}
+
+export interface IExpedienteStats {
+    totalMovements: number;
+    firstMovementDate: string | null;
+    lastMovementDate: string | null;
+    averageDaysBetweenMovements: number;
+}
+
+export interface IActivityPrediction {
+    status: ActivityStatus;
+    lastActivityDate: string | null;
+    daysSinceLastActivity: number | null;
+}
+
+export interface ICaratulaComponents {
+    plaintiff: string | null;
+    defendant: string | null;
+    caseType: string | null;
 }
 
 export interface IExpediente {
-    /** Identificador Único del Expediente. Formato: Sede-NroRegistro/Año. */
     iue: string;
-    /** Carátula oficial del expediente. */
     caratula: string | null;
-    /** Sede judicial donde tramita. */
     sede: string;
-    /** Número de registro. */
     nroRegistro: number;
-    /** Año del expediente. */
     anio: number;
-    /** Total de movimientos registrados. */
     totalMovimientos: number;
-    /** Fecha y hora de la última sincronización. */
     lastSyncAt: string | null;
-    /** Lista de movimientos del expediente. */
-    movements: IMovement[];
+    movements: TimelineEntry[];
+    stats?: IExpedienteStats;
+    stage?: ICaseStageResult;
+    prediction?: IActivityPrediction;
+    parties?: ICaratulaComponents | null;
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────

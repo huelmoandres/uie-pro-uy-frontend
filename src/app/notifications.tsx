@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Switch, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
-import { Bell, FileSearch, BellOff } from 'lucide-react-native';
+import { Bell, FileSearch, BellOff, FileText, Mic, PenLine, FolderClosed } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { PageContainer } from '@components/ui';
 import {
@@ -21,8 +21,37 @@ const NOTIFICATION_TYPES: Array<{
         key: 'expedienteUpdates',
         icon: FileSearch,
         title: 'Movimientos judiciales',
-        description:
-            'Recibí una alerta cada vez que un expediente que seguís registre nuevos movimientos o decretos.',
+        description: 'Recibí una alerta cada vez que un expediente que seguís registre nuevos movimientos.',
+    },
+    {
+        key: 'notifyDecrees',
+        icon: FileText,
+        title: 'Decretos',
+        description: 'Notificaciones específicas cuando se dicta un nuevo decreto en tus expedientes.',
+    },
+    {
+        key: 'notifyAudiences',
+        icon: Mic,
+        title: 'Audiencias',
+        description: 'Alertas cuando se programa o modifica una audiencia.',
+    },
+    {
+        key: 'notifyNotifications',
+        icon: Bell,
+        title: 'Notificaciones judiciales',
+        description: 'Alertas ante notificaciones formales dentro del expediente.',
+    },
+    {
+        key: 'notifyWritings',
+        icon: PenLine,
+        title: 'Escritos',
+        description: 'Notificaciones al presentarse escritos o documentos.',
+    },
+    {
+        key: 'notifyInternal',
+        icon: FolderClosed,
+        title: 'Trámites internos',
+        description: 'Incluir movimientos internos (Secretaría, Mesa de entrada). Activar solo si necesitás seguimiento detallado.',
     },
 ];
 

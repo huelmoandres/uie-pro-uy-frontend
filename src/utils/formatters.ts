@@ -1,7 +1,10 @@
 /**
  * Pure utility functions for formatting judicial data.
+ * Uses date-fns for reliable, locale-aware date formatting.
  * No side effects, fully testable.
  */
+import { format, formatDistanceToNow, parseISO, isValid } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 // ─── IUE ──────────────────────────────────────────────────────────────────────
 
@@ -22,42 +25,42 @@ export function normalizeIue(iue: string): string {
 
 // ─── Dates ────────────────────────────────────────────────────────────────────
 
+function parseDate(isoDate: string): Date | null {
+    const date = parseISO(isoDate);
+    return isValid(date) ? date : null;
+}
+
 /**
- * Formats an ISO date string to a localized Spanish date string.
+ * Formats an ISO date string to "dd/MM/yyyy".
  * Example: "2024-03-15T00:00:00.000Z" → "15/03/2024"
  */
-export function formatDate(isoDate: string | null | undefined): string {
+export function formatDate(isoDate: string | Date | null | undefined): string {
     if (!isoDate) return 'Sin fecha';
-    const date = new Date(isoDate);
-    if (isNaN(date.getTime())) return 'Fecha inválida';
-    return date.toLocaleDateString('es-UY', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    });
+    const date = isoDate instanceof Date ? isoDate : parseDate(isoDate);
+    if (!date) return 'Fecha inválida';
+    return format(date, 'dd/MM/yyyy');
 }
 
 /**
  * Formats an ISO date string to a human-readable relative time in Spanish.
- * Example: "hace 3 días"
+ * Example: "hace 3 días", "en 2 días"
  */
 export function formatRelativeDate(isoDate: string | null | undefined): string {
     if (!isoDate) return 'Sin sincronización';
-    const date = new Date(isoDate);
-    if (isNaN(date.getTime())) return 'Fecha inválida';
+    const date = parseDate(isoDate);
+    if (!date) return 'Fecha inválida';
+    return formatDistanceToNow(date, { addSuffix: true, locale: es });
+}
 
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return 'hace un momento';
-    if (diffMins < 60) return `hace ${diffMins} min`;
-    if (diffHours < 24) return `hace ${diffHours} h`;
-    if (diffDays === 1) return 'ayer';
-    if (diffDays < 30) return `hace ${diffDays} días`;
-    return formatDate(isoDate);
+/**
+ * Formats an ISO date string to a short human-readable format with month name.
+ * Example: "15 mar. 2024"
+ */
+export function formatDateShort(isoDate: string | Date | null | undefined): string {
+    if (!isoDate) return 'Sin fecha';
+    const date = isoDate instanceof Date ? isoDate : parseDate(isoDate as string);
+    if (!date) return 'Fecha inválida';
+    return format(date, "d MMM yyyy", { locale: es });
 }
 
 // ─── Movement types ───────────────────────────────────────────────────────────
@@ -81,24 +84,18 @@ export function getMovementTypeLabel(tipo: string): string {
 /**
  * Strips HTML tags from a string and decodes common HTML entities.
  * Used to sanitize caratula strings that may contain tags like <br>, &amp;, etc.
- *
- * Example: "LURIN S.A. <br><br>CONCURSO" → "LURIN S.A. CONCURSO"
  */
 export function stripHtml(input: string | null | undefined): string {
     if (!input) return '';
     return input
-        // Replace <br>, <br/>, <br /> with a space
         .replace(/<br\s*\/?>/gi, ' ')
-        // Remove all remaining HTML tags
         .replace(/<[^>]+>/g, '')
-        // Decode common HTML entities
         .replace(/&amp;/g, '&')
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'")
         .replace(/&nbsp;/g, ' ')
-        // Collapse multiple spaces into one
         .replace(/\s{2,}/g, ' ')
         .trim();
 }

@@ -5,3 +5,8 @@ export * from './MovementItem';
 export * from './DecreeViewer';
 export * from './ExpedientesFilterModal';
 export * from './agenda/AgendaWebView';
+export * from './CaseStageBadge';
+export * from './ActivityStatusBadge';
+export * from './DeadlineBadge';
+export * from './InternalGroupItem';
+export * from './AgendaItemCard';

@@ -3,7 +3,7 @@ import { Pressable, Text, View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@context/AuthContext';
 import { PageContainer, ConfirmationModal } from '@components/ui';
-import { User, LogOut, ChevronRight, Settings, Bell, Shield, HelpCircle } from 'lucide-react-native';
+import { User, LogOut, ChevronRight, Settings, Bell, Shield, HelpCircle, LayoutDashboard } from 'lucide-react-native';
 
 /**
  * Premium Profile Screen (Tab Two)
@@ -14,6 +14,7 @@ export default function ProfileScreen() {
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
   const menuItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', color: '#64748B', route: '/dashboard' },
     { icon: Settings, label: 'Configuración', color: '#64748B', route: '/settings' },
     { icon: Bell, label: 'Notificaciones', color: '#64748B', route: '/notifications' },
     { icon: Shield, label: 'Privacidad', color: '#64748B', route: '/privacy' },

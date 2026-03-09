@@ -16,6 +16,8 @@ import { useRestoreColorScheme } from '@hooks/useAppColorScheme';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@components/ui/ToastConfig';
 import { LoadingOverlay } from '@components/shared/LoadingOverlay';
+import { AppLoadingScreen } from '@components/shared/AppLoadingScreen';
+import { NetworkBanner } from '@components/shared/NetworkBanner';
 import { HeaderBackButton } from '@components/shared/HeaderBackButton';
 
 import {
@@ -55,16 +57,18 @@ export default function RootLayout() {
   }, [loaded, isChecking, isThemeReady]);
 
   if (!loaded || isChecking || !isThemeReady) {
-    return null;
+    return (
+      <AppLoadingScreen
+        message={isChecking ? 'Verificando actualizaciones...' : undefined}
+      />
+    );
   }
 
   return (
     <QueryProvider>
       <AuthProvider>
         <RootLayoutNav />
-        {isDownloading && (
-          <LoadingOverlay visible={isDownloading} message="Descargando actualización..." />
-        )}
+        <LoadingOverlay visible={isDownloading} message="Descargando actualización..." />
       </AuthProvider>
     </QueryProvider>
   );
@@ -81,7 +85,7 @@ function RootLayoutNav() {
   useNotifications();
 
   if (isLoading) {
-    return null;
+    return <AppLoadingScreen />;
   }
 
   const inAuthGroup = segments[0] === '(auth)';
@@ -122,6 +126,7 @@ function RootLayoutNav() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="notifications" />
+        <Stack.Screen name="dashboard" />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         <Stack.Screen name="+not-found" />
       </Stack>
@@ -134,6 +139,9 @@ function RootLayoutNav() {
       {!isAuthenticated && !inAuthGroup && <Redirect href="/(auth)/login" />}
 
       <Toast config={toastConfig} topOffset={Platform.OS === 'ios' ? 60 : 40} />
+
+      {/* Global network connectivity banner */}
+      <NetworkBanner />
     </ThemeProvider>
   );
 }
