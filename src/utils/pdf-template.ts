@@ -5,7 +5,7 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { stripHtml, formatDate } from './formatters';
-import { isInternalGroup, flattenTimeline } from '@app-types/expediente.types';
+import { flattenTimeline } from '@app-types/expediente.types';
 import type { IExpediente } from '@app-types/expediente.types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -43,225 +43,329 @@ function categoryLabel(category: string): string {
     return map[category] ?? category;
 }
 
-function categoryColor(category: string): string {
+function categoryDot(category: string): string {
     const map: Record<string, string> = {
-        DECREE: '#1E3A5F',
+        DECREE:       '#1E3A5F',
         NOTIFICATION: '#7C3AED',
-        WRITING: '#0369A1',
-        AUDIENCE: '#B45309',
-        INTERNAL: '#6B7280',
+        WRITING:      '#0369A1',
+        AUDIENCE:     '#B45309',
+        INTERNAL:     '#94A3B8',
     };
-    return map[category] ?? '#6B7280';
+    return map[category] ?? '#94A3B8';
+}
+
+function activityInfo(status: string): { label: string; color: string } {
+    const map: Record<string, { label: string; color: string }> = {
+        ACTIVE:   { label: 'Activo',       color: '#15803D' },
+        ON_TRACK: { label: 'En curso',     color: '#1D4ED8' },
+        DELAYED:  { label: 'Demorado',     color: '#B45309' },
+        DORMANT:  { label: 'Inactivo',     color: '#64748B' },
+        UNKNOWN:  { label: 'Desconocido',  color: '#64748B' },
+    };
+    return map[status] ?? map.UNKNOWN;
 }
 
 // ─── Main builder ─────────────────────────────────────────────────────────────
 
-export function buildExpedientePdf(expediente: IExpediente, notes: string | null): string {
-    const generatedAt = format(new Date(), "d 'de' MMMM yyyy, HH:mm", { locale: es });
-    const caratula = stripHtml(expediente.caratula) || 'Sin carátula registrada';
-    const movements = flattenTimeline(expediente.movements);
+export function buildExpedientePdf(expediente: IExpediente): string {
+    const generatedAt = format(new Date(), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es });
+    const caratula    = stripHtml(expediente.caratula) || 'Sin carátula registrada';
+    const movements   = flattenTimeline(expediente.movements);
 
-    // ── Movements rows ─────────────────────────────────────────────────────
-    const movementRows = movements.map((m) => {
-        const category = m.classification?.type ?? 'INTERNAL';
-        const color = categoryColor(category);
-        const label = categoryLabel(category);
-        const hasDecree = !!m.decree?.textoDecreto;
-        const decreto = hasDecree
-            ? `<span style="font-size:9px;color:#059669;">&#10003; Decreto</span>`
-            : '';
-        return `
-        <tr>
-            <td style="padding:7px 10px;border-bottom:1px solid #F1F5F9;white-space:nowrap;">
-                ${esc(formatDate(m.fecha))}
-            </td>
-            <td style="padding:7px 10px;border-bottom:1px solid #F1F5F9;">
-                <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600;color:${color};background:${color}18;border:1px solid ${color}30;">
-                    ${label}
-                </span>
-            </td>
-            <td style="padding:7px 10px;border-bottom:1px solid #F1F5F9;font-size:11px;color:#334155;">
-                ${esc(m.tipo)} ${decreto}
-            </td>
-            <td style="padding:7px 10px;border-bottom:1px solid #F1F5F9;font-size:10px;color:#64748B;">
-                ${esc(m.sede)}
-            </td>
-        </tr>`;
-    }).join('');
-
-    // ── Parties section ────────────────────────────────────────────────────
-    const partiesHtml = expediente.parties
+    // ── Stats ──────────────────────────────────────────────────────────────
+    const stats = expediente.stats;
+    const statsRow = stats
         ? `
-        <div class="section">
-            <div class="section-title">Partes</div>
-            <table style="width:100%;border-collapse:collapse;">
-                ${expediente.parties.plaintiff ? `
-                <tr>
-                    <td style="padding:5px 0;width:110px;font-size:11px;color:#64748B;font-weight:600;">Actor</td>
-                    <td style="padding:5px 0;font-size:11px;color:#1E293B;">${esc(expediente.parties.plaintiff)}</td>
-                </tr>` : ''}
-                ${expediente.parties.defendant ? `
-                <tr>
-                    <td style="padding:5px 0;font-size:11px;color:#64748B;font-weight:600;">Demandado</td>
-                    <td style="padding:5px 0;font-size:11px;color:#1E293B;">${esc(expediente.parties.defendant)}</td>
-                </tr>` : ''}
-                ${expediente.parties.caseType ? `
-                <tr>
-                    <td style="padding:5px 0;font-size:11px;color:#64748B;font-weight:600;">Tipo</td>
-                    <td style="padding:5px 0;font-size:11px;color:#1E293B;">${esc(expediente.parties.caseType)}</td>
-                </tr>` : ''}
-            </table>
-        </div>`
-        : '';
-
-    // ── Notes section ──────────────────────────────────────────────────────
-    const notesHtml = notes
-        ? `
-        <div class="section" style="page-break-inside:avoid;">
-            <div class="section-title">Mis Notas</div>
-            <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:12px 14px;font-size:11px;color:#78350F;line-height:1.6;white-space:pre-wrap;">${esc(notes)}</div>
-        </div>`
-        : '';
-
-    // ── Stage + activity badges ────────────────────────────────────────────
-    const stageBadge = expediente.stage
-        ? `<span style="display:inline-block;padding:3px 10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:20px;font-size:10px;font-weight:600;color:#1D4ED8;">
-            ${stageLabel(expediente.stage.stage)}
-           </span>`
-        : '';
-
-    const activityBadge = expediente.prediction
-        ? (() => {
-            const map: Record<string, { bg: string; color: string; label: string }> = {
-                ACTIVE:   { bg: '#F0FDF4', color: '#15803D', label: 'Activo' },
-                ON_TRACK: { bg: '#EFF6FF', color: '#1D4ED8', label: 'En curso' },
-                DELAYED:  { bg: '#FFFBEB', color: '#B45309', label: 'Demorado' },
-                DORMANT:  { bg: '#F1F5F9', color: '#475569', label: 'Inactivo' },
-                UNKNOWN:  { bg: '#F1F5F9', color: '#6B7280', label: 'Desconocido' },
-            };
-            const s = map[expediente.prediction.status] ?? map.UNKNOWN;
-            return `<span style="display:inline-block;padding:3px 10px;background:${s.bg};border:1px solid ${s.color}30;border-radius:20px;font-size:10px;font-weight:600;color:${s.color};">${s.label}</span>`;
-        })()
-        : '';
-
-    // ── Stats row ──────────────────────────────────────────────────────────
-    const statsHtml = expediente.stats?.totalMovements != null
-        ? `
-        <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;">
-            <div class="stat-box">
-                <div class="stat-label">Total movimientos</div>
-                <div class="stat-value">${expediente.totalMovimientos}</div>
+        <div class="stats-grid">
+            <div class="stat">
+                <span class="stat-n">${expediente.totalMovimientos}</span>
+                <span class="stat-l">Total movimientos</span>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Primer movimiento</div>
-                <div class="stat-value">${formatDate(expediente.stats.firstMovementDate)}</div>
+            <div class="stat">
+                <span class="stat-n">${formatDate(stats.firstMovementDate)}</span>
+                <span class="stat-l">Primer movimiento</span>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Último movimiento</div>
-                <div class="stat-value">${formatDate(expediente.stats.lastMovementDate)}</div>
+            <div class="stat">
+                <span class="stat-n">${formatDate(stats.lastMovementDate)}</span>
+                <span class="stat-l">Último movimiento</span>
             </div>
-            ${expediente.stats.averageDaysBetweenMovements != null ? `
-            <div class="stat-box">
-                <div class="stat-label">Promedio entre mov.</div>
-                <div class="stat-value">${Math.round(expediente.stats.averageDaysBetweenMovements)} días</div>
+            ${stats.averageDaysBetweenMovements != null ? `
+            <div class="stat">
+                <span class="stat-n">${Math.round(stats.averageDaysBetweenMovements)}d</span>
+                <span class="stat-l">Promedio entre mov.</span>
             </div>` : ''}
         </div>`
         : '';
 
-    // ── Full HTML document ─────────────────────────────────────────────────
+    // ── Parties ────────────────────────────────────────────────────────────
+    const p = expediente.parties;
+    const partiesBlock = p && (p.plaintiff || p.defendant || p.caseType)
+        ? `
+        <div class="block">
+            <div class="block-title">Partes del Proceso</div>
+            <table class="parties-table">
+                ${p.plaintiff ? `<tr><td class="pt-label">Actor</td><td class="pt-value">${esc(p.plaintiff)}</td></tr>` : ''}
+                ${p.defendant ? `<tr><td class="pt-label">Demandado</td><td class="pt-value">${esc(p.defendant)}</td></tr>` : ''}
+                ${p.caseType  ? `<tr><td class="pt-label">Tipo de proceso</td><td class="pt-value">${esc(p.caseType)}</td></tr>` : ''}
+            </table>
+        </div>`
+        : '';
+
+    // ── Stage / Activity badges ────────────────────────────────────────────
+    const stageBadge = expediente.stage
+        ? `<span class="badge badge-blue">${stageLabel(expediente.stage.stage)}</span>`
+        : '';
+    const actBadge = expediente.prediction
+        ? (() => {
+            const a = activityInfo(expediente.prediction.status);
+            return `<span class="badge" style="color:${a.color};border-color:${a.color}40;background:${a.color}10;">${a.label}</span>`;
+        })()
+        : '';
+
+    // ── Movements table rows ───────────────────────────────────────────────
+    const rows = movements.map((m, i) => {
+        const cat   = m.classification?.type ?? 'INTERNAL';
+        const dot   = categoryDot(cat);
+        const label = categoryLabel(cat);
+        const even  = i % 2 === 0;
+        return `
+        <tr style="background:${even ? '#FFFFFF' : '#F8FAFC'};">
+            <td class="td tc-date">${esc(formatDate(m.fecha))}</td>
+            <td class="td tc-cat">
+                <span style="display:inline-flex;align-items:center;gap:5px;">
+                    <span style="width:6px;height:6px;border-radius:50%;background:${dot};display:inline-block;flex-shrink:0;"></span>
+                    ${label}
+                </span>
+            </td>
+            <td class="td tc-tipo">${esc(m.tipo)}</td>
+            <td class="td tc-decree">${m.decree?.textoDecreto ? '<span class="decree-yes">&#10003;</span>' : ''}</td>
+        </tr>`;
+    }).join('');
+
+    // ── Full document ──────────────────────────────────────────────────────
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-    font-size: 12px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11px;
     color: #1E293B;
-    background: #FFFFFF;
-    padding: 36px 40px;
+    background: #fff;
+    padding: 44px 48px 36px;
+    line-height: 1.5;
   }
+
+  /* ── Header ── */
   .header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 2px solid #1E3A5F;
-    padding-bottom: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
-  .brand { font-size: 11px; font-weight: 700; color: #C5A059; letter-spacing: 2px; text-transform: uppercase; }
-  .title { font-size: 20px; font-weight: 700; color: #1E3A5F; margin-top: 4px; }
-  .iue-badge {
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
-    padding: 8px 14px;
+  .header-left {}
+  .brand-line {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #C5A059;
+    margin-bottom: 4px;
+  }
+  .doc-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.5px;
+  }
+  .header-right {
     text-align: right;
   }
-  .iue-label { font-size: 9px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; }
-  .iue-value { font-size: 15px; font-weight: 700; color: #1E3A5F; margin-top: 2px; }
-  .caratula {
+  .iue-label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #94A3B8;
+    margin-bottom: 4px;
+  }
+  .iue-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1E3A5F;
+    letter-spacing: -0.5px;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    height: 2px;
+    background: linear-gradient(90deg, #1E3A5F 0%, #C5A059 60%, #ffffff 100%);
+    margin-bottom: 28px;
+    border-radius: 2px;
+  }
+
+  /* ── Caratula ── */
+  .caratula-box {
+    border-left: 3px solid #C5A059;
+    padding: 10px 16px;
+    margin-bottom: 24px;
+    background: #FAFBFC;
+  }
+  .caratula-label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #94A3B8;
+    margin-bottom: 5px;
+  }
+  .caratula-text {
     font-size: 13px;
     font-weight: 600;
-    color: #334155;
+    color: #0F172A;
     line-height: 1.5;
-    background: #F8FAFC;
-    border-left: 3px solid #C5A059;
-    padding: 10px 14px;
-    border-radius: 0 6px 6px 0;
-    margin-bottom: 20px;
   }
-  .meta-grid {
+
+  /* ── Metadata grid ── */
+  .meta-row {
     display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+    gap: 0;
+    margin-bottom: 24px;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    overflow: hidden;
   }
-  .meta-item { flex: 1; min-width: 160px; }
-  .meta-label { font-size: 9px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
-  .meta-value { font-size: 12px; font-weight: 600; color: #1E293B; }
-  .section { margin-bottom: 24px; }
-  .section-title {
-    font-size: 9px;
-    font-weight: 700;
-    color: #94A3B8;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #F1F5F9;
-  }
-  .stat-box {
+  .meta-cell {
     flex: 1;
-    min-width: 120px;
+    padding: 10px 14px;
+    border-right: 1px solid #E2E8F0;
+  }
+  .meta-cell:last-child { border-right: none; }
+  .meta-label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #94A3B8;
+    margin-bottom: 4px;
+  }
+  .meta-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1E293B;
+  }
+
+  /* ── Badges ── */
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .badge {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    border: 1px solid transparent;
+  }
+  .badge-blue { color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF; }
+
+  /* ── Stats ── */
+  .stats-grid {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    flex: 1;
+    min-width: 110px;
     background: #F8FAFC;
     border: 1px solid #E2E8F0;
-    border-radius: 8px;
-    padding: 10px 14px;
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
-  .stat-label { font-size: 9px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-  .stat-value { font-size: 13px; font-weight: 700; color: #1E3A5F; }
-  .movements-table {
+  .stat-n {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1E3A5F;
+  }
+  .stat-l {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #94A3B8;
+  }
+
+  /* ── Generic block ── */
+  .block { margin-bottom: 24px; }
+  .block-title {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #94A3B8;
+    padding-bottom: 7px;
+    border-bottom: 1px solid #E2E8F0;
+    margin-bottom: 12px;
+  }
+
+  /* ── Parties table ── */
+  .parties-table { width: 100%; border-collapse: collapse; }
+  .pt-label {
+    padding: 5px 0;
+    width: 130px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748B;
+    vertical-align: top;
+  }
+  .pt-value {
+    padding: 5px 0;
+    font-size: 11px;
+    color: #1E293B;
+    font-weight: 500;
+  }
+
+  /* ── Movements table ── */
+  .mv-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11px;
+    font-size: 10.5px;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    overflow: hidden;
   }
-  .movements-table thead tr {
-    background: #F8FAFC;
+  .mv-table thead tr {
+    background: #1E3A5F;
   }
-  .movements-table th {
-    padding: 8px 10px;
+  .th {
+    padding: 9px 12px;
     text-align: left;
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 700;
-    color: #94A3B8;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 2px solid #E2E8F0;
+    color: #FFFFFF;
+    white-space: nowrap;
   }
-  .movements-table tr:last-child td { border-bottom: none; }
+  .td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+  }
+  .mv-table tr:last-child td { border-bottom: none; }
+  .tc-date  { width: 90px;  white-space: nowrap; color: #475569; }
+  .tc-cat   { width: 110px; color: #334155; font-weight: 600; }
+  .tc-tipo  { color: #334155; }
+  .tc-decree { width: 60px; text-align: center; }
+  .decree-yes { color: #15803D; font-weight: 700; font-size: 12px; }
+
+  /* ── Footer ── */
   .footer {
     margin-top: 36px;
     padding-top: 12px;
@@ -270,92 +374,97 @@ export function buildExpedientePdf(expediente: IExpediente, notes: string | null
     justify-content: space-between;
     align-items: center;
   }
-  .footer-brand { font-size: 10px; font-weight: 700; color: #C5A059; letter-spacing: 1px; }
-  .footer-date { font-size: 9px; color: #94A3B8; }
+  .footer-brand { font-size: 9px; font-weight: 800; letter-spacing: 2px; color: #C5A059; }
+  .footer-meta  { font-size: 9px; color: #94A3B8; text-align: right; }
+
   @media print {
     body { padding: 20px; }
-    .section { page-break-inside: avoid; }
   }
 </style>
 </head>
 <body>
 
-<!-- ─── Header ──────────────────────────────────────────────────────────── -->
+<!-- Header -->
 <div class="header">
-  <div>
-    <div class="brand">IUE Tracker</div>
-    <div class="title">Expediente Judicial</div>
+  <div class="header-left">
+    <div class="brand-line">IUE Tracker &nbsp;·&nbsp; Seguimiento Judicial</div>
+    <div class="doc-title">Expediente Judicial</div>
   </div>
-  <div class="iue-badge">
-    <div class="iue-label">IUE</div>
+  <div class="header-right">
+    <div class="iue-label">N.º de Expediente</div>
     <div class="iue-value">${esc(expediente.iue)}</div>
   </div>
 </div>
 
-<!-- ─── Carátula ────────────────────────────────────────────────────────── -->
-<div class="caratula">${esc(caratula)}</div>
+<div class="divider"></div>
 
-<!-- ─── Metadata ───────────────────────────────────────────────────────── -->
-<div class="meta-grid">
-  <div class="meta-item">
+<!-- Carátula -->
+<div class="caratula-box">
+  <div class="caratula-label">Carátula</div>
+  <div class="caratula-text">${esc(caratula)}</div>
+</div>
+
+<!-- Metadata -->
+<div class="meta-row">
+  <div class="meta-cell">
     <div class="meta-label">Sede</div>
     <div class="meta-value">${esc(expediente.sede)}</div>
   </div>
-  <div class="meta-item">
+  <div class="meta-cell">
     <div class="meta-label">Año</div>
     <div class="meta-value">${expediente.anio}</div>
   </div>
-  <div class="meta-item">
+  <div class="meta-cell">
     <div class="meta-label">Nro. Registro</div>
     <div class="meta-value">${expediente.nroRegistro}</div>
   </div>
-  <div class="meta-item">
-    <div class="meta-label">Última sync</div>
+  <div class="meta-cell">
+    <div class="meta-label">Última actualización</div>
     <div class="meta-value">${formatDate(expediente.lastSyncAt)}</div>
   </div>
 </div>
 
-<!-- ─── Stage + Activity ─────────────────────────────────────────────── -->
-${stageBadge || activityBadge ? `
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
-  ${stageBadge} ${activityBadge}
+<!-- Badges -->
+${stageBadge || actBadge ? `
+<div class="badges">
+  ${stageBadge}${actBadge}
 </div>` : ''}
 
-<!-- ─── Stats ───────────────────────────────────────────────────────────── -->
-${statsHtml ? `
-<div class="section">
-  <div class="section-title">Estadísticas</div>
-  ${statsHtml}
+<!-- Stats -->
+${statsRow ? `
+<div class="block">
+  <div class="block-title">Estadísticas del Expediente</div>
+  ${statsRow}
 </div>` : ''}
 
-<!-- ─── Parties ─────────────────────────────────────────────────────────── -->
-${partiesHtml}
+<!-- Parties -->
+${partiesBlock}
 
-<!-- ─── Movements ───────────────────────────────────────────────────────── -->
-<div class="section">
-  <div class="section-title">Historial de Movimientos (${movements.length})</div>
-  <table class="movements-table">
+<!-- Movements -->
+<div class="block">
+  <div class="block-title">Historial de Movimientos &nbsp;(${movements.length})</div>
+  <table class="mv-table">
     <thead>
       <tr>
-        <th>Fecha</th>
-        <th>Categoría</th>
-        <th>Tipo</th>
-        <th>Sede</th>
+        <th class="th">Fecha</th>
+        <th class="th">Categoría</th>
+        <th class="th">Tipo de movimiento</th>
+        <th class="th" style="text-align:center;">Decreto</th>
       </tr>
     </thead>
     <tbody>
-      ${movementRows || '<tr><td colspan="4" style="padding:16px;text-align:center;color:#94A3B8;">Sin movimientos registrados</td></tr>'}
+      ${rows || `<tr><td class="td" colspan="4" style="text-align:center;color:#94A3B8;padding:20px;">Sin movimientos registrados</td></tr>`}
     </tbody>
   </table>
 </div>
 
-<!-- ─── Notes ───────────────────────────────────────────────────────────── -->
-${notesHtml}
-
-<!-- ─── Footer ──────────────────────────────────────────────────────────── -->
+<!-- Footer -->
 <div class="footer">
   <div class="footer-brand">IUE TRACKER</div>
-  <div class="footer-date">Generado el ${esc(generatedAt)}</div>
+  <div class="footer-meta">
+    Generado el ${esc(generatedAt)}<br/>
+    Documento de uso interno — no constituye copia oficial
+  </div>
 </div>
 
 </body>

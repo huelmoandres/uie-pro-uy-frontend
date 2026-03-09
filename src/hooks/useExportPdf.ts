@@ -8,18 +8,18 @@ import type { IExpediente } from '@app-types/expediente.types';
 
 interface ExportState {
     isExporting: boolean;
-    export: (expediente: IExpediente, notes?: string | null) => Promise<void>;
+    export: (expediente: IExpediente) => Promise<void>;
 }
 
 export function useExportPdf(): ExportState {
     const [isExporting, setIsExporting] = useState(false);
 
-    const exportPdf = useCallback(async (expediente: IExpediente, notes?: string | null) => {
+    const exportPdf = useCallback(async (expediente: IExpediente) => {
         if (isExporting) return;
         setIsExporting(true);
 
         try {
-            const html = buildExpedientePdf(expediente, notes ?? null);
+            const html = buildExpedientePdf(expediente);
 
             // Sanitize IUE for use in filename (replace / and spaces with -)
             const safeIue = expediente.iue.replace(/\//g, '-').replace(/\s+/g, '-');
@@ -28,8 +28,15 @@ export function useExportPdf(): ExportState {
             const { uri } = await Print.printToFileAsync({
                 html,
                 base64: false,
-                uri: filename,
             });
+
+            // Rename to include IUE in filename
+            const { uri: renamedUri } = await import('expo-file-system').then(async (fs) => {
+                const dir = uri.substring(0, uri.lastIndexOf('/') + 1);
+                const dest = `${dir}${filename}`;
+                await fs.moveAsync({ from: uri, to: dest });
+                return { uri: dest };
+            }).catch(() => ({ uri })); // fallback to original uri if rename fails
 
             const canShare = await Sharing.isAvailableAsync();
             if (!canShare) {
@@ -41,7 +48,7 @@ export function useExportPdf(): ExportState {
                 return;
             }
 
-            await Sharing.shareAsync(uri, {
+            await Sharing.shareAsync(renamedUri, {
                 mimeType: 'application/pdf',
                 dialogTitle: `Expediente ${expediente.iue}`,
                 UTI: 'com.adobe.pdf',

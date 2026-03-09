@@ -482,7 +482,7 @@ export default function ExpedienteDetailScreen() {
                     {/* Export PDF */}
                     <Pressable
                         className="mb-3 flex-row items-center justify-between rounded-3xl bg-accent/5 p-5 border border-accent/15 active:bg-accent/10"
-                        onPress={() => void pdfExporter.export(item, savedNotes)}
+                        onPress={() => void pdfExporter.export(item)}
                         disabled={pdfExporter.isExporting}
                     >
                         <View className="flex-row items-center">
