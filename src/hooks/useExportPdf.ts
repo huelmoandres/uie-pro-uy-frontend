@@ -21,9 +21,14 @@ export function useExportPdf(): ExportState {
         try {
             const html = buildExpedientePdf(expediente, notes ?? null);
 
+            // Sanitize IUE for use in filename (replace / and spaces with -)
+            const safeIue = expediente.iue.replace(/\//g, '-').replace(/\s+/g, '-');
+            const filename = `Expediente_${safeIue}.pdf`;
+
             const { uri } = await Print.printToFileAsync({
                 html,
                 base64: false,
+                uri: filename,
             });
 
             const canShare = await Sharing.isAvailableAsync();
