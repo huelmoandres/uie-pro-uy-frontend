@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
+    ActivityIndicator,
     Pressable,
     Text,
     View,
@@ -10,7 +11,7 @@ import {
 } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { useExpedienteDetail, useExpedienteNotes } from '@hooks';
+import { useExpedienteDetail, useExpedienteNotes, useExportPdf } from '@hooks';
 import { ExpedienteService } from '@services';
 import { ConfirmationModal, Skeleton, PageContainer } from '@components/ui';
 import { MovementItem, AgendaWebView, InternalGroupItem, CaseStageBadge, ActivityStatusBadge } from '@components/features';
@@ -28,6 +29,7 @@ import {
     Users,
     StickyNote,
     Check,
+    Download,
 } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
@@ -47,6 +49,7 @@ export default function ExpedienteDetailScreen() {
     const notesInputRef = useRef<TextInput>(null);
 
     const { mutation: notesMutation, notes: savedNotes } = useExpedienteNotes(iue);
+    const pdfExporter = useExportPdf();
     // While editing, show the in-progress text; otherwise show what's saved in DB.
     const displayNotes = notesText !== null ? notesText : (savedNotes ?? '');
 
@@ -475,6 +478,31 @@ export default function ExpedienteDetailScreen() {
                     <Text className="mb-4 ml-1 text-[10px] font-sans-bold uppercase tracking-[2.5px] text-slate-400">
                         Gestión del Expediente
                     </Text>
+
+                    {/* Export PDF */}
+                    <Pressable
+                        className="mb-3 flex-row items-center justify-between rounded-3xl bg-accent/5 p-5 border border-accent/15 active:bg-accent/10"
+                        onPress={() => void pdfExporter.export(item, savedNotes)}
+                        disabled={pdfExporter.isExporting}
+                    >
+                        <View className="flex-row items-center">
+                            <View className="h-10 w-10 items-center justify-center rounded-xl bg-accent/10 mr-4">
+                                <Download size={18} color="#B89146" />
+                            </View>
+                            <View>
+                                <Text className="text-sm font-sans-bold text-accent">
+                                    {pdfExporter.isExporting ? 'Generando PDF...' : 'Exportar PDF'}
+                                </Text>
+                                <Text className="text-[11px] font-sans text-accent/60">
+                                    Movimientos, notas y estadísticas
+                                </Text>
+                            </View>
+                        </View>
+                        {pdfExporter.isExporting && (
+                            <ActivityIndicator size="small" color="#B89146" />
+                        )}
+                    </Pressable>
+
                     <Pressable
                         className="flex-row items-center justify-between rounded-3xl bg-danger/5 p-5 border border-danger/10 active:bg-danger/10"
                         onPress={() => setShowUnfollowModal(true)}

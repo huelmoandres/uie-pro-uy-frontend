@@ -60,7 +60,8 @@
           "color": "#1E3A5F"
         }
       ],
-      "expo-image"
+      "expo-image",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true

@@ -11,3 +11,4 @@ export * from './useDecreeSummary';
 export * from './useNetworkStatus';
 export * from './usePinExpediente';
 export * from './useExpedienteNotes';
+export * from './useExportPdf';
