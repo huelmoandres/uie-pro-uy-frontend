@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
     ActivityIndicator,
     Pressable,
@@ -27,14 +27,132 @@ import {
     History,
     FileText,
     Users,
-    StickyNote,
-    Check,
+    Pencil,
     Download,
 } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
 import { stripHtml } from '@utils/formatters';
 import { isInternalGroup, flattenTimeline, type TimelineEntry } from '@app-types/expediente.types';
+
+// ── Notes editor ──────────────────────────────────────────────────────────────
+function NotesEditor({ iue, initialNotes }: { iue: string; initialNotes: string | null }) {
+    const { mutation, notes: savedNotes } = useExpedienteNotes(iue);
+    const [editing, setEditing] = useState(false);
+    const [draft, setDraft] = useState('');
+    const inputRef = useRef<TextInput>(null);
+
+    // Sync draft with saved notes when not editing
+    useEffect(() => {
+        if (!editing) setDraft(savedNotes ?? initialNotes ?? '');
+    }, [savedNotes, initialNotes, editing]);
+
+    const displayText = editing ? draft : (savedNotes ?? initialNotes ?? '');
+
+    const handleEdit = useCallback(() => {
+        setDraft(savedNotes ?? initialNotes ?? '');
+        setEditing(true);
+        setTimeout(() => inputRef.current?.focus(), 80);
+    }, [savedNotes, initialNotes]);
+
+    const handleCancel = useCallback(() => {
+        setEditing(false);
+        setDraft(savedNotes ?? initialNotes ?? '');
+    }, [savedNotes, initialNotes]);
+
+    const handleSave = useCallback(() => {
+        mutation.mutate(draft.trim() || null, {
+            onSuccess: () => {
+                setEditing(false);
+                void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            },
+        });
+    }, [mutation, draft]);
+
+    const hasChanges = draft.trim() !== (savedNotes ?? initialNotes ?? '').trim();
+
+    return (
+        <View className="mb-8">
+            <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-[10px] font-sans-bold uppercase tracking-[2.5px] text-slate-400">
+                    Mis Notas
+                </Text>
+                {!editing && (
+                    <Pressable onPress={handleEdit} hitSlop={8} className="flex-row items-center gap-1.5">
+                        <Pencil size={12} color="#B89146" />
+                        <Text className="text-[11px] font-sans-semi text-accent">
+                            {displayText ? 'Editar' : 'Agregar'}
+                        </Text>
+                    </Pressable>
+                )}
+            </View>
+
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+                <View
+                    className={`rounded-2xl border overflow-hidden ${
+                        editing
+                            ? 'border-accent/50 bg-white dark:bg-white/5'
+                            : 'border-slate-100 dark:border-white/5 bg-white dark:bg-primary/40'
+                    }`}
+                >
+                    {editing ? (
+                        <TextInput
+                            ref={inputRef}
+                            value={draft}
+                            onChangeText={setDraft}
+                            multiline
+                            placeholder="Escribí tus notas personales sobre este expediente..."
+                            placeholderTextColor="#94A3B8"
+                            className="font-sans text-[13px] text-slate-700 dark:text-slate-200 leading-relaxed p-4"
+                            style={{ textAlignVertical: 'top', minHeight: 96 }}
+                        />
+                    ) : displayText ? (
+                        <Pressable onPress={handleEdit} className="p-4">
+                            <Text className="font-sans text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                                {displayText}
+                            </Text>
+                        </Pressable>
+                    ) : (
+                        <Pressable onPress={handleEdit} className="p-4 flex-row items-center gap-2">
+                            <Pencil size={14} color="#94A3B8" />
+                            <Text className="font-sans text-[13px] text-slate-400">
+                                Tocá para agregar notas personales...
+                            </Text>
+                        </Pressable>
+                    )}
+
+                    {editing && (
+                        <View className="flex-row border-t border-slate-100 dark:border-white/10">
+                            <Pressable
+                                onPress={handleCancel}
+                                className="flex-1 items-center py-2.5 border-r border-slate-100 dark:border-white/10"
+                            >
+                                <Text className="font-sans-semi text-[13px] text-slate-500 dark:text-slate-400">
+                                    Cancelar
+                                </Text>
+                            </Pressable>
+                            <Pressable
+                                onPress={handleSave}
+                                disabled={mutation.isPending || !hasChanges}
+                                className={`flex-1 items-center py-2.5 ${
+                                    hasChanges && !mutation.isPending ? 'opacity-100' : 'opacity-40'
+                                }`}
+                            >
+                                {mutation.isPending ? (
+                                    <ActivityIndicator size="small" color="#B89146" />
+                                ) : (
+                                    <Text className="font-sans-semi text-[13px] text-accent">
+                                        Guardar
+                                    </Text>
+                                )}
+                            </Pressable>
+                        </View>
+                    )}
+                </View>
+            </KeyboardAvoidingView>
+        </View>
+    );
+}
 
 export default function ExpedienteDetailScreen() {
     const queryClient = useQueryClient();
@@ -44,25 +162,7 @@ export default function ExpedienteDetailScreen() {
 
     const iue = (id as string).replace(':', '/');
 
-    const [notesText, setNotesText] = useState<string | null>(null);
-    const [notesEditing, setNotesEditing] = useState(false);
-    const notesInputRef = useRef<TextInput>(null);
-
-    const { mutation: notesMutation, notes: savedNotes } = useExpedienteNotes(iue);
     const pdfExporter = useExportPdf();
-    // While editing, show the in-progress text; otherwise show what's saved in DB.
-    const displayNotes = notesText !== null ? notesText : (savedNotes ?? '');
-
-    const handleSaveNotes = useCallback(() => {
-        notesMutation.mutate(displayNotes || null, {
-            onSuccess: () => { setNotesEditing(false); setNotesText(null); },
-        });
-    }, [notesMutation, displayNotes]);
-
-    const handleStartEditNotes = useCallback(() => {
-        setNotesEditing(true);
-        setTimeout(() => notesInputRef.current?.focus(), 100);
-    }, []);
 
     const [decreeFilter, setDecreeFilter] = useState<'all' | 'decree' | 'no-decree'>('all');
     const [yearFilter, setYearFilter] = useState<number | null>(null);
@@ -417,61 +517,7 @@ export default function ExpedienteDetailScreen() {
                 </View>
 
                 {/* ── Notas personales ──────────────────────────────── */}
-                <View className="mb-8">
-                    <View className="flex-row items-center justify-between mb-4">
-                        <Text className="text-[10px] font-sans-bold uppercase tracking-[2.5px] text-slate-400">
-                            Mis Notas
-                        </Text>
-                        {!notesEditing ? (
-                            <Pressable onPress={handleStartEditNotes} hitSlop={8}>
-                                <Text className="text-[11px] font-sans-semi text-accent">Editar</Text>
-                            </Pressable>
-                        ) : (
-                            <Pressable
-                                onPress={handleSaveNotes}
-                                disabled={notesMutation.isPending}
-                                className="flex-row items-center gap-1 bg-accent/10 rounded-full px-3 py-1"
-                            >
-                                <Check size={12} color="#B89146" />
-                                <Text className="text-[11px] font-sans-semi text-accent">Guardar</Text>
-                            </Pressable>
-                        )}
-                    </View>
-                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-                        <Pressable
-                            onPress={handleStartEditNotes}
-                            className={`rounded-[24px] border p-4 min-h-[80px] ${
-                                notesEditing
-                                    ? 'border-accent/40 bg-accent/5 dark:bg-accent/10'
-                                    : 'border-slate-100 dark:border-white/5 bg-white dark:bg-primary/40'
-                            }`}
-                        >
-                            {notesEditing ? (
-                                <TextInput
-                                    ref={notesInputRef}
-                                    value={displayNotes}
-                                    onChangeText={setNotesText}
-                                    multiline
-                                    placeholder="Agregá notas personales sobre este expediente..."
-                                    placeholderTextColor="#94A3B8"
-                                    className="font-sans text-[13px] text-slate-700 dark:text-slate-300 leading-relaxed"
-                                    style={{ textAlignVertical: 'top', minHeight: 64 }}
-                                />
-                            ) : displayNotes ? (
-                                <Text className="font-sans text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                                    {displayNotes}
-                                </Text>
-                            ) : (
-                                <View className="flex-row items-center gap-2 opacity-50">
-                                    <StickyNote size={16} color="#94A3B8" />
-                                    <Text className="font-sans text-[13px] text-slate-400">
-                                        Sin notas. Tocá Editar para agregar.
-                                    </Text>
-                                </View>
-                            )}
-                        </Pressable>
-                    </KeyboardAvoidingView>
-                </View>
+                <NotesEditor iue={iue} initialNotes={null} />
 
                 {/* Gestión */}
                 <View className="mt-4 pb-12">
