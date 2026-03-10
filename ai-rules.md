@@ -110,7 +110,15 @@ Configurar y usar siempre alias en `tsconfig.json`:
 
 ## 12. **Compact Design Principle:** Default to Small (sm) for components (buttons, inputs, icons) to ensure a compact, professional UI. Avoid large placeholders or oversized elements to maintain a professional, information-dense display.
 
-## 13. 🔄 Gestión de Actualizaciones OTA (Expo Updates)
+## 13. 💳 Suscripciones (RevenueCat)
+* **Entitlement:** `pro_access` — desbloquea acceso completo a la app.
+* **Modelo:** No hay tier gratuito. La app se compra (suscripción con trial de 7 días) y da acceso a todo sin límites.
+* **Product ID:** Configurar en RevenueCat Dashboard el producto "Suscripción Mensual Pro" (App Store Connect).
+* **Paywall:** Pantalla `/paywall` con título "IUE.uy Pro", beneficios, botón "Suscribirse" y "Restaurar Compras" (obligatorio por Apple).
+* **Legal:** El Paywall debe incluir links a Política de Privacidad y Términos de Uso (requerido por Apple).
+* **Identificación:** Usar `Purchases.logIn(userId)` al autenticar y `Purchases.logOut()` al cerrar sesión.
+
+## 14. 🔄 Gestión de Actualizaciones OTA (Expo Updates)
 * **Manual Control:** Queda prohibido el comportamiento por defecto de "esperar y aplicar en el próximo reinicio" para cambios críticos. Se debe usar el hook `useUpdates` de `expo-updates`.
 * **Startup Check:** Al arrancar la app (en `app/_layout.tsx`), se debe verificar si existe una actualización disponible antes de ocultar el `SplashScreen`.
 * **UX de Actualización:** * Si hay una actualización disponible, mostrar un `LoadingOverlay` con el mensaje "Actualizando el sistema jurídico...".

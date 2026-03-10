@@ -4,11 +4,14 @@ import { Clock, MapPin } from 'lucide-react-native';
 import type { IMovement, MovementCategory, MovementPriority } from '@app-types/expediente.types';
 import { formatDate, getMovementTypeLabel } from '@utils/formatters';
 import { DecreeViewer } from './DecreeViewer';
+import type { IDecreePdfContext } from '@utils/pdf-template';
 
 interface Props {
     item: IMovement;
     isFirst: boolean;
     isLast: boolean;
+    /** Contexto opcional para exportar el decreto a PDF con datos del expediente */
+    decreeContext?: IDecreePdfContext;
 }
 
 const DOT_COLOR: Record<MovementPriority, string> = {
@@ -25,7 +28,7 @@ const CATEGORY_CHIP: Record<MovementCategory, { label: string; color: string }> 
     INTERNAL:     { label: 'Interno',        color: '#94A3B8' },
 };
 
-export const MovementItem = React.memo(({ item, isFirst, isLast }: Props) => {
+export const MovementItem = React.memo(({ item, isFirst, isLast, decreeContext }: Props) => {
     const priority = item.classification?.priority ?? 'LOW';
     const category = item.classification?.type;
     const dotColor = DOT_COLOR[priority];
@@ -79,7 +82,12 @@ export const MovementItem = React.memo(({ item, isFirst, isLast }: Props) => {
                     )}
                 </View>
 
-                {item.decree && <DecreeViewer decree={item.decree} />}
+                {item.decree && (
+                    <DecreeViewer
+                        decree={item.decree}
+                        decreeContext={decreeContext}
+                    />
+                )}
             </View>
         </View>
     );

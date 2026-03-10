@@ -6,7 +6,15 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { stripHtml, formatDate } from './formatters';
 import { flattenTimeline } from '@app-types/expediente.types';
-import type { IExpediente } from '@app-types/expediente.types';
+import type { IExpediente, IDecree } from '@app-types/expediente.types';
+
+/** Contexto opcional del expediente para incluir en el PDF del decreto */
+export interface IDecreePdfContext {
+    expedienteIue: string;
+    caratula: string | null;
+    movementFecha: string;
+    movementTipo: string;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -473,6 +481,138 @@ ${partiesBlock}
 <!-- Footer -->
 <div class="footer">
   <div class="footer-brand">IUE TRACKER</div>
+  <div class="footer-meta">
+    Generado el ${esc(generatedAt)}<br/>
+    Documento de uso interno — no constituye copia oficial
+  </div>
+</div>
+
+</body>
+</html>`;
+}
+
+// ─── Decree PDF ───────────────────────────────────────────────────────────────
+
+export function buildDecreePdf(decree: IDecree, context?: IDecreePdfContext): string {
+    const generatedAt = format(new Date(), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es });
+    const decreeText = decree.isReserved
+        ? 'Este decreto está reservado y no puede ser visualizado.'
+        : (stripHtml(decree.textoDecreto ?? '') || 'Sin texto disponible.');
+    const nroDecree = decree.nroDecreto ?? 'Sin número';
+
+    const contextBlock = context
+        ? `
+<div class="caratula-box">
+  <div class="caratula-label">Expediente</div>
+  <div class="caratula-text">${esc(context.expedienteIue)}</div>
+</div>
+<div class="meta-row">
+  <div class="meta-cell">
+    <div class="meta-label">Carátula</div>
+    <div class="meta-value" style="font-size:10px;">${esc(stripHtml(context.caratula) || '—')}</div>
+  </div>
+</div>
+<div class="meta-row">
+  <div class="meta-cell">
+    <div class="meta-label">Fecha del movimiento</div>
+    <div class="meta-value">${formatDate(context.movementFecha)}</div>
+  </div>
+  <div class="meta-cell">
+    <div class="meta-label">Tipo de movimiento</div>
+    <div class="meta-value">${esc(context.movementTipo)}</div>
+  </div>
+</div>`
+        : '';
+
+    const reservedBlock = decree.isReserved
+        ? `
+<div class="reserved-box">
+  <div class="reserved-label">⚠️ Decreto reservado</div>
+  <div class="reserved-text">Este decreto está reservado y no puede ser visualizado.</div>
+</div>`
+        : '';
+
+    const deadlineBlock =
+        decree.deadline?.hasDeadline && decree.deadline.detectedText
+            ? `
+<div class="deadline-box">
+  <div class="deadline-label">Plazo detectado</div>
+  <div class="deadline-text">${esc(decree.deadline.detectedText)}</div>
+</div>`
+            : '';
+
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="color-scheme" content="light">
+<style>
+  :root { color-scheme: light; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    color: #1E293B;
+    background: #ffffff;
+    padding: 44px 48px 36px;
+    line-height: 1.5;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .brand-line { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #C5A059; margin-bottom: 4px; }
+  .doc-title { font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; }
+  .header-right { text-align: right; }
+  .iue-label { font-size: 8px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #64748B; margin-bottom: 4px; }
+  .iue-value { font-size: 18px; font-weight: 800; color: #1E3A5F; letter-spacing: -0.5px; }
+  .divider { height: 2px; background: linear-gradient(90deg, #1E3A5F 0%, #C5A059 60%, #ffffff 100%); margin-bottom: 28px; border-radius: 2px; }
+  .caratula-box { border-left: 3px solid #C5A059; padding: 10px 16px; margin-bottom: 24px; background: #FAFBFC; }
+  .caratula-label { font-size: 8px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #64748B; margin-bottom: 5px; }
+  .caratula-text { font-size: 13px; font-weight: 600; color: #0F172A; line-height: 1.5; }
+  .meta-row { display: flex; gap: 0; margin-bottom: 24px; border: 1px solid #E2E8F0; border-radius: 6px; overflow: hidden; }
+  .meta-cell { flex: 1; padding: 10px 14px; border-right: 1px solid #E2E8F0; }
+  .meta-cell:last-child { border-right: none; }
+  .meta-label { font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #64748B; margin-bottom: 4px; }
+  .meta-value { font-size: 12px; font-weight: 700; color: #1E293B; }
+  .reserved-box { margin-bottom: 24px; padding: 12px 16px; border: 1px solid #F59E0B; border-radius: 8px; background: #FFFBEB; }
+  .reserved-label { font-size: 11px; font-weight: 700; color: #B45309; margin-bottom: 4px; }
+  .reserved-text { font-size: 10px; color: #92400E; }
+  .deadline-box { margin-bottom: 24px; padding: 12px 16px; border: 1px solid #0EA5E9; border-radius: 8px; background: #F0F9FF; }
+  .deadline-label { font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #0284C7; margin-bottom: 4px; }
+  .deadline-text { font-size: 11px; color: #0C4A6E; }
+  .block { margin-bottom: 24px; }
+  .decree-body { font-size: 12px; line-height: 1.7; color: #334155; white-space: pre-wrap; }
+  .footer { margin-top: 36px; padding-top: 12px; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; }
+  .footer-brand { font-size: 9px; font-weight: 800; letter-spacing: 2px; color: #C5A059; }
+  .footer-meta { font-size: 9px; color: #64748B; text-align: right; }
+  @media print { body { padding: 20px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="brand-line">IUE Pro &nbsp;·&nbsp; Decreto Judicial</div>
+    <div class="doc-title">Decreto ${esc(nroDecree)}</div>
+  </div>
+  <div class="header-right">
+    <div class="iue-label">N.º de Decreto</div>
+    <div class="iue-value">${esc(nroDecree)}</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+${contextBlock}
+${reservedBlock}
+${deadlineBlock}
+
+<div class="block">
+  <div class="caratula-label" style="margin-bottom:8px;">Texto del decreto</div>
+  <div class="decree-body">${esc(decreeText)}</div>
+</div>
+
+<div class="footer">
+  <div class="footer-brand">IUE PRO</div>
   <div class="footer-meta">
     Generado el ${esc(generatedAt)}<br/>
     Documento de uso interno — no constituye copia oficial

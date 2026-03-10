@@ -503,12 +503,19 @@ export default function ExpedienteDetailScreen() {
                                     );
                                 }
 
+                                const decreeContext = {
+                                    expedienteIue: item.iue,
+                                    caratula: item.caratula,
+                                    movementFecha: entry.fecha,
+                                    movementTipo: entry.tipo,
+                                };
                                 return (
                                     <MovementItem
                                         key={`${entry.orden}-${index}`}
                                         item={entry}
                                         isFirst={isFirst}
                                         isLast={isLast}
+                                        decreeContext={decreeContext}
                                     />
                                 );
                             })}

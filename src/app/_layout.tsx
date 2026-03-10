@@ -3,12 +3,13 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Redirect, Stack, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/base/useColorScheme';
 import { AuthProvider, useAuth } from '@context/AuthContext';
+import { SubscriptionProvider, useSubscription } from '@context/SubscriptionContext';
 import { QueryProvider } from '@providers/QueryProvider';
 import { useNotifications, requestAndRegisterNotifications } from '@hooks/useNotifications';
 import { useAppUpdates } from '@hooks/useAppUpdates';
@@ -68,10 +69,23 @@ export default function RootLayout() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <RootLayoutNav />
-        <LoadingOverlay visible={isDownloading} message="Descargando actualización..." />
+        <SubscriptionWrapper>
+          <RootLayoutNav />
+          <LoadingOverlay visible={isDownloading} message="Descargando actualización..." />
+        </SubscriptionWrapper>
       </AuthProvider>
     </QueryProvider>
+  );
+}
+
+// ─── Subscription wrapper (needs AuthContext) ───────────────────────────────────
+
+function SubscriptionWrapper({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  return (
+    <SubscriptionProvider userId={user?.id ?? null}>
+      {children}
+    </SubscriptionProvider>
   );
 }
 
@@ -81,6 +95,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const segments = useSegments();
   const { isAuthenticated, isLoading } = useAuth();
+  const { isPro, isInTrial, isLoading: isSubscriptionLoading } = useSubscription();
 
   // Register for push notifications (Side effect only, safe for layout stability)
   useNotifications();
@@ -90,6 +105,19 @@ function RootLayoutNav() {
   }
 
   const inAuthGroup = segments[0] === '(auth)';
+  const inPaywall = (segments as string[]).includes('paywall');
+
+  // Usuario autenticado sin suscripción → bloquear en Paywall (onboarding de pago)
+  const mustSeePaywall =
+    isAuthenticated &&
+    !isSubscriptionLoading &&
+    !isPro &&
+    !isInTrial &&
+    !inPaywall;
+
+  if (isAuthenticated && isSubscriptionLoading) {
+    return <AppLoadingScreen message="Verificando suscripción..." />;
+  }
 
   const isDark = colorScheme === 'dark';
 
@@ -128,6 +156,7 @@ function RootLayoutNav() {
         />
         <Stack.Screen name="notifications" />
         <Stack.Screen name="dashboard" />
+        <Stack.Screen name="paywall" options={{ title: 'IUE.uy Pro' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         <Stack.Screen name="+not-found" />
       </Stack>
@@ -138,6 +167,7 @@ function RootLayoutNav() {
         Prevents full-tree re-renders/flickers during login errors.
       */}
       {!isAuthenticated && !inAuthGroup && <Redirect href="/(auth)/login" />}
+      {mustSeePaywall && <Redirect href="/paywall" />}
 
       <Toast config={toastConfig} topOffset={Platform.OS === 'ios' ? 60 : 40} />
 

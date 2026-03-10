@@ -12,3 +12,5 @@ export * from './useNetworkStatus';
 export * from './usePinExpediente';
 export * from './useExpedienteNotes';
 export * from './useExportPdf';
+export * from './useExportDecreePdf';
+export * from './usePaywallActions';

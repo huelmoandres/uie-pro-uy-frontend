@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Pressable, Text, View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@context/AuthContext';
+import { useSubscription } from '@context/SubscriptionContext';
 import { PageContainer, ConfirmationModal, InfoButton } from '@components/ui';
-import { User, LogOut, ChevronRight, Settings, Bell, Shield, HelpCircle } from 'lucide-react-native';
+import { User, LogOut, ChevronRight, Settings, Bell, Shield, HelpCircle, Crown } from 'lucide-react-native';
 import { INFO_HINTS } from '@/constants/InfoHints';
 
 /**
@@ -12,9 +13,18 @@ import { INFO_HINTS } from '@/constants/InfoHints';
  */
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
+  const { isPro, isInTrial } = useSubscription();
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
+  const badgeLabel = isInTrial ? 'En período de prueba' : isPro ? 'Pro' : 'ABOGADO/A';
+
   const menuItems = [
+    {
+      icon: Crown,
+      label: isPro || isInTrial ? 'IUE Pro - Activo' : 'IUE Pro - Suscribirse',
+      color: '#B89146',
+      route: '/paywall',
+    },
     { icon: Settings, label: 'Configuración', color: '#64748B', route: '/settings' },
     { icon: Bell, label: 'Notificaciones', color: '#64748B', route: '/notifications' },
     { icon: Shield, label: 'Privacidad', color: '#64748B', route: '/privacy' },
@@ -43,7 +53,7 @@ export default function ProfileScreen() {
               <Text className="text-sm font-sans text-slate-500 mt-1">{user?.email}</Text>
 
               <View className="mt-4 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/20">
-                <Text className="text-[10px] font-sans-bold text-accent uppercase tracking-widest">ABOGADO/A</Text>
+                <Text className="text-[10px] font-sans-bold text-accent uppercase tracking-widest">{badgeLabel}</Text>
               </View>
             </View>
           </View>

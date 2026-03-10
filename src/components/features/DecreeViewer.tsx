@@ -9,17 +9,21 @@ import {
     View,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { AlertCircle, CheckCircle2, Clock, CreditCard, FileText, Scissors, Sparkles, X } from 'lucide-react-native';
+import { AlertCircle, CheckCircle2, Clock, CreditCard, Download, FileText, Scissors, Sparkles, X } from 'lucide-react-native';
 import type { IDecree, IDecreeSummary } from '@app-types/expediente.types';
 import { stripHtml } from '@utils/formatters';
 import { InfoButton } from '@components/ui';
 import { INFO_HINTS } from '@/constants/InfoHints';
 import { DeadlineBadge } from './DeadlineBadge';
 import { useDecreeSummary } from '@hooks/useDecreeSummary';
+import { useExportDecreePdf } from '@hooks';
+import type { IDecreePdfContext } from '@utils/pdf-template';
 import axios from 'axios';
 
 interface Props {
     decree: IDecree;
+    /** Contexto opcional para incluir expediente y movimiento en el PDF exportado */
+    decreeContext?: IDecreePdfContext;
 }
 
 /**
@@ -27,11 +31,12 @@ interface Props {
  * Tapping it opens the full text in a premium bottom-sheet Modal.
  * A "Resumir con IA" button generates an executive summary via OpenAI.
  */
-export const DecreeViewer = React.memo(({ decree }: Props) => {
+export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
     const [visible, setVisible] = useState(false);
     const [summary, setSummary] = useState<IDecreeSummary | null>(null);
 
     const { mutate: summarize, isPending: isSummarizing, isError: summaryError, error: summaryRawError } = useDecreeSummary();
+    const { isExporting, export: exportPdf } = useExportDecreePdf();
 
     const isQuotaError =
         axios.isAxiosError(summaryRawError) &&
@@ -98,12 +103,28 @@ export const DecreeViewer = React.memo(({ decree }: Props) => {
                                     </Text>
                                 </View>
                             </View>
-                            <Pressable
-                                onPress={() => setVisible(false)}
-                                className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
-                            >
-                                <X size={15} color="#94A3B8" />
-                            </Pressable>
+                            <View className="flex-row items-center gap-2">
+                                <Pressable
+                                    onPress={() => exportPdf(decree, decreeContext)}
+                                    disabled={isExporting}
+                                    className="flex-row items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 active:opacity-70 disabled:opacity-50"
+                                >
+                                    {isExporting ? (
+                                        <ActivityIndicator size="small" color="#B89146" />
+                                    ) : (
+                                        <Download size={14} color="#B89146" />
+                                    )}
+                                    <Text className="text-[11px] font-sans-bold text-accent">
+                                        {isExporting ? 'Generando...' : 'Exportar PDF'}
+                                    </Text>
+                                </Pressable>
+                                <Pressable
+                                    onPress={() => setVisible(false)}
+                                    className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
+                                >
+                                    <X size={15} color="#94A3B8" />
+                                </Pressable>
+                            </View>
                         </View>
 
                         {/* Scrollable content */}

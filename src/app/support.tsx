@@ -76,6 +76,10 @@ const FAQS: FaqItem[] = [
         question: '¿Puedo exportar un expediente a PDF?',
         answer: 'Sí. En el detalle del expediente, bajá hasta la sección "Gestión del Expediente" y presioná "Exportar PDF". Se generará un documento con carátula, metadatos, partes, estadísticas e historial de movimientos. El archivo se nombra automáticamente con el número de IUE.',
     },
+    {
+        question: '¿Puedo exportar un decreto individual a PDF?',
+        answer: 'Sí. Tocá "Ver Decreto" o el número del decreto en cualquier movimiento. En el visor que se abre, tocá "Exportar PDF" en la parte superior. El PDF incluye el texto del decreto, el expediente asociado y la fecha del movimiento.',
+    },
     // ── Dashboard ────────────────────────────────────────────────────────
     {
         question: '¿Qué muestra el Dashboard?',
