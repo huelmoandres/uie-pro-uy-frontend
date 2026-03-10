@@ -83,7 +83,7 @@ export default function RootLayout() {
 function SubscriptionWrapper({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   return (
-    <SubscriptionProvider userId={user?.id ?? null}>
+    <SubscriptionProvider userId={user?.id ?? null} userEmail={user?.email ?? null}>
       {children}
     </SubscriptionProvider>
   );

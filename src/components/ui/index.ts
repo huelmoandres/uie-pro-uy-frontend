@@ -4,3 +4,4 @@ export * from './ToastConfig';
 export * from './Skeleton';
 export * from './PageContainer';
 export * from './Paginator';
+export * from './TagBadge';

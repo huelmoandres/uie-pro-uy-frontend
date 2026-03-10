@@ -1,10 +1,11 @@
 import React, { useCallback } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { FileText, Calendar, Clock, ChevronRight, Hash, Star } from 'lucide-react-native';
+import { FileText, Calendar, Clock, ChevronRight, Hash, Star, Tag } from 'lucide-react-native';
 import type { IExpediente } from '@app-types/expediente.types';
 import { formatRelativeDate, stripHtml } from '@utils/formatters';
+import { TagBadge } from '@components/ui/TagBadge';
 
 interface Props {
     item: IExpediente;
@@ -12,13 +13,15 @@ interface Props {
     isSelectionMode?: boolean;
     onSelect?: (iue: string) => void;
     onPin?: (iue: string, isPinned: boolean) => void;
+    /** Si se provee, muestra un botón de etiqueta para abrir el TagPickerModal. */
+    onTagsPress?: (iue: string) => void;
 }
 
 /**
  * Premium Expediente Card
- * Features depth, refined typography, and Lucide icons.
+ * Features depth, refined typography, Lucide icons, and tag badges.
  */
-export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, onSelect, onPin }: Props) => {
+export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, onSelect, onPin, onTagsPress }: Props) => {
     const handlePress = useCallback(() => {
         if (isSelectionMode) {
             onSelect?.(item.iue);
@@ -38,6 +41,13 @@ export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, o
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onPin?.(item.iue, !item.isPinned);
     }, [item.iue, item.isPinned, onPin]);
+
+    const handleTagsPress = useCallback(() => {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onTagsPress?.(item.iue);
+    }, [item.iue, onTagsPress]);
+
+    const hasTags = item.tags && item.tags.length > 0;
 
     return (
         <Pressable
@@ -65,6 +75,18 @@ export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, o
                         </View>
                     ) : (
                         <>
+                            {onTagsPress && (
+                                <Pressable
+                                    onPress={handleTagsPress}
+                                    hitSlop={8}
+                                    className="p-0.5"
+                                >
+                                    <Tag
+                                        size={13}
+                                        color={hasTags ? '#B89146' : '#CBD5E1'}
+                                    />
+                                </Pressable>
+                            )}
                             {onPin && (
                                 <Pressable
                                     onPress={handlePin}
@@ -105,6 +127,20 @@ export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, o
                     <ChevronRight size={18} color="#CBD5E1" />
                 </View>
             </View>
+
+            {/* Tags row — solo si hay tags asignados */}
+            {hasTags && (
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    className="mt-2.5"
+                    contentContainerClassName="flex-row gap-1.5"
+                >
+                    {item.tags!.map((tag) => (
+                        <TagBadge key={tag.id} tag={tag} size="xs" />
+                    ))}
+                </ScrollView>
+            )}
 
             {/* Separator */}
             <View className="my-3 h-[1px] w-full bg-slate-100 dark:bg-white/5" />

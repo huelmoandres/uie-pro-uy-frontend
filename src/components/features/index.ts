@@ -10,3 +10,5 @@ export * from './ActivityStatusBadge';
 export * from './DeadlineBadge';
 export * from './InternalGroupItem';
 export * from './AgendaItemCard';
+export * from './TagPickerModal';
+export * from './ManageTagsModal';

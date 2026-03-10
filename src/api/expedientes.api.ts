@@ -43,7 +43,7 @@ export async function unfollowExpediente(iue: string): Promise<void> {
  * Triggers a manual sync for a single expediente.
  */
 export async function syncExpediente(iue: string): Promise<void> {
-    await apiClient.post(`/expedientes/${encodeURIComponent(iue)}/sync`);
+    await apiClient.post('/expedientes/sync', { iue });
 }
 
 /**

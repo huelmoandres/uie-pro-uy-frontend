@@ -108,6 +108,8 @@ export interface ICaratulaComponents {
     caseType: string | null;
 }
 
+import type { ITag } from './tag.types';
+
 export interface IExpediente {
     iue: string;
     caratula: string | null;
@@ -125,6 +127,8 @@ export interface IExpediente {
     isPinned?: boolean;
     /** Notas personales del usuario sobre este expediente. */
     notes?: string | null;
+    /** Etiquetas personalizadas asignadas por el usuario a este expediente. */
+    tags?: ITag[];
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────
@@ -157,4 +161,6 @@ export interface IExpedientesQuery {
     orderBy?: ExpedienteOrderByField;
     order?: 'asc' | 'desc';
     onlyPinned?: boolean;
+    /** IDs de tags para filtrar. Solo muestra expedientes que tengan ALGUNA de estas etiquetas. */
+    tagIds?: string[];
 }

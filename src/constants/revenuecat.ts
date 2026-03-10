@@ -16,4 +16,16 @@ export const PRODUCT_ID_MONTHLY = 'com.huelmoandres.iueprouy.mensual';
 /** Display name for the subscription (shown in Paywall) */
 export const SUBSCRIPTION_DISPLAY_NAME = 'Suscripción Mensual Pro';
 
+/** Precio mostrado en el Paywall (debe coincidir con App Store Connect) */
+export const SUBSCRIPTION_PRICE = '$12.99 USD';
+
 /** Free trial: 7 días — configurado en App Store Connect. No hay tier gratuito; la app se compra y da acceso completo sin límites. */
+
+/**
+ * Emails que no requieren suscripción (admins, testers, reviewers).
+ * Editá esta lista y hacé `eas update` — no requiere rebuild.
+ */
+export const SUBSCRIPTION_BYPASS_EMAILS: string[] = [
+    'huelmoandres@gmail.com',
+    'alatallada@ferreirayasociados.com.uy',
+].map((e) => e.trim().toLowerCase()).filter(Boolean);

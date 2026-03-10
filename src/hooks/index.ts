@@ -14,3 +14,5 @@ export * from './useExpedienteNotes';
 export * from './useExportPdf';
 export * from './useExportDecreePdf';
 export * from './usePaywallActions';
+export * from './useTags';
+export * from './useTagMutations';

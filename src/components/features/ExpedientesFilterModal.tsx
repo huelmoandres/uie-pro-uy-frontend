@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, Modal, StyleSheet, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { X, SlidersHorizontal, Check, ArrowDownUp } from 'lucide-react-native';
+import { X, SlidersHorizontal, ArrowDownUp } from 'lucide-react-native';
 import type { IExpedientesQuery, ExpedienteOrderByField, FollowStatus } from '@app-types/expediente.types';
+import { useTags } from '@hooks';
+import { TagBadge } from '@components/ui';
 
 interface Props {
     visible: boolean;
@@ -12,6 +14,8 @@ interface Props {
 }
 
 export const ExpedientesFilterModal = React.memo(({ visible, currentFilters, onClose, onApply }: Props) => {
+    const { data: tags = [] } = useTags();
+
     // Local state to draft changes before applying
     const [draft, setDraft] = useState<Partial<IExpedientesQuery>>(currentFilters);
 
@@ -26,12 +30,24 @@ export const ExpedientesFilterModal = React.memo(({ visible, currentFilters, onC
         setDraft(prev => ({ ...prev, [key]: value }));
     };
 
+    const toggleTagFilter = (tagId: string) => {
+        setDraft(prev => {
+            const current = prev.tagIds ?? [];
+            const isSelected = current.includes(tagId);
+            return {
+                ...prev,
+                tagIds: isSelected ? current.filter((id) => id !== tagId) : [...current, tagId],
+            };
+        });
+    };
+
     const handleApply = () => {
         onApply({
             ...draft,
             // Clean up empty strings to undefined to not send them
             sede: draft.sede?.trim() || undefined,
             anio: draft.anio ? Number(draft.anio) : undefined,
+            tagIds: draft.tagIds?.length ? draft.tagIds : undefined,
         });
         onClose();
     };
@@ -149,7 +165,7 @@ export const ExpedientesFilterModal = React.memo(({ visible, currentFilters, onC
                         {/* Anio */}
                         <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-3">Año</Text>
                         <TextInput
-                            className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 font-sans text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white mb-10"
+                            className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 font-sans text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white mb-6"
                             placeholder="Ej: 2024"
                             placeholderTextColor="#94A3B8"
                             keyboardType="numeric"
@@ -157,6 +173,30 @@ export const ExpedientesFilterModal = React.memo(({ visible, currentFilters, onC
                             value={draft.anio ? String(draft.anio) : ''}
                             onChangeText={(text) => updateDraft('anio', text)}
                         />
+
+                        {/* Tags */}
+                        {tags.length > 0 && (
+                            <>
+                                <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-3">
+                                    Etiquetas
+                                </Text>
+                                <View className="flex-row flex-wrap gap-2 mb-10">
+                                    {tags.map((tag) => {
+                                        const isActive = draft.tagIds?.includes(tag.id) ?? false;
+                                        return (
+                                            <Pressable
+                                                key={tag.id}
+                                                onPress={() => toggleTagFilter(tag.id)}
+                                                className={`rounded-full border-2 active:opacity-70 ${isActive ? 'opacity-100' : 'opacity-50'}`}
+                                                style={isActive ? { borderColor: tag.color } : { borderColor: 'transparent' }}
+                                            >
+                                                <TagBadge tag={tag} size="sm" />
+                                            </Pressable>
+                                        );
+                                    })}
+                                </View>
+                            </>
+                        )}
 
                     </ScrollView>
 

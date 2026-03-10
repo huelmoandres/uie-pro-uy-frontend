@@ -11,7 +11,7 @@ import { useExpedientes, useDebounce, usePinExpediente } from '@hooks';
 import { Search, RefreshCw, FolderOpen, SlidersHorizontal, Plus, Calendar as CalendarIcon, Star } from 'lucide-react-native';
 import { Skeleton, PageContainer, Paginator, InfoButton } from '@components/ui';
 import { INFO_HINTS } from '@/constants/InfoHints';
-import { ExpedienteCard, FollowExpedienteModal, ExpedientesFilterModal, AgendaWebView } from '@components/features';
+import { ExpedienteCard, FollowExpedienteModal, ExpedientesFilterModal, AgendaWebView, TagPickerModal } from '@components/features';
 import * as Haptics from 'expo-haptics';
 import Toast from 'react-native-toast-message';
 import type { IExpediente, IExpedientesQuery } from '@app-types/expediente.types';
@@ -50,6 +50,7 @@ export default function ExpedientesScreen() {
     order: 'desc',
     orderBy: 'lastSyncAt',
   });
+  const [tagPickerIue, setTagPickerIue] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchText, 500);
   const { data, isLoading, isError, refetch, isRefetching } = useExpedientes(queryParams);
@@ -159,9 +160,9 @@ export default function ExpedientesScreen() {
             onPress={() => setShowFilterModal(true)}
           >
             <SlidersHorizontal size={18} color="#64748B" />
-            {(queryParams.sede || queryParams.anio) && (
+            {(queryParams.sede || queryParams.anio || queryParams.tagIds?.length) ? (
               <View className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-danger border border-white dark:border-primary" />
-            )}
+            ) : null}
           </Pressable>
         </View>
 
@@ -169,11 +170,10 @@ export default function ExpedientesScreen() {
         <View className="mt-4 flex-row items-center gap-2">
           <Pressable
             onPress={() => handleTabChange('all')}
-            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${
-              activeTab === 'all'
-                ? 'bg-primary border-primary'
-                : 'bg-transparent border-slate-200 dark:border-white/10'
-            }`}
+            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${activeTab === 'all'
+              ? 'bg-primary border-primary'
+              : 'bg-transparent border-slate-200 dark:border-white/10'
+              }`}
           >
             <Text className={`text-[12px] font-sans-semi ${activeTab === 'all' ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>
               Todos
@@ -186,11 +186,10 @@ export default function ExpedientesScreen() {
           </Pressable>
           <Pressable
             onPress={() => handleTabChange('pinned')}
-            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${
-              activeTab === 'pinned'
-                ? 'bg-accent border-accent'
-                : 'bg-transparent border-slate-200 dark:border-white/10'
-            }`}
+            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${activeTab === 'pinned'
+              ? 'bg-accent border-accent'
+              : 'bg-transparent border-slate-200 dark:border-white/10'
+              }`}
           >
             <Star
               size={11}
@@ -258,6 +257,7 @@ export default function ExpedientesScreen() {
                 isSelectionMode={selectedIues.length > 0}
                 onSelect={toggleSelection}
                 onPin={handlePin}
+                onTagsPress={selectedIues.length === 0 ? setTagPickerIue : undefined}
               />
             )}
             // @ts-ignore
@@ -363,6 +363,16 @@ export default function ExpedientesScreen() {
           }}
         />
       </Modal>
+
+      {/* Tag Picker Modal */}
+      <TagPickerModal
+        visible={!!tagPickerIue}
+        iue={tagPickerIue ?? ''}
+        assignedTagIds={
+          expedientes.find((e) => e.iue === tagPickerIue)?.tags?.map((t) => t.id) ?? []
+        }
+        onClose={() => setTagPickerIue(null)}
+      />
 
     </View>
   );

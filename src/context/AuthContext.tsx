@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { AuthService } from '@services';
 import { SECURE_STORE_KEYS, setGlobalSignOut } from '@api/client';
 import { logout as apiLogout } from '@api/auth.api';
+import { queryClient } from '@providers/QueryProvider';
 import type { IUser } from '@app-types/auth.types';
 
 interface AuthContextData {
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } finally {
             await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
             await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+            queryClient.clear();
             setToken(null);
             setUser(null);
         }

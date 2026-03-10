@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
 import { useAppColorScheme } from '@hooks/useAppColorScheme';
-import { Monitor, Moon, Sun, Check, User as UserIcon, Phone, CreditCard, Save, X } from 'lucide-react-native';
+import { Monitor, Moon, Sun, Check, User as UserIcon, Phone, CreditCard, Save, X, Tag, ChevronRight } from 'lucide-react-native';
 import { useAuth } from '@context/AuthContext';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,12 +10,16 @@ import { updateProfileSchema, type UpdateProfileFormData } from '@schemas/auth.s
 import { updateProfile } from '@api/auth.api';
 import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
+import { ManageTagsModal } from '@components/features';
+import { InfoButton } from '@components/ui';
+import { INFO_HINTS } from '@constants/InfoHints';
 
 export default function SettingsScreen() {
     const { user, updateUserState } = useAuth();
     const { colorScheme, setColorScheme } = useAppColorScheme();
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [manageTagsVisible, setManageTagsVisible] = useState(false);
 
     const {
         control,
@@ -210,6 +214,40 @@ export default function SettingsScreen() {
                         )}
                     </View>
 
+                    {/* Mis Etiquetas section */}
+                    <View className="flex-row items-center ml-2 mb-2 mt-4">
+                        <Text className="flex-1 text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
+                            Mis Etiquetas
+                        </Text>
+                        <InfoButton
+                            title={INFO_HINTS.etiquetas.title}
+                            description={INFO_HINTS.etiquetas.description}
+                        />
+                    </View>
+                    <View className="overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm dark:bg-slate-900/50 dark:border-white/5 mb-8">
+                        <Pressable
+                            onPress={() => {
+                                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setManageTagsVisible(true);
+                            }}
+                            className="flex-row items-center p-4 active:bg-slate-50 dark:active:bg-white/5"
+                        >
+                            <View className="mr-3 h-8 w-8 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-500/10">
+                                <Tag size={16} color="#B89146" />
+                            </View>
+                            <View className="flex-1">
+                                <Text className="text-[15px] font-sans-semi text-slate-700 dark:text-slate-300">
+                                    Gestionar etiquetas
+                                </Text>
+                                <Text className="text-[11px] font-sans text-slate-400 mt-0.5">
+                                    Crear, editar y eliminar tus etiquetas de color
+                                </Text>
+                            </View>
+                            <ChevronRight size={16} color="#CBD5E1" />
+                        </Pressable>
+                    </View>
+
+
                     <Text className="ml-2 mb-2 text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
                         Apariencia
                     </Text>
@@ -240,6 +278,11 @@ export default function SettingsScreen() {
                     </View>
                 </View>
             </ScrollView>
+
+            <ManageTagsModal
+                visible={manageTagsVisible}
+                onClose={() => setManageTagsVisible(false)}
+            />
         </View>
     );
 }

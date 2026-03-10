@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 import { apiClient } from '../api/client';
-import { navigateToExpediente } from '@utils/navigation';
+import { navigateToExpedienteFromNotification } from '@utils/navigation';
 
 // Detect if we are running in Expo Go (where notifications are restricted in SDK 53+)
 const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
@@ -132,12 +132,12 @@ function handleNotificationResponse(response: any) {
     }
 
     if (type === 'EXPEDIENTE_UPDATE' && iue) {
-        navigateToExpediente(iue);
+        navigateToExpedienteFromNotification(iue);
         return;
     }
 
     // Fallback: if there's an IUE for any other type, go to the expediente.
     if (iue) {
-        navigateToExpediente(iue);
+        navigateToExpedienteFromNotification(iue);
     }
 }

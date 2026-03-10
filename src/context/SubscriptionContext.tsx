@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import Purchases, { CustomerInfo } from 'react-native-purchases';
 import { Platform } from 'react-native';
 import { parseProFromCustomerInfo } from '@utils/subscription';
+import { SUBSCRIPTION_BYPASS_EMAILS } from '@/constants/revenuecat';
 
 const REVENUECAT_API_KEY_IOS = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS ?? '';
 const REVENUECAT_API_KEY_ANDROID = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID ?? '';
@@ -19,7 +20,15 @@ interface SubscriptionContextData {
 
 const SubscriptionContext = createContext<SubscriptionContextData>({} as SubscriptionContextData);
 
-export function SubscriptionProvider({ children, userId }: { children: React.ReactNode; userId: string | null }) {
+export function SubscriptionProvider({
+    children,
+    userId,
+    userEmail,
+}: {
+    children: React.ReactNode;
+    userId: string | null;
+    userEmail?: string | null;
+}) {
     const [isPro, setIsPro] = useState(false);
     const [isInTrial, setIsInTrial] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -55,6 +64,15 @@ export function SubscriptionProvider({ children, userId }: { children: React.Rea
             return;
         }
 
+        const emailLower = userEmail?.trim().toLowerCase();
+        const isBypass = emailLower && SUBSCRIPTION_BYPASS_EMAILS.includes(emailLower);
+        if (isBypass) {
+            setIsLoading(false);
+            setIsPro(true);
+            setIsInTrial(false);
+            return;
+        }
+
         const apiKey = Platform.OS === 'ios' ? REVENUECAT_API_KEY_IOS : REVENUECAT_API_KEY_ANDROID;
         if (!apiKey) {
             __DEV__ && console.warn('RevenueCat API key not configured. Subscription checks disabled.');
@@ -87,7 +105,7 @@ export function SubscriptionProvider({ children, userId }: { children: React.Rea
         return () => {
             mounted = false;
         };
-    }, [userId, refreshSubscription]);
+    }, [userId, userEmail, refreshSubscription]);
 
     return (
         <SubscriptionContext.Provider

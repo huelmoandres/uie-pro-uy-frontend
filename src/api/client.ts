@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig, type AxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
+import { queryClient } from '@providers/QueryProvider';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -55,6 +56,7 @@ let refreshQueue: Array<(token: string) => void> = [];
 async function performSignOut() {
     await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
     await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+    queryClient.clear();
     if (globalSignOut) {
         await globalSignOut();
     } else {

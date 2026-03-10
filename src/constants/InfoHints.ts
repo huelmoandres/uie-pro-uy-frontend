@@ -103,4 +103,21 @@ export const INFO_HINTS = {
         description:
             'Tu nombre y correo se usan al realizar reservas en la Agenda Procesal del Poder Judicial. Mantener estos datos actualizados ayuda a que las reservas se procesen correctamente.',
     },
+
+    // ── Etiquetas Personalizadas ──────────────────────────────────────────
+    etiquetas: {
+        title: '¿Para qué sirven las etiquetas?',
+        description:
+            'Las etiquetas son marcas de colores que vos mismo creás para organizar tus expedientes. Por ejemplo: "Urgente", "Familia", "Laboral" o "Pendiente de cobro".\n\nSolo vos las ves. Podés crear hasta 20 etiquetas y asignar varias a un mismo expediente.',
+    },
+    etiquetasGestion: {
+        title: 'Cómo gestionar etiquetas',
+        description:
+            'Desde Configuración → Mis Etiquetas podés:\n• Crear nuevas etiquetas con nombre y color\n• Editar el nombre o color de las existentes\n• Eliminar una etiqueta (se quita automáticamente de todos tus expedientes)\n\nPara asignar una etiqueta a un expediente, tocá el ícono 🏷️ en la tarjeta del expediente.',
+    },
+    etiquetasLimite: {
+        title: 'Límite de etiquetas',
+        description:
+            'Podés crear hasta 20 etiquetas. Si llegás al límite, eliminá alguna que ya no uses antes de crear una nueva.',
+    },
 } as const;
