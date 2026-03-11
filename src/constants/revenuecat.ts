@@ -17,7 +17,10 @@ export const PRODUCT_ID_MONTHLY = 'com.huelmoandres.iueprouy.mensual';
 export const SUBSCRIPTION_DISPLAY_NAME = 'Suscripción Mensual Pro';
 
 /** Precio mostrado en el Paywall (debe coincidir con App Store Connect) */
-export const SUBSCRIPTION_PRICE = '$12.99 USD';
+export const SUBSCRIPTION_PRICE = '12.99 USD';
+
+/** Días de prueba gratuita configurados en App Store Connect */
+export const SUBSCRIPTION_TRIAL_DAYS = 7;
 
 /** Free trial: 7 días — configurado en App Store Connect. No hay tier gratuito; la app se compra y da acceso completo sin límites. */
 

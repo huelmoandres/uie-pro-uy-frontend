@@ -13,7 +13,12 @@ import { apiClient } from './client';
 export async function getExpedientes(
     params: IExpedientesQuery = {},
 ): Promise<IPaginatedExpedientes> {
-    const { data } = await apiClient.get<IPaginatedExpedientes>('/expedientes', { params });
+    const queryParams = { ...params };
+    // Axios serializa arrays como tagIds[]=a&tagIds[]=b. NestJS espera tagIds=a,b (por nuestro Custom Transform).
+    if (queryParams.tagIds && Array.isArray(queryParams.tagIds)) {
+        queryParams.tagIds = queryParams.tagIds.join(',') as any;
+    }
+    const { data } = await apiClient.get<IPaginatedExpedientes>('/expedientes', { params: queryParams });
     return data;
 }
 

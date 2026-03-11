@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { RotateCcw, Check } from 'lucide-react-native';
 import { router } from 'expo-router';
-import { SUBSCRIPTION_PRICE } from '@/constants/revenuecat';
+import { SUBSCRIPTION_PRICE, SUBSCRIPTION_TRIAL_DAYS } from '@/constants/revenuecat';
 
 interface PaywallCtaProps {
     onSubscribe: () => void;
@@ -37,9 +37,14 @@ export function PaywallCta({
 
     return (
         <>
-            <Text className="mb-3 text-center text-[15px] font-sans-semi text-slate-600 dark:text-slate-300">
-                {SUBSCRIPTION_PRICE} / mes
-            </Text>
+            <View className="mb-3 items-center">
+                <Text className="text-[16px] font-sans-bold text-slate-900 dark:text-white">
+                    {SUBSCRIPTION_PRICE} / mes
+                </Text>
+                <Text className="mt-1 text-[12px] font-sans text-slate-500 dark:text-slate-400">
+                    {SUBSCRIPTION_TRIAL_DAYS} días de prueba gratis, sin permanencia.
+                </Text>
+            </View>
             <Pressable
                 className="items-center justify-center rounded-2xl bg-accent py-4 shadow-lg shadow-accent/30 active:scale-[0.98] disabled:opacity-60"
                 onPress={onSubscribe}
@@ -49,7 +54,7 @@ export function PaywallCta({
                     <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
                     <Text className="text-sm font-sans-bold uppercase tracking-[2px] text-white">
-                        Suscribirse
+                        Comenzar prueba gratuita
                     </Text>
                 )}
             </Pressable>

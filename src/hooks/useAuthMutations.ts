@@ -4,6 +4,7 @@ import { useAuth } from '@context/AuthContext';
 import * as SecureStore from 'expo-secure-store';
 import { SECURE_STORE_KEYS } from '@api/client';
 import type { ILoginRequest, IRegisterRequest } from '@app-types/auth.types';
+import { requestAndRegisterNotifications } from '@hooks/useNotifications';
 
 export const useLoginMutation = () => {
     const queryClient = useQueryClient();
@@ -19,6 +20,12 @@ export const useLoginMutation = () => {
             const user = await AuthService.getCurrentUser();
             updateUserState(user, await SecureStore.getItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN));
             queryClient.setQueryData(['currentUser'], user);
+
+            try {
+                await requestAndRegisterNotifications();
+            } catch (e) {
+                console.warn('[Auth] Failed to register push token after login:', e);
+            }
         },
     });
 };
@@ -37,6 +44,12 @@ export const useRegisterMutation = () => {
             const user = await AuthService.getCurrentUser();
             updateUserState(user, await SecureStore.getItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN));
             queryClient.setQueryData(['currentUser'], user);
+
+            try {
+                await requestAndRegisterNotifications();
+            } catch (e) {
+                console.warn('[Auth] Failed to register push token after register:', e);
+            }
         },
     });
 };
