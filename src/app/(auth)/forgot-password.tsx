@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pressable, Text, View } from "react-native";
+import { Keyboard, Pressable, Text, View } from "react-native";
 import { router, Stack } from "expo-router";
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
@@ -42,9 +42,12 @@ export default function ForgotPasswordScreen() {
   const emailValue = watch("email");
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
+    Keyboard.dismiss();
     try {
       setIsLoading(true);
-      await forgotPassword(data.email.trim());
+      const email = data.email.trim();
+      if (!email) return;
+      await forgotPassword(email);
       setSent(true);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({

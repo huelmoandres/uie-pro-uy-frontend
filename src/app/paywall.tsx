@@ -28,6 +28,7 @@ export default function PaywallScreen() {
       >
         <PaywallHero />
         <PaywallBenefits />
+        <PaywallLegal />
         <PaywallCta
           onSubscribe={handleSubscribe}
           onRestore={handleRestore}
@@ -35,7 +36,6 @@ export default function PaywallScreen() {
           isRestoring={isRestoring}
           isPro={isPro || isInTrial}
         />
-        <PaywallLegal />
         <PaywallLogout onSignOut={signOut} />
       </ScrollView>
     </>
