@@ -26,21 +26,23 @@ export function PaywallCta({
 
   if (isPro) {
     return (
-      <Pressable
-        className="items-center justify-center rounded-2xl bg-accent py-4 shadow-lg shadow-accent/30 active:scale-[0.98] flex-row gap-2"
-        onPress={() => router.replace("/(tabs)" as import("expo-router").Href)}
-      >
-        <Check size={18} color="#FFFFFF" />
-        <Text className="text-sm font-sans-bold uppercase tracking-[2px] text-white">
-          Suscripción activa — Ir al inicio
-        </Text>
-      </Pressable>
+      <View className="mt-10">
+        <Pressable
+          className="flex-row items-center justify-center gap-2.5 rounded-2xl bg-accent py-5 shadow-lg shadow-accent/25 active:scale-[0.98]"
+          onPress={() => router.replace("/(tabs)" as import("expo-router").Href)}
+        >
+          <Check size={20} color="#FFFFFF" strokeWidth={2.5} />
+          <Text className="text-sm font-sans-bold uppercase tracking-[2px] text-white">
+            Suscripción activa — Ir al inicio
+          </Text>
+        </Pressable>
+      </View>
     );
   }
 
   return (
-    <>
-      <View className="mb-3 items-center">
+    <View className="mt-10">
+      <View className="mb-4 items-center">
         <Text className="text-[16px] font-sans-bold text-slate-900 dark:text-white">
           {SUBSCRIPTION_PRICE} / mes
         </Text>
@@ -49,7 +51,7 @@ export function PaywallCta({
         </Text>
       </View>
       <Pressable
-        className="items-center justify-center rounded-2xl bg-accent py-4 shadow-lg shadow-accent/30 active:scale-[0.98] disabled:opacity-60"
+        className="items-center justify-center rounded-2xl bg-accent py-5 shadow-lg shadow-accent/25 active:scale-[0.98] disabled:opacity-60"
         onPress={onSubscribe}
         disabled={isBusy}
       >
@@ -63,7 +65,7 @@ export function PaywallCta({
       </Pressable>
 
       <Pressable
-        className="mt-4 flex-row items-center justify-center gap-2 py-3 active:opacity-70 disabled:opacity-50"
+        className="mt-5 flex-row items-center justify-center gap-2 py-3 active:opacity-70 disabled:opacity-50"
         onPress={onRestore}
         disabled={isBusy}
       >
@@ -76,6 +78,6 @@ export function PaywallCta({
           Restaurar Compras
         </Text>
       </Pressable>
-    </>
+    </View>
   );
 }
