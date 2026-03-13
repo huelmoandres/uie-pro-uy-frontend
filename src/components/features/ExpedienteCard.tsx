@@ -1,166 +1,208 @@
-import React, { useCallback } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { router } from 'expo-router';
-import * as Haptics from 'expo-haptics';
-import { FileText, Calendar, Clock, ChevronRight, Hash, Star, Tag } from 'lucide-react-native';
-import type { IExpediente } from '@app-types/expediente.types';
-import { formatRelativeDate, stripHtml } from '@utils/formatters';
-import { TagBadge } from '@components/ui/TagBadge';
+import React, { useCallback } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { router } from "expo-router";
+import * as Haptics from "expo-haptics";
+import {
+  FileText,
+  Calendar,
+  Clock,
+  ChevronRight,
+  Hash,
+  Star,
+  Tag,
+  Bell,
+} from "lucide-react-native";
+import type { IExpediente } from "@app-types/expediente.types";
+import { formatRelativeDate, stripHtml } from "@utils/formatters";
+import { TagBadge } from "@components/ui/TagBadge";
 
 interface Props {
-    item: IExpediente;
-    isSelected?: boolean;
-    isSelectionMode?: boolean;
-    onSelect?: (iue: string) => void;
-    onPin?: (iue: string, isPinned: boolean) => void;
-    /** Si se provee, muestra un botón de etiqueta para abrir el TagPickerModal. */
-    onTagsPress?: (iue: string) => void;
+  item: IExpediente;
+  isSelected?: boolean;
+  isSelectionMode?: boolean;
+  onSelect?: (iue: string) => void;
+  onPin?: (iue: string, isPinned: boolean) => void;
+  /** Si se provee, muestra un botón de etiqueta para abrir el TagPickerModal. */
+  onTagsPress?: (iue: string) => void;
+  /** Si se provee, muestra un botón para agregar recordatorio al expediente. */
+  onAddReminder?: (item: IExpediente) => void;
 }
 
 /**
  * Premium Expediente Card
  * Features depth, refined typography, Lucide icons, and tag badges.
  */
-export const ExpedienteCard = React.memo(({ item, isSelected, isSelectionMode, onSelect, onPin, onTagsPress }: Props) => {
+export const ExpedienteCard = React.memo(
+  ({
+    item,
+    isSelected,
+    isSelectionMode,
+    onSelect,
+    onPin,
+    onTagsPress,
+    onAddReminder,
+  }: Props) => {
     const handlePress = useCallback(() => {
-        if (isSelectionMode) {
-            onSelect?.(item.iue);
-        } else {
-            router.push(`/expedientes/${item.iue.replace('/', ':')}`);
-        }
+      if (isSelectionMode) {
+        onSelect?.(item.iue);
+      } else {
+        router.push(`/expedientes/${item.iue.replace("/", ":")}`);
+      }
     }, [isSelectionMode, item.iue, onSelect]);
 
     const handleLongPress = useCallback(() => {
-        if (!isSelectionMode) {
-            onSelect?.(item.iue);
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        }
+      if (!isSelectionMode) {
+        onSelect?.(item.iue);
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
     }, [isSelectionMode, item.iue, onSelect]);
 
     const handlePin = useCallback(() => {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        onPin?.(item.iue, !item.isPinned);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      onPin?.(item.iue, !item.isPinned);
     }, [item.iue, item.isPinned, onPin]);
 
     const handleTagsPress = useCallback(() => {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        onTagsPress?.(item.iue);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      onTagsPress?.(item.iue);
     }, [item.iue, onTagsPress]);
 
+    const handleAddReminder = useCallback(() => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      onAddReminder?.(item);
+    }, [item, onAddReminder]);
+
     const hasTags = item.tags && item.tags.length > 0;
+    const tagColor = hasTags ? "#B89146" : "#94A3B8";
+    const starColor = item.isPinned ? "#B89146" : "#94A3B8";
+    const starFill = item.isPinned ? "#B89146" : "transparent";
 
     return (
-        <Pressable
-            className={`mb-3.5 overflow-hidden rounded-[24px] bg-white p-4 border shadow-premium dark:bg-slate-900/40 dark:shadow-premium-dark active:scale-[0.98] active:bg-slate-50 dark:active:bg-slate-900/60 ${isSelected
-                ? 'border-accent bg-accent/5 dark:bg-accent/10'
-                : 'border-slate-100 dark:border-white/5'
+      <Pressable
+        className={`mb-2.5 overflow-hidden rounded-[24px] bg-white p-4 border shadow-premium dark:bg-slate-900/40 dark:shadow-premium-dark active:scale-[0.98] active:bg-slate-50 dark:active:bg-slate-900/60 ${
+          isSelected
+            ? "border-accent bg-accent/5 dark:bg-accent/10"
+            : "border-slate-100 dark:border-white/5"
+        }`}
+        onPress={handlePress}
+        onLongPress={handleLongPress}
+        delayLongPress={500}
+      >
+        {/* Header */}
+        <View className="mb-3 gap-2">
+          {/* Fila 1: IUE (izq) | Selector o hora (der) */}
+          <View className="flex-row items-center justify-between gap-2">
+            <View className="flex-row items-center rounded-lg bg-slate-100 px-2.5 py-1.5 dark:bg-primary/30 border border-slate-200/50 dark:border-primary/20 shrink-0">
+              <Hash size={11} color="#64748B" className="mr-2" />
+              <Text className="text-[10px] font-sans-bold uppercase tracking-[0.5px] text-slate-600 dark:text-navy-200">
+                {item.iue}
+              </Text>
+            </View>
+            {isSelectionMode ? (
+              <View
+                className={`h-6 w-6 rounded-full border items-center justify-center shrink-0 ${
+                  isSelected
+                    ? "bg-accent border-accent"
+                    : "border-slate-300 dark:border-slate-600"
                 }`}
-            onPress={handlePress}
-            onLongPress={handleLongPress}
-            delayLongPress={500}
-        >
-            {/* Header section */}
-            <View className="mb-3 flex-row items-center justify-between">
-                <View className="flex-row items-center rounded-lg bg-slate-100 px-2.5 py-1 dark:bg-primary/30 border border-slate-200/50 dark:border-primary/20">
-                    <Hash size={9} color="#64748B" className="mr-1" />
-                    <Text className="text-[9.5px] font-sans-bold uppercase tracking-[0.5px] text-slate-600 dark:text-navy-200">
-                        {item.iue}
-                    </Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                    {isSelectionMode ? (
-                        <View className={`h-5 w-5 rounded-full border items-center justify-center ${isSelected ? 'bg-accent border-accent' : 'border-slate-300 dark:border-slate-600'
-                            }`}>
-                            {isSelected && <View className="h-2 w-2 rounded-full bg-white" />}
-                        </View>
-                    ) : (
-                        <>
-                            {onTagsPress && (
-                                <Pressable
-                                    onPress={handleTagsPress}
-                                    hitSlop={8}
-                                    className="p-0.5"
-                                >
-                                    <Tag
-                                        size={13}
-                                        color={hasTags ? '#B89146' : '#CBD5E1'}
-                                    />
-                                </Pressable>
-                            )}
-                            {onPin && (
-                                <Pressable
-                                    onPress={handlePin}
-                                    hitSlop={8}
-                                    className="p-0.5"
-                                >
-                                    <Star
-                                        size={13}
-                                        color={item.isPinned ? '#B89146' : '#CBD5E1'}
-                                        fill={item.isPinned ? '#B89146' : 'transparent'}
-                                    />
-                                </Pressable>
-                            )}
-                            <Clock size={10} color="#94A3B8" className="mr-1" />
-                            <Text className="text-[9.5px] font-sans-semi text-slate-400 uppercase tracking-tight">
-                                {formatRelativeDate(item.lastSyncAt)}
-                            </Text>
-                        </>
-                    )}
-                </View>
-            </View>
-
-            {/* Main content */}
-            <View className="flex-row">
-                <View className="flex-1">
-                    <Text className="mb-1.5 text-[13px] font-sans-bold leading-tight text-slate-900 dark:text-white" numberOfLines={2}>
-                        {stripHtml(item.caratula) || 'Sin carátula registrada'}
-                    </Text>
-
-                    <View className="flex-row items-center">
-                        <View className="h-1.5 w-1.5 rounded-full bg-accent mr-1.5" />
-                        <Text className="flex-1 text-[12px] font-sans-medium text-slate-500 dark:text-slate-400" numberOfLines={1}>
-                            {item.sede}
-                        </Text>
-                    </View>
-                </View>
-                <View className="ml-3 items-center justify-center">
-                    <ChevronRight size={18} color="#CBD5E1" />
-                </View>
-            </View>
-
-            {/* Tags row — solo si hay tags asignados */}
-            {hasTags && (
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    className="mt-2.5"
-                    contentContainerClassName="flex-row gap-1.5"
-                >
-                    {item.tags!.map((tag) => (
-                        <TagBadge key={tag.id} tag={tag} size="xs" />
-                    ))}
-                </ScrollView>
+              >
+                {isSelected && (
+                  <View className="h-2.5 w-2.5 rounded-full bg-white" />
+                )}
+              </View>
+            ) : (
+              <View className="flex-row items-center gap-2 shrink-0">
+                <Clock size={12} color="#94A3B8" />
+                <Text className="text-[11px] font-sans-semi text-slate-400 uppercase tracking-tight">
+                  {formatRelativeDate(item.lastSyncAt)}
+                </Text>
+              </View>
             )}
-
-            {/* Separator */}
-            <View className="my-3 h-[1px] w-full bg-slate-100 dark:bg-white/5" />
-
-            {/* Footer stats */}
-            <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center">
-                    <View className="mr-2 h-7 w-7 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                        <FileText size={12} color="#B89146" />
-                    </View>
-                    <Text className="text-[11px] font-sans-semi text-slate-600 dark:text-slate-400">
-                        {item.totalMovimientos} <Text className="text-slate-400 font-sans">eventos</Text>
-                    </Text>
-                </View>
-
-                <View className="flex-row items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1 dark:bg-slate-800/30">
-                    <Calendar size={11} color="#94A3B8" />
-                    <Text className="text-[10px] font-sans-bold text-slate-500 dark:text-slate-400">{item.anio}</Text>
-                </View>
+          </View>
+          {/* Fila 2: íconos de acción a la derecha */}
+          {!isSelectionMode && (onAddReminder || onTagsPress || onPin) && (
+            <View className="flex-row items-center justify-end gap-1">
+              {onAddReminder && (
+                <Pressable onPress={handleAddReminder} hitSlop={10} className="p-1">
+                  <Bell size={15} color="#B89146" />
+                </Pressable>
+              )}
+              {onTagsPress && (
+                <Pressable onPress={handleTagsPress} hitSlop={10} className="p-1">
+                  <Tag size={15} color={tagColor} />
+                </Pressable>
+              )}
+              {onPin && (
+                <Pressable onPress={handlePin} hitSlop={10} className="p-1">
+                  <Star size={15} color={starColor} fill={starFill} />
+                </Pressable>
+              )}
             </View>
-        </Pressable>
+          )}
+        </View>
+
+        {/* Main content */}
+        <View className="flex-row gap-3">
+          <View className="flex-1 min-w-0">
+            <Text
+              className="mb-2 text-[15px] font-sans-bold leading-snug text-slate-900 dark:text-white"
+              numberOfLines={2}
+            >
+              {stripHtml(item.caratula) || "Sin carátula registrada"}
+            </Text>
+
+            <View className="flex-row items-center gap-2.5 mt-0.5">
+              <View className="h-2 w-2 rounded-full bg-accent shrink-0" />
+              <Text
+                className="flex-1 text-[12px] font-sans-medium text-slate-500 dark:text-slate-400"
+                numberOfLines={1}
+              >
+                {item.sede}
+              </Text>
+            </View>
+          </View>
+          <View className="items-center justify-center shrink-0">
+            <ChevronRight size={18} color="#94A3B8" />
+          </View>
+        </View>
+
+        {/* Tags row — solo si hay tags asignados */}
+        {hasTags && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="mt-3"
+            contentContainerClassName="flex-row gap-2"
+          >
+            {item.tags!.map((tag) => (
+              <TagBadge key={tag.id} tag={tag} size="xs" />
+            ))}
+          </ScrollView>
+        )}
+
+        {/* Separator */}
+        <View className="my-3 h-[1px] w-full bg-slate-100 dark:bg-white/5" />
+
+        {/* Footer stats */}
+        <View className="flex-row items-center justify-between gap-2">
+          <View className="flex-row items-center gap-2">
+            <View className="h-7 w-7 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/50 shrink-0">
+              <FileText size={12} color="#B89146" />
+            </View>
+            <Text className="text-[12px] font-sans-semi text-slate-600 dark:text-slate-400">
+              {item.totalMovimientos}{" "}
+              <Text className="text-slate-400 font-sans">eventos</Text>
+            </Text>
+          </View>
+
+          <View className="flex-row items-center gap-2 rounded-lg bg-slate-50 px-3 py-1.5 dark:bg-slate-800/30 shrink-0">
+            <Calendar size={12} color="#94A3B8" />
+            <Text className="text-[11px] font-sans-bold text-slate-500 dark:text-slate-400">
+              {item.anio}
+            </Text>
+          </View>
+        </View>
+      </Pressable>
     );
-});
+  },
+);

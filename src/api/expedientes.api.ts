@@ -1,9 +1,9 @@
 import type {
-    IExpediente,
-    IExpedientesQuery,
-    IPaginatedExpedientes,
-} from '@app-types/expediente.types';
-import { apiClient } from './client';
+  IExpediente,
+  IExpedientesQuery,
+  IPaginatedExpedientes,
+} from "@app-types/expediente.types";
+import { apiClient } from "./client";
 
 // ─── Expedientes API ──────────────────────────────────────────────────────────
 
@@ -11,58 +11,72 @@ import { apiClient } from './client';
  * Fetches a paginated and filtered list of followed expedientes.
  */
 export async function getExpedientes(
-    params: IExpedientesQuery = {},
+  params: IExpedientesQuery = {},
 ): Promise<IPaginatedExpedientes> {
-    const queryParams = { ...params };
-    // Axios serializa arrays como tagIds[]=a&tagIds[]=b. NestJS espera tagIds=a,b (por nuestro Custom Transform).
-    if (queryParams.tagIds && Array.isArray(queryParams.tagIds)) {
-        queryParams.tagIds = queryParams.tagIds.join(',') as any;
-    }
-    const { data } = await apiClient.get<IPaginatedExpedientes>('/expedientes', { params: queryParams });
-    return data;
+  const queryParams = { ...params };
+  // Axios serializa arrays como tagIds[]=a&tagIds[]=b. NestJS espera tagIds=a,b (por nuestro Custom Transform).
+  if (queryParams.tagIds && Array.isArray(queryParams.tagIds)) {
+    queryParams.tagIds = queryParams.tagIds.join(",") as any;
+  }
+  const { data } = await apiClient.get<IPaginatedExpedientes>("/expedientes", {
+    params: queryParams,
+  });
+  return data;
 }
 
 /**
  * Fetches a single expediente by its IUE, including all movements.
  */
 export async function getExpedienteById(iue: string): Promise<IExpediente> {
-    const { data } = await apiClient.get<IExpediente>(`/expedientes/${encodeURIComponent(iue)}`);
-    return data;
+  const { data } = await apiClient.get<IExpediente>(
+    `/expedientes/${encodeURIComponent(iue)}`,
+  );
+  return data;
 }
 
 /**
  * Adds an expediente to the user's follow list by IUE.
  */
 export async function followExpediente(iue: string): Promise<void> {
-    await apiClient.post(`/expedientes/${encodeURIComponent(iue)}/follow`);
+  await apiClient.post(`/expedientes/${encodeURIComponent(iue)}/follow`);
 }
 
 /**
  * Removes an expediente from the user's follow list.
  */
 export async function unfollowExpediente(iue: string): Promise<void> {
-    await apiClient.delete(`/expedientes/${encodeURIComponent(iue)}/follow`);
+  await apiClient.delete(`/expedientes/${encodeURIComponent(iue)}/follow`);
 }
 
 /**
  * Triggers a manual sync for a single expediente.
  */
 export async function syncExpediente(iue: string): Promise<void> {
-    await apiClient.post('/expedientes/sync', { iue });
+  await apiClient.post("/expedientes/sync", { iue });
 }
 
 /**
  * Toggles the pin (favorite) status of a followed expediente.
  */
-export async function pinExpediente(iue: string, isPinned: boolean): Promise<void> {
-    await apiClient.patch(`/expedientes/${encodeURIComponent(iue)}/follow`, { isPinned });
+export async function pinExpediente(
+  iue: string,
+  isPinned: boolean,
+): Promise<void> {
+  await apiClient.patch(`/expedientes/${encodeURIComponent(iue)}/follow`, {
+    isPinned,
+  });
 }
 
 /**
  * Updates the personal notes for a followed expediente.
  */
-export async function updateExpedienteNotes(iue: string, notes: string | null): Promise<void> {
-    await apiClient.patch(`/expedientes/${encodeURIComponent(iue)}/follow`, { notes });
+export async function updateExpedienteNotes(
+  iue: string,
+  notes: string | null,
+): Promise<void> {
+  await apiClient.patch(`/expedientes/${encodeURIComponent(iue)}/follow`, {
+    notes,
+  });
 }
 
 /**
@@ -70,10 +84,11 @@ export async function updateExpedienteNotes(iue: string, notes: string | null): 
  * Returns null if the user is not following it.
  */
 export async function getExpedienteFollowData(
-    iue: string,
+  iue: string,
 ): Promise<{ isPinned: boolean; notes: string | null } | null> {
-    const { data } = await apiClient.get<{ isPinned: boolean; notes: string | null } | null>(
-        `/expedientes/${encodeURIComponent(iue)}/follow`,
-    );
-    return data;
+  const { data } = await apiClient.get<{
+    isPinned: boolean;
+    notes: string | null;
+  } | null>(`/expedientes/${encodeURIComponent(iue)}/follow`);
+  return data;
 }

@@ -1,46 +1,46 @@
-import type { CaseStage } from './expediente.types';
+import type { CaseStage } from "./expediente.types";
 
 export interface IDeadlineSummary {
-    id: string;
-    expedienteIue: string;
-    expedienteCaratula: string | null;
-    dueDate: string;
-    daysRemaining: number;
-    detectedText: string;
+  id: string;
+  expedienteIue: string;
+  expedienteCaratula: string | null;
+  dueDate: string;
+  daysRemaining: number;
+  detectedText: string;
 }
 
 export interface IRecentMovement {
-    expedienteIue: string;
-    expedienteCaratula: string | null;
-    tipo: string;
-    fecha: string;
-    priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  expedienteIue: string;
+  expedienteCaratula: string | null;
+  tipo: string;
+  fecha: string;
+  priority: "LOW" | "MEDIUM" | "HIGH";
 }
 
 export interface IDormantExpediente {
-    iue: string;
-    caratula: string | null;
-    lastActivityDate: string | null;
-    daysSinceLastActivity: number;
+  iue: string;
+  caratula: string | null;
+  lastActivityDate: string | null;
+  daysSinceLastActivity: number;
 }
 
 export interface IStageDistribution {
-    stage: CaseStage;
-    count: number;
+  stage: CaseStage;
+  count: number;
 }
 
 export interface IDashboardStats {
-    totalFollowed: number;
-    activeInLast30Days: number;
-    openDeadlines: number;
-    urgentDeadlineCount: number;
+  totalFollowed: number;
+  activeInLast30Days: number;
+  openDeadlines: number;
+  urgentDeadlineCount: number;
 }
 
 export interface IDashboardSummary {
-    urgentDeadlines: IDeadlineSummary[];
-    warningDeadlines: IDeadlineSummary[];
-    dormantExpedientes: IDormantExpediente[];
-    recentHighPriorityMovements: IRecentMovement[];
-    stageDistribution: IStageDistribution[];
-    stats: IDashboardStats;
+  urgentDeadlines: IDeadlineSummary[];
+  warningDeadlines: IDeadlineSummary[];
+  dormantExpedientes: IDormantExpediente[];
+  recentHighPriorityMovements: IRecentMovement[];
+  stageDistribution: IStageDistribution[];
+  stats: IDashboardStats;
 }

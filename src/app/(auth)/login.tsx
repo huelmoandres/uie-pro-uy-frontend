@@ -1,19 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { Pressable, Text, View } from "react-native";
+import { router, Stack } from "expo-router";
+import Toast from "react-native-toast-message";
+import * as Haptics from "expo-haptics";
+import { useForm } from "react-hook-form";
+import { Scale } from "lucide-react-native";
+import { useLoginMutation } from "@hooks/useAuthMutations";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginFormData } from "@schemas/auth.schema";
+import { PageContainer } from "@components/ui";
 import {
-    Pressable,
-    Text,
-    TextInput,
-    View,
-} from 'react-native';
-import { router, Stack } from 'expo-router';
-import Toast from 'react-native-toast-message';
-import * as Haptics from 'expo-haptics';
-import { useForm, Controller } from 'react-hook-form';
-import { Scale } from 'lucide-react-native';
-import { useLoginMutation } from '@hooks/useAuthMutations';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { loginSchema, type LoginFormData } from '@schemas/auth.schema';
-import { PageContainer } from '@components/ui';
+  AuthScreenHeader,
+  AuthFormCard,
+  FormField,
+  AuthButton,
+} from "@components/auth";
+import { extractApiErrorMessage } from "@utils/apiError";
+import {
+  EMAIL_NOT_VERIFIED_MESSAGE,
+  LOGIN_ERROR_FALLBACK,
+} from "@constants/auth";
 
 /**
  * Premium Login Screen
@@ -21,130 +27,117 @@ import { PageContainer } from '@components/ui';
  * Follows Rule 12 (SM default).
  */
 export default function LoginScreen() {
-    const { mutateAsync: loginMutation, isPending: isLoading } = useLoginMutation();
+  const [showVerifyEmailPrompt, setShowVerifyEmailPrompt] = useState(false);
+  const [pendingVerifyEmail, setPendingVerifyEmail] = useState("");
 
-    const {
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<LoginFormData>({
-        resolver: zodResolver(loginSchema),
-    });
+  const { mutateAsync: loginMutation, isPending: isLoading } =
+    useLoginMutation();
 
-    const onSubmit = async (data: LoginFormData) => {
-        try {
-            await loginMutation(data);
-            void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            router.replace('/(tabs)');
-        } catch (error) {
-            void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            Toast.show({
-                type: 'error',
-                text1: 'Error de ingreso',
-                text2: 'Credenciales inválidas o error de red.',
-            });
-        }
-    };
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-    return (
-        <PageContainer keyboardAware={true} className="px-0">
-            <Stack.Screen options={{ headerShown: false }} />
+  const onSubmit = async (data: LoginFormData) => {
+    setShowVerifyEmailPrompt(false);
+    try {
+      await loginMutation(data);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.replace("/(tabs)");
+    } catch (error) {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const msg = extractApiErrorMessage(error, LOGIN_ERROR_FALLBACK);
+      Toast.show({
+        type: "error",
+        text1: "Error de ingreso",
+        text2: msg,
+      });
+      if (msg === EMAIL_NOT_VERIFIED_MESSAGE) {
+        setShowVerifyEmailPrompt(true);
+        setPendingVerifyEmail(data.email);
+      }
+    }
+  };
 
-            {/* Premium Header */}
-            <View className="px-6 pb-12 pt-12 items-center">
-                <View className="h-16 w-16 items-center justify-center rounded-[24px] bg-primary shadow-premium dark:bg-white/5 dark:shadow-premium-dark mb-6">
-                    <Scale size={32} color="#B89146" />
-                </View>
-                <Text className="text-3xl font-sans-bold text-center text-slate-900 dark:text-white tracking-tight">UIE Pro Uy</Text>
-                <Text className="text-sm font-sans text-center text-slate-600 mt-2">Gestión Judicial de Alta Gama</Text>
-            </View>
+  return (
+    <PageContainer keyboardAware={true} className="px-0">
+      <Stack.Screen options={{ headerShown: false }} />
 
-            {/* Form Card (Rule 12: SM) */}
-            <View className="px-2 flex-1">
-                <View className="overflow-hidden rounded-[40px] bg-white p-8 shadow-premium dark:bg-primary dark:shadow-premium-dark border border-slate-100 dark:border-white/5">
-                    <View>
-                        <View className="mb-6">
-                            <Text className="mb-2 ml-1 text-[10px] font-sans-bold uppercase tracking-[1.5px] text-accent">
-                                Email Profesional
-                            </Text>
-                            <Controller
-                                control={control}
-                                name="email"
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <TextInput
-                                        className={`rounded-2xl bg-slate-50 border ${errors.email ? 'border-danger' : 'border-slate-200'} px-5 py-2.5 font-sans text-sm text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:border-accent`}
-                                        placeholder="ejemplo@estudio.com"
-                                        placeholderTextColor="#94A3B8"
-                                        onBlur={onBlur}
-                                        onChangeText={onChange}
-                                        value={value}
-                                        autoCapitalize="none"
-                                        keyboardType="email-address"
-                                        editable={!isLoading}
-                                    />
-                                )}
-                            />
-                            {errors.email && (
-                                <Text className="mt-1 ml-1 text-[10px] font-sans-semi text-danger">
-                                    {errors.email.message}
-                                </Text>
-                            )}
-                        </View>
+      <AuthScreenHeader
+        icon={Scale}
+        title="UIE Pro Uy"
+        subtitle="Gestión Judicial de Alta Gama"
+        showBackButton={false}
+      />
 
-                        <View className="mb-8">
-                            <Text className="mb-2 ml-1 text-[10px] font-sans-bold uppercase tracking-[1.5px] text-accent">
-                                Contraseña
-                            </Text>
-                            <Controller
-                                control={control}
-                                name="password"
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <TextInput
-                                        className={`rounded-2xl bg-slate-50 border ${errors.password ? 'border-danger' : 'border-slate-200'} px-5 py-2.5 font-sans text-sm text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:border-accent`}
-                                        placeholder="••••••••"
-                                        placeholderTextColor="#94A3B8"
-                                        onBlur={onBlur}
-                                        onChangeText={onChange}
-                                        value={value}
-                                        secureTextEntry
-                                        editable={!isLoading}
-                                    />
-                                )}
-                            />
-                            {errors.password && (
-                                <Text className="mt-1 ml-1 text-[10px] font-sans-semi text-danger">
-                                    {errors.password.message}
-                                </Text>
-                            )}
-                            <Pressable
-                                onPress={() => router.push('/(auth)/forgot-password')}
-                                className="mt-2 self-end"
-                            >
-                                <Text className="text-[11px] font-sans-semi text-accent">
-                                    ¿Olvidaste tu contraseña?
-                                </Text>
-                            </Pressable>
-                        </View>
+      <View className="px-6 flex-1">
+        <AuthFormCard>
+          <FormField
+            control={control}
+            name="email"
+            label="Email Profesional"
+            placeholder="ejemplo@estudio.com"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            disabled={isLoading}
+            error={errors.email?.message}
+          />
+          <View className="mb-8">
+            <FormField
+              control={control}
+              name="password"
+              label="Contraseña"
+              placeholder="••••••••"
+              secureTextEntry
+              disabled={isLoading}
+              error={errors.password?.message}
+            />
+            <Pressable
+              onPress={() => router.push("/(auth)/forgot-password")}
+              className="mt-2 self-end"
+            >
+              <Text className="text-[11px] font-sans-semi text-accent">
+                ¿Olvidaste tu contraseña?
+              </Text>
+            </Pressable>
+          </View>
 
-                        <Pressable
-                            className="items-center justify-center rounded-full bg-accent py-4 shadow-lg shadow-accent/40 active:scale-[0.98] active:bg-accent-dark disabled:opacity-50"
-                            onPress={handleSubmit(onSubmit)}
-                            disabled={isLoading}
-                        >
-                            <Text className="text-sm font-sans-bold uppercase tracking-[1px] text-white">
-                                {isLoading ? 'Ingresando...' : 'Ingresar'}
-                            </Text>
-                        </Pressable>
-                    </View>
-                </View>
+          <AuthButton
+            label="Ingresar"
+            loadingLabel="Ingresando..."
+            isLoading={isLoading}
+            onPress={handleSubmit(onSubmit)}
+          />
 
-                <View className="mt-10 flex-row justify-center pb-12 px-10">
-                    <Text className="font-sans text-sm text-slate-600">¿No tenés cuenta? </Text>
-                    <Pressable onPress={() => router.push('/(auth)/register')}>
-                        <Text className="font-sans-bold text-sm text-accent-dark">Registrate</Text>
-                    </Pressable>
-                </View>
-            </View>
-        </PageContainer>
-    );
+          {showVerifyEmailPrompt && (
+            <AuthButton
+              variant="secondary"
+              label="Verificar correo"
+              onPress={() => {
+                setShowVerifyEmailPrompt(false);
+                router.push({
+                  pathname: "/(auth)/verify-email",
+                  params: { email: pendingVerifyEmail },
+                });
+              }}
+            />
+          )}
+        </AuthFormCard>
+
+        <View className="mt-10 flex-row justify-center pb-12 px-10">
+          <Text className="font-sans text-sm text-slate-600">
+            ¿No tenés cuenta?{" "}
+          </Text>
+          <Pressable onPress={() => router.push("/(auth)/register")}>
+            <Text className="font-sans-bold text-sm text-accent-dark">
+              Registrate
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </PageContainer>
+  );
 }

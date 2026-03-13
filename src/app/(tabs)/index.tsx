@@ -1,20 +1,36 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { Pressable, Text, TextInput, View, Modal } from "react-native";
+import { router } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
+import { useExpedientes, useDebounce, usePinExpediente } from "@hooks";
 import {
-  Pressable,
-  Text,
-  TextInput,
-  View,
-  Modal,
-} from 'react-native';
-import { FlashList } from '@shopify/flash-list';
-import { useExpedientes, useDebounce, usePinExpediente } from '@hooks';
-import { Search, RefreshCw, FolderOpen, SlidersHorizontal, Plus, Calendar as CalendarIcon, Star } from 'lucide-react-native';
-import { Skeleton, PageContainer, Paginator, InfoButton } from '@components/ui';
-import { INFO_HINTS } from '@/constants/InfoHints';
-import { ExpedienteCard, FollowExpedienteModal, ExpedientesFilterModal, AgendaWebView, TagPickerModal } from '@components/features';
-import * as Haptics from 'expo-haptics';
-import Toast from 'react-native-toast-message';
-import type { IExpediente, IExpedientesQuery } from '@app-types/expediente.types';
+  Search,
+  RefreshCw,
+  FolderOpen,
+  SlidersHorizontal,
+  Plus,
+  Calendar as CalendarIcon,
+  Star,
+  GitCompare,
+} from "lucide-react-native";
+import { useColorScheme } from "@/components/base/useColorScheme";
+import Colors from "@/constants/Colors";
+import { Skeleton, PageContainer, Paginator, InfoButton } from "@components/ui";
+import { INFO_HINTS } from "@/constants/InfoHints";
+import {
+  ExpedienteCard,
+  FollowExpedienteModal,
+  ExpedientesFilterModal,
+  AgendaWebView,
+  TagPickerModal,
+  CreateReminderModal,
+} from "@components/features";
+import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
+import type {
+  IExpediente,
+  IExpedientesQuery,
+} from "@app-types/expediente.types";
 
 export function ExpedienteSkeleton() {
   return (
@@ -35,11 +51,13 @@ export function ExpedienteSkeleton() {
   );
 }
 
-type TabFilter = 'all' | 'pinned';
+type TabFilter = "all" | "pinned";
 
 export default function ExpedientesScreen() {
-  const [searchText, setSearchText] = useState('');
-  const [activeTab, setActiveTab] = useState<TabFilter>('all');
+  const colorScheme = useColorScheme();
+  const secondaryIconColor = Colors[colorScheme].tabIconDefault;
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<TabFilter>("all");
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedIues, setSelectedIues] = useState<string[]>([]);
@@ -47,13 +65,16 @@ export default function ExpedientesScreen() {
   const [queryParams, setQueryParams] = useState<IExpedientesQuery>({
     page: 1,
     limit: 20,
-    order: 'desc',
-    orderBy: 'lastSyncAt',
+    order: "desc",
+    orderBy: "lastSyncAt",
   });
   const [tagPickerIue, setTagPickerIue] = useState<string | null>(null);
+  const [reminderModalItem, setReminderModalItem] =
+    useState<IExpediente | null>(null);
 
   const debouncedSearch = useDebounce(searchText, 500);
-  const { data, isLoading, isError, refetch, isRefetching } = useExpedientes(queryParams);
+  const { data, isLoading, isError, refetch, isRefetching } =
+    useExpedientes(queryParams);
   const pinMutation = usePinExpediente();
 
   useEffect(() => {
@@ -70,7 +91,7 @@ export default function ExpedientesScreen() {
     setQueryParams((prev) => ({
       ...prev,
       page: 1,
-      onlyPinned: tab === 'pinned' ? true : undefined,
+      onlyPinned: tab === "pinned" ? true : undefined,
     }));
   }, []);
 
@@ -78,22 +99,27 @@ export default function ExpedientesScreen() {
     void refetch();
   }, [refetch]);
 
-  const handlePin = useCallback((iue: string, isPinned: boolean) => {
-    pinMutation.mutate({ iue, isPinned });
-  }, [pinMutation]);
+  const handlePin = useCallback(
+    (iue: string, isPinned: boolean) => {
+      pinMutation.mutate({ iue, isPinned });
+    },
+    [pinMutation],
+  );
 
   const toggleSelection = useCallback((iue: string) => {
-    setSelectedIues(prev => {
+    setSelectedIues((prev) => {
       const isSelected = prev.includes(iue);
       if (isSelected) {
-        return prev.filter(id => id !== iue);
+        return prev.filter((id) => id !== iue);
       }
       if (prev.length >= 5) {
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Warning,
+        );
         Toast.show({
-          type: 'info',
-          text1: 'Límite alcanzado',
-          text2: 'Solo podés seleccionar hasta 5 expedientes.',
+          type: "info",
+          text1: "Límite alcanzado",
+          text2: "Solo podés seleccionar hasta 5 expedientes.",
         });
         return prev;
       }
@@ -109,6 +135,17 @@ export default function ExpedientesScreen() {
     if (selectedIues.length === 0) return;
     setShowBulkAgenda(true);
   }, [selectedIues]);
+
+  const canCompare =
+    selectedIues.length >= 2 && selectedIues.length <= 3;
+  const handleCompare = useCallback(() => {
+    if (!canCompare) return;
+    const iuesParam = selectedIues.join(",");
+    router.push({
+      pathname: "/expedientes/compare",
+      params: { iues: iuesParam },
+    });
+  }, [canCompare, selectedIues]);
 
   // Sort pinned items first within the current page
   const expedientes = useMemo(() => {
@@ -133,7 +170,11 @@ export default function ExpedientesScreen() {
               Expedientes
             </Text>
           </View>
-          <InfoButton title={INFO_HINTS.expedientesList.title} description={INFO_HINTS.expedientesList.description} size={18} />
+          <InfoButton
+            title={INFO_HINTS.expedientesList.title}
+            description={INFO_HINTS.expedientesList.description}
+            size={18}
+          />
         </View>
 
         {/* Search & Filter & Add bar */}
@@ -160,7 +201,9 @@ export default function ExpedientesScreen() {
             onPress={() => setShowFilterModal(true)}
           >
             <SlidersHorizontal size={18} color="#64748B" />
-            {(queryParams.sede || queryParams.anio || queryParams.tagIds?.length) ? (
+            {queryParams.sede ||
+            queryParams.anio ||
+            queryParams.tagIds?.length ? (
               <View className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-danger border border-white dark:border-primary" />
             ) : null}
           </Pressable>
@@ -169,43 +212,57 @@ export default function ExpedientesScreen() {
         {/* Todos / Favoritos tabs */}
         <View className="mt-4 flex-row items-center gap-2">
           <Pressable
-            onPress={() => handleTabChange('all')}
-            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${activeTab === 'all'
-              ? 'bg-primary border-primary'
-              : 'bg-transparent border-slate-200 dark:border-white/10'
-              }`}
+            onPress={() => handleTabChange("all")}
+            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${
+              activeTab === "all"
+                ? "bg-primary border-primary"
+                : "bg-transparent border-slate-200 dark:border-white/10"
+            }`}
           >
-            <Text className={`text-[12px] font-sans-semi ${activeTab === 'all' ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+            <Text
+              className={`text-[12px] font-sans-semi ${activeTab === "all" ? "text-white" : "text-slate-500 dark:text-slate-400"}`}
+            >
               Todos
             </Text>
-            {data?.meta?.totalItems !== undefined && activeTab === 'all' && (
+            {data?.meta?.totalItems !== undefined && activeTab === "all" && (
               <View className="bg-white/20 rounded-full px-1.5 py-0.5">
-                <Text className="text-[10px] font-sans-bold text-white">{data.meta.totalItems}</Text>
+                <Text className="text-[10px] font-sans-bold text-white">
+                  {data.meta.totalItems}
+                </Text>
               </View>
             )}
           </Pressable>
           <Pressable
-            onPress={() => handleTabChange('pinned')}
-            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${activeTab === 'pinned'
-              ? 'bg-accent border-accent'
-              : 'bg-transparent border-slate-200 dark:border-white/10'
-              }`}
+            onPress={() => handleTabChange("pinned")}
+            className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 border active:opacity-70 ${
+              activeTab === "pinned"
+                ? "bg-accent border-accent"
+                : "bg-transparent border-slate-200 dark:border-white/10"
+            }`}
           >
             <Star
               size={11}
-              color={activeTab === 'pinned' ? '#FFFFFF' : '#B89146'}
-              fill={activeTab === 'pinned' ? '#FFFFFF' : 'transparent'}
+              color={activeTab === "pinned" ? "#FFFFFF" : "#B89146"}
+              fill={activeTab === "pinned" ? "#FFFFFF" : "transparent"}
             />
-            <Text className={`text-[12px] font-sans-semi ${activeTab === 'pinned' ? 'text-white' : 'text-accent'}`}>
+            <Text
+              className={`text-[12px] font-sans-semi ${activeTab === "pinned" ? "text-white" : "text-accent"}`}
+            >
               Favoritos
             </Text>
-            {data?.meta?.totalItems !== undefined && activeTab === 'pinned' && (
+            {data?.meta?.totalItems !== undefined && activeTab === "pinned" && (
               <View className="bg-white/20 rounded-full px-1.5 py-0.5">
-                <Text className="text-[10px] font-sans-bold text-white">{data.meta.totalItems}</Text>
+                <Text className="text-[10px] font-sans-bold text-white">
+                  {data.meta.totalItems}
+                </Text>
               </View>
             )}
           </Pressable>
-          <InfoButton title={INFO_HINTS.todosFavoritos.title} description={INFO_HINTS.todosFavoritos.description} size={14} />
+          <InfoButton
+            title={INFO_HINTS.todosFavoritos.title}
+            description={INFO_HINTS.todosFavoritos.description}
+            size={14}
+          />
         </View>
       </View>
 
@@ -220,25 +277,37 @@ export default function ExpedientesScreen() {
         ) : isError ? (
           <View className="flex-1 items-center justify-center pt-20">
             <RefreshCw size={40} color="#EF4444" />
-            <Text className="mt-4 font-sans-bold text-slate-900 dark:text-white">Error al cargar</Text>
-            <Pressable onPress={handleRefresh} className="mt-4 rounded-full bg-slate-200 px-6 py-2">
-              <Text className="text-xs font-sans-bold text-slate-900">Reintentar</Text>
+            <Text className="mt-4 font-sans-bold text-slate-900 dark:text-white">
+              Error al cargar
+            </Text>
+            <Pressable
+              onPress={handleRefresh}
+              className="mt-4 rounded-full bg-slate-200 px-6 py-2"
+            >
+              <Text className="text-xs font-sans-bold text-slate-900">
+                Reintentar
+              </Text>
             </Pressable>
           </View>
         ) : expedientes.length === 0 ? (
           <View className="flex-1 items-center justify-center pt-20">
-            {activeTab === 'pinned' ? (
+            {activeTab === "pinned" ? (
               <>
                 <Star size={48} color="#B89146" fill="transparent" />
-                <Text className="mt-4 font-sans-semi text-slate-500">No tenés favoritos</Text>
+                <Text className="mt-4 font-sans-semi text-slate-500">
+                  No tenés favoritos
+                </Text>
                 <Text className="mt-2 text-[12px] font-sans text-slate-400 text-center px-8">
-                  Presioná la estrella ★ en un expediente para marcarlo como favorito
+                  Presioná la estrella ★ en un expediente para marcarlo como
+                  favorito
                 </Text>
               </>
             ) : (
               <>
                 <FolderOpen size={48} color="#94A3B8" />
-                <Text className="mt-4 font-sans-semi text-slate-500">No hay expedientes</Text>
+                <Text className="mt-4 font-sans-semi text-slate-500">
+                  No hay expedientes
+                </Text>
                 <Text className="mt-2 text-[12px] font-sans text-slate-400">
                   Presioná el botón + para agregar uno
                 </Text>
@@ -257,7 +326,12 @@ export default function ExpedientesScreen() {
                 isSelectionMode={selectedIues.length > 0}
                 onSelect={toggleSelection}
                 onPin={handlePin}
-                onTagsPress={selectedIues.length === 0 ? setTagPickerIue : undefined}
+                onTagsPress={
+                  selectedIues.length === 0 ? setTagPickerIue : undefined
+                }
+                onAddReminder={
+                  selectedIues.length === 0 ? setReminderModalItem : undefined
+                }
               />
             )}
             // @ts-ignore
@@ -272,52 +346,65 @@ export default function ExpedientesScreen() {
       {/* Selection Bar & Paginator Container */}
       <View className="bg-white dark:bg-primary border-t border-slate-200/60 dark:border-white/10 z-10 px-5 pt-3 pb-4">
         {selectedIues.length > 0 ? (
-          <View>
+          <View className="gap-3">
             <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <View className="bg-accent px-2.5 py-1 rounded-lg mr-3 shadow-sm shadow-accent/20">
-                  <Text className="font-sans-bold text-xs text-white">
+              <View className="flex-row items-center gap-2">
+                <View className="h-7 min-w-[28px] items-center justify-center rounded-lg bg-accent px-2 shadow-sm shadow-accent/20">
+                  <Text className="font-sans-bold text-[11px] text-white">
                     {selectedIues.length}
                   </Text>
                 </View>
-                <Text className="font-sans-bold text-[13px] text-slate-900 dark:text-white">
-                  {selectedIues.length === 1 ? 'Seleccionado' : 'Seleccionados'}
+                <Text className="font-sans-semi text-[12px] text-slate-600 dark:text-slate-300">
+                  {selectedIues.length === 1 ? "Seleccionado" : "Seleccionados"}
                 </Text>
               </View>
 
-              <Pressable
-                onPress={handleBulkAgenda}
-                className="flex-row items-center gap-2 rounded-xl bg-accent px-6 py-3 shadow-md shadow-accent/20 active:scale-[0.96]"
-              >
-                <CalendarIcon size={16} color="#FFFFFF" strokeWidth={2.5} />
-                <Text className="font-sans-bold text-xs uppercase tracking-wider text-white">
-                  Agendar
-                </Text>
-              </Pressable>
+              <View className="flex-row items-center gap-2">
+                {canCompare && (
+                  <Pressable
+                    onPress={handleCompare}
+                    accessibilityLabel="Comparar expedientes"
+                    className="h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 dark:border-white/15 dark:bg-white/5 active:scale-[0.95]"
+                  >
+                    <GitCompare size={16} color="#64748B" />
+                  </Pressable>
+                )}
+                <Pressable
+                  onPress={handleBulkAgenda}
+                  accessibilityLabel="Agendar turno"
+                  className="h-9 w-9 items-center justify-center rounded-lg bg-accent shadow-sm shadow-accent/20 active:scale-[0.95]"
+                >
+                  <CalendarIcon size={16} color="#FFFFFF" strokeWidth={2.5} />
+                </Pressable>
+              </View>
             </View>
 
-            <View className="items-center mt-3">
-              <Pressable
-                onPress={clearSelection}
-                className="active:opacity-40 py-2"
-                hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
-              >
-                <Text className="font-sans-bold text-[10px] uppercase tracking-[2px] text-slate-400 dark:text-slate-500">
-                  Desmarcar todo
-                </Text>
-              </Pressable>
-            </View>
+            <Pressable
+              onPress={clearSelection}
+              accessibilityLabel="Desmarcar todo"
+              className="self-center active:opacity-60 py-1"
+              hitSlop={{ top: 8, bottom: 8, left: 16, right: 16 }}
+            >
+              <Text className="font-sans-semi text-[10px] text-slate-400 dark:text-slate-500">
+                Desmarcar todo
+              </Text>
+            </Pressable>
           </View>
         ) : (
-          data?.meta && expedientes.length > 0 && (
+          data?.meta &&
+          expedientes.length > 0 && (
             <View className="pt-1">
               <Paginator
                 currentPage={data.meta.currentPage}
                 totalPages={data.meta.totalPages}
                 pageSize={data.meta.itemsPerPage}
                 totalItems={data.meta.totalItems}
-                onPageChange={(p) => setQueryParams(prev => ({ ...prev, page: p }))}
-                onPageSizeChange={(s) => setQueryParams(prev => ({ ...prev, limit: s, page: 1 }))}
+                onPageChange={(p) =>
+                  setQueryParams((prev) => ({ ...prev, page: p }))
+                }
+                onPageSizeChange={(s) =>
+                  setQueryParams((prev) => ({ ...prev, limit: s, page: 1 }))
+                }
               />
             </View>
           )
@@ -348,16 +435,16 @@ export default function ExpedientesScreen() {
         <AgendaWebView
           iues={selectedIues}
           // Use the sede from the first selected expediente
-          sede={expedientes.find(e => e.iue === selectedIues[0])?.sede || ''}
+          sede={expedientes.find((e) => e.iue === selectedIues[0])?.sede || ""}
           onClose={() => setShowBulkAgenda(false)}
           onBookingComplete={(payload) => {
             setShowBulkAgenda(false);
             if (payload.success) {
               clearSelection();
               Toast.show({
-                type: 'success',
-                text1: '¡Turno agendado!',
-                text2: 'Tu turno múltiple fue registrado exitosamente.',
+                type: "success",
+                text1: "¡Turno agendado!",
+                text2: "Tu turno múltiple fue registrado exitosamente.",
               });
             }
           }}
@@ -367,13 +454,22 @@ export default function ExpedientesScreen() {
       {/* Tag Picker Modal */}
       <TagPickerModal
         visible={!!tagPickerIue}
-        iue={tagPickerIue ?? ''}
+        iue={tagPickerIue ?? ""}
         assignedTagIds={
-          expedientes.find((e) => e.iue === tagPickerIue)?.tags?.map((t) => t.id) ?? []
+          expedientes
+            .find((e) => e.iue === tagPickerIue)
+            ?.tags?.map((t) => t.id) ?? []
         }
         onClose={() => setTagPickerIue(null)}
       />
 
+      {/* Recordatorio para expediente (fecha fija) */}
+      <CreateReminderModal
+        visible={reminderModalItem != null}
+        onClose={() => setReminderModalItem(null)}
+        iue={reminderModalItem?.iue ?? null}
+        caratula={reminderModalItem?.caratula ?? null}
+      />
     </View>
   );
 }

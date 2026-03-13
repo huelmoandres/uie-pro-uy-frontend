@@ -1,14 +1,14 @@
-import React from 'react';
-import { View, ScrollView, ViewProps } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import React from "react";
+import { View, ScrollView, ViewProps } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 interface PageContainerProps extends ViewProps {
-    children: React.ReactNode;
-    scrollable?: boolean;
-    withHeader?: boolean;
-    keyboardAware?: boolean;
-    refreshControl?: React.ReactElement;
+  children: React.ReactNode;
+  scrollable?: boolean;
+  withHeader?: boolean;
+  keyboardAware?: boolean;
+  refreshControl?: React.ReactElement;
 }
 
 /**
@@ -18,49 +18,54 @@ interface PageContainerProps extends ViewProps {
  * Uses Premium Background tokens.
  */
 export function PageContainer({
-    children,
-    scrollable = false,
-    withHeader = false,
-    keyboardAware = false,
-    className = '',
-    ...props
+  children,
+  scrollable = false,
+  withHeader = false,
+  keyboardAware = false,
+  className = "",
+  ...props
 }: PageContainerProps) {
-    const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
 
-    // Decide which container to use
-    let Container: any = View;
-    if (keyboardAware) {
-        Container = KeyboardAwareScrollView;
-    } else if (scrollable) {
-        Container = ScrollView;
-    }
+  // Decide which container to use
+  let Container: any = View;
+  if (keyboardAware) {
+    Container = KeyboardAwareScrollView;
+  } else if (scrollable) {
+    Container = ScrollView;
+  }
 
-    // Rule: Standard horizontal padding is px-6
-    const baseClassName = `flex-1 px-6 ${className}`;
+  // Rule: Standard horizontal padding is px-6
+  const baseClassName = `flex-1 px-6 ${className}`;
 
-    // Standard spacing logic
-    const contentContainerStyle = (scrollable || keyboardAware) ? {
-        flexGrow: 1,
-        paddingTop: withHeader ? 0 : insets.top,
-        paddingBottom: insets.bottom + 40
-    } : {
-        paddingTop: withHeader ? 0 : insets.top,
-        paddingBottom: insets.bottom
-    };
+  // Standard spacing logic
+  const contentContainerStyle =
+    scrollable || keyboardAware
+      ? {
+          flexGrow: 1,
+          paddingTop: withHeader ? 0 : insets.top,
+          paddingBottom: insets.bottom + 40,
+        }
+      : {
+          paddingTop: withHeader ? 0 : insets.top,
+          paddingBottom: insets.bottom,
+        };
 
-    return (
-        <View className="flex-1 bg-background-light dark:bg-background-dark">
-            <Container
-                className={baseClassName}
-                contentContainerStyle={contentContainerStyle}
-                // KeyboardAwareScrollView specific props
-                enableOnAndroid={true}
-                extraScrollHeight={50}
-                keyboardShouldPersistTaps="handled"
-                {...props}
-            >
-                {children}
-            </Container>
-        </View>
-    );
+  return (
+    <View className="flex-1 bg-background-light dark:bg-background-dark">
+      <Container
+        className={baseClassName}
+        contentContainerStyle={contentContainerStyle}
+        // KeyboardAwareScrollView: desactivar scroll automático al input para evitar
+        // "Error measuring text field" con OtpInput y otros inputs complejos
+        enableAutomaticScroll={false}
+        enableOnAndroid={true}
+        extraScrollHeight={50}
+        keyboardShouldPersistTaps="handled"
+        {...props}
+      >
+        {children}
+      </Container>
+    </View>
+  );
 }

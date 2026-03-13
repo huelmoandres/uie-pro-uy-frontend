@@ -1,12 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
-import { AgendaApi } from '@api/agenda.api';
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@context/AuthContext";
+import { AgendaApi } from "@api/agenda.api";
 
-const QUERY_KEY = ['deadline-agenda'] as const;
+const QUERY_KEY_BASE = ["deadline-agenda"] as const;
 
 export function useDeadlineAgenda() {
-    return useQuery({
-        queryKey: QUERY_KEY,
-        queryFn: AgendaApi.getAgenda,
-        staleTime: 1000 * 60 * 5,
-    });
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+
+  return useQuery({
+    queryKey: [...QUERY_KEY_BASE, userId],
+    queryFn: AgendaApi.getAgenda,
+    staleTime: 1000 * 60 * 5,
+    enabled: !!userId,
+  });
 }

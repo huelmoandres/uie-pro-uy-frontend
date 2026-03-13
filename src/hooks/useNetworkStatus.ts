@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+import { useEffect, useRef, useState } from "react";
+import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 
 interface NetworkStatus {
-    /** true si hay conexión activa (puede ser wifi, celular, etc.) */
-    isOnline: boolean;
-    /** true si acaba de recuperarse la conexión (útil para auto-retry) */
-    justReconnected: boolean;
+  /** true si hay conexión activa (puede ser wifi, celular, etc.) */
+  isOnline: boolean;
+  /** true si acaba de recuperarse la conexión (útil para auto-retry) */
+  justReconnected: boolean;
 }
 
 /**
@@ -15,25 +15,26 @@ interface NetworkStatus {
  *    lo que permite disparar refetch/retry automáticos.
  */
 export function useNetworkStatus(): NetworkStatus {
-    const [isOnline, setIsOnline] = useState(true);
-    const [justReconnected, setJustReconnected] = useState(false);
-    const prevOnline = useRef(true);
+  const [isOnline, setIsOnline] = useState(true);
+  const [justReconnected, setJustReconnected] = useState(false);
+  const prevOnline = useRef(true);
 
-    useEffect(() => {
-        const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-            const connected = state.isConnected === true && state.isInternetReachable !== false;
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+      const connected =
+        state.isConnected === true && state.isInternetReachable !== false;
 
-            if (!prevOnline.current && connected) {
-                setJustReconnected(true);
-                setTimeout(() => setJustReconnected(false), 100);
-            }
+      if (!prevOnline.current && connected) {
+        setJustReconnected(true);
+        setTimeout(() => setJustReconnected(false), 100);
+      }
 
-            prevOnline.current = connected;
-            setIsOnline(connected);
-        });
+      prevOnline.current = connected;
+      setIsOnline(connected);
+    });
 
-        return unsubscribe;
-    }, []);
+    return unsubscribe;
+  }, []);
 
-    return { isOnline, justReconnected };
+  return { isOnline, justReconnected };
 }

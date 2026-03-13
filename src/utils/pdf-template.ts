@@ -1,89 +1,83 @@
 /**
  * Builds the HTML string used to render the expediente PDF via expo-print.
  * Pure function — no side effects, fully testable.
+ * Fechas en hora Uruguay (America/Montevideo).
  */
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { stripHtml, formatDate } from './formatters';
-import { flattenTimeline } from '@app-types/expediente.types';
-import type { IExpediente, IDecree } from '@app-types/expediente.types';
+import { formatInTimeZone } from "date-fns-tz";
+import { es } from "date-fns/locale";
+import { stripHtml, formatDate } from "./formatters";
+import { APP_TIMEZONE } from "@constants/timezone";
+import { flattenTimeline } from "@app-types/expediente.types";
+import type { IExpediente, IDecree } from "@app-types/expediente.types";
 
 /** Contexto opcional del expediente para incluir en el PDF del decreto */
 export interface IDecreePdfContext {
-    expedienteIue: string;
-    caratula: string | null;
-    movementFecha: string;
-    movementTipo: string;
+  expedienteIue: string;
+  caratula: string | null;
+  movementFecha: string;
+  movementTipo: string;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function esc(text: string | null | undefined): string {
-    if (!text) return '';
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-}
-
-function stageLabel(stage: string): string {
-    const map: Record<string, string> = {
-        FILING: 'Presentación',
-        PRELIMINARY: 'Preliminar',
-        EVIDENCE: 'Prueba',
-        PLEADINGS: 'Alegatos',
-        JUDGMENT: 'Sentencia',
-        APPEAL: 'Recursos',
-        ENFORCEMENT: 'Ejecución',
-    };
-    return map[stage] ?? stage;
+  if (!text) return "";
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function categoryLabel(category: string): string {
-    const map: Record<string, string> = {
-        DECREE: 'Decreto',
-        NOTIFICATION: 'Notificación',
-        WRITING: 'Escrito',
-        AUDIENCE: 'Audiencia',
-        INTERNAL: 'Interno',
-    };
-    return map[category] ?? category;
+  const map: Record<string, string> = {
+    DECREE: "Decreto",
+    NOTIFICATION: "Notificación",
+    WRITING: "Escrito",
+    AUDIENCE: "Audiencia",
+    INTERNAL: "Interno",
+  };
+  return map[category] ?? category;
 }
 
 function categoryDot(category: string): string {
-    const map: Record<string, string> = {
-        DECREE:       '#1E3A5F',
-        NOTIFICATION: '#7C3AED',
-        WRITING:      '#0369A1',
-        AUDIENCE:     '#B45309',
-        INTERNAL:     '#94A3B8',
-    };
-    return map[category] ?? '#94A3B8';
+  const map: Record<string, string> = {
+    DECREE: "#1E3A5F",
+    NOTIFICATION: "#7C3AED",
+    WRITING: "#0369A1",
+    AUDIENCE: "#B45309",
+    INTERNAL: "#94A3B8",
+  };
+  return map[category] ?? "#94A3B8";
 }
 
 function activityInfo(status: string): { label: string; color: string } {
-    const map: Record<string, { label: string; color: string }> = {
-        ACTIVE:   { label: 'Activo',       color: '#15803D' },
-        ON_TRACK: { label: 'En curso',     color: '#1D4ED8' },
-        DELAYED:  { label: 'Demorado',     color: '#B45309' },
-        DORMANT:  { label: 'Inactivo',     color: '#64748B' },
-        UNKNOWN:  { label: 'Desconocido',  color: '#64748B' },
-    };
-    return map[status] ?? map.UNKNOWN;
+  const map: Record<string, { label: string; color: string }> = {
+    ACTIVE: { label: "Activo", color: "#15803D" },
+    ON_TRACK: { label: "En curso", color: "#1D4ED8" },
+    DELAYED: { label: "Demorado", color: "#B45309" },
+    DORMANT: { label: "Inactivo", color: "#64748B" },
+    UNKNOWN: { label: "Desconocido", color: "#64748B" },
+  };
+  return map[status] ?? map.UNKNOWN;
 }
 
 // ─── Main builder ─────────────────────────────────────────────────────────────
 
 export function buildExpedientePdf(expediente: IExpediente): string {
-    const generatedAt = format(new Date(), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es });
-    const caratula    = stripHtml(expediente.caratula) || 'Sin carátula registrada';
-    const movements   = flattenTimeline(expediente.movements);
+  const generatedAt = formatInTimeZone(
+    new Date(),
+    APP_TIMEZONE,
+    "d 'de' MMMM 'de' yyyy, HH:mm",
+    { locale: es },
+  );
+  const caratula = stripHtml(expediente.caratula) || "Sin carátula registrada";
+  const movements = flattenTimeline(expediente.movements);
 
-    // ── Stats ──────────────────────────────────────────────────────────────
-    const stats = expediente.stats;
-    const statsRow = stats
-        ? `
+  // ── Stats ──────────────────────────────────────────────────────────────
+  const stats = expediente.stats;
+  const statsRow = stats
+    ? `
         <div class="stats-grid">
             <div class="stat">
                 <span class="stat-n">${expediente.totalMovimientos}</span>
@@ -97,47 +91,50 @@ export function buildExpedientePdf(expediente: IExpediente): string {
                 <span class="stat-n">${formatDate(stats.lastMovementDate)}</span>
                 <span class="stat-l">Último movimiento</span>
             </div>
-            ${stats.averageDaysBetweenMovements != null ? `
+            ${
+              stats.averageDaysBetweenMovements != null
+                ? `
             <div class="stat">
                 <span class="stat-n">${Math.round(stats.averageDaysBetweenMovements)}d</span>
                 <span class="stat-l">Promedio entre mov.</span>
-            </div>` : ''}
+            </div>`
+                : ""
+            }
         </div>`
-        : '';
+    : "";
 
-    // ── Parties ────────────────────────────────────────────────────────────
-    const p = expediente.parties;
-    const partiesBlock = p && (p.plaintiff || p.defendant || p.caseType)
-        ? `
+  // ── Parties ────────────────────────────────────────────────────────────
+  const p = expediente.parties;
+  const partiesBlock =
+    p && (p.plaintiff || p.defendant || p.caseType)
+      ? `
         <div class="block">
             <div class="block-title">Partes del Proceso</div>
             <table class="parties-table">
-                ${p.plaintiff ? `<tr><td class="pt-label">Actor</td><td class="pt-value">${esc(p.plaintiff)}</td></tr>` : ''}
-                ${p.defendant ? `<tr><td class="pt-label">Demandado</td><td class="pt-value">${esc(p.defendant)}</td></tr>` : ''}
-                ${p.caseType  ? `<tr><td class="pt-label">Tipo de proceso</td><td class="pt-value">${esc(p.caseType)}</td></tr>` : ''}
+                ${p.plaintiff ? `<tr><td class="pt-label">Actor</td><td class="pt-value">${esc(p.plaintiff)}</td></tr>` : ""}
+                ${p.defendant ? `<tr><td class="pt-label">Demandado</td><td class="pt-value">${esc(p.defendant)}</td></tr>` : ""}
+                ${p.caseType ? `<tr><td class="pt-label">Tipo de proceso</td><td class="pt-value">${esc(p.caseType)}</td></tr>` : ""}
             </table>
         </div>`
-        : '';
+      : "";
 
-    // ── Stage / Activity badges ────────────────────────────────────────────
-    const stageBadge = expediente.stage
-        ? `<span class="badge badge-blue">${stageLabel(expediente.stage.stage)}</span>`
-        : '';
-    const actBadge = expediente.prediction
-        ? (() => {
-            const a = activityInfo(expediente.prediction.status);
-            return `<span class="badge" style="color:${a.color};border-color:${a.color}40;background:${a.color}10;">${a.label}</span>`;
-        })()
-        : '';
+  // ── Estado (Activo, Inactivo, etc.) ─────────────────────────────────────
+  const actBadge = expediente.prediction
+    ? (() => {
+        const a = activityInfo(expediente.prediction.status);
+        return `<span class="badge" style="color:${a.color};border-color:${a.color}40;background:${a.color}10;">${a.label}</span>`;
+      })()
+    : "";
 
-    // ── Movements table rows ───────────────────────────────────────────────
-    const rows = movements.map((m, i) => {
-        const cat   = m.classification?.type ?? 'INTERNAL';
-        const dot   = categoryDot(cat);
-        const label = categoryLabel(cat);
-        const even  = i % 2 === 0;
-        return `
-        <tr style="background:${even ? '#FFFFFF' : '#F8FAFC'};">
+  // ── Movements table rows ───────────────────────────────────────────────
+  const rows = movements
+    .map((m, i) => {
+      const cat = m.classification?.type ?? "INTERNAL";
+      const dot = categoryDot(cat);
+      const label = categoryLabel(cat);
+      const even = i % 2 === 0;
+      return `
+        <tr style="background:${even ? "#FFFFFF" : "#F8FAFC"};">
             <td class="td tc-date">${esc(formatDate(m.fecha))}</td>
             <td class="td tc-cat">
                 <span style="display:inline-flex;align-items:center;gap:5px;">
@@ -146,12 +143,13 @@ export function buildExpedientePdf(expediente: IExpediente): string {
                 </span>
             </td>
             <td class="td tc-tipo">${esc(m.tipo)}</td>
-            <td class="td tc-decree">${m.decree?.textoDecreto ? '<span class="decree-yes">&#10003;</span>' : ''}</td>
+            <td class="td tc-decree">${m.decree?.textoDecreto ? '<span class="decree-yes">&#10003;</span>' : ""}</td>
         </tr>`;
-    }).join('');
+    })
+    .join("");
 
-    // ── Full document ──────────────────────────────────────────────────────
-    return `<!DOCTYPE html>
+  // ── Full document ──────────────────────────────────────────────────────
+  return `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
@@ -444,18 +442,26 @@ export function buildExpedientePdf(expediente: IExpediente): string {
   </div>
 </div>
 
-<!-- Badges -->
-${stageBadge || actBadge ? `
+<!-- Badges (Estado: Activo, Inactivo, etc.) -->
+${
+  actBadge
+    ? `
 <div class="badges">
-  ${stageBadge}${actBadge}
-</div>` : ''}
+  ${actBadge}
+</div>`
+    : ""
+}
 
 <!-- Stats -->
-${statsRow ? `
+${
+  statsRow
+    ? `
 <div class="block">
   <div class="block-title">Estadísticas del Expediente</div>
   ${statsRow}
-</div>` : ''}
+</div>`
+    : ""
+}
 
 <!-- Parties -->
 ${partiesBlock}
@@ -493,15 +499,23 @@ ${partiesBlock}
 
 // ─── Decree PDF ───────────────────────────────────────────────────────────────
 
-export function buildDecreePdf(decree: IDecree, context?: IDecreePdfContext): string {
-    const generatedAt = format(new Date(), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es });
-    const decreeText = decree.isReserved
-        ? 'Este decreto está reservado y no puede ser visualizado.'
-        : (stripHtml(decree.textoDecreto ?? '') || 'Sin texto disponible.');
-    const nroDecree = decree.nroDecreto ?? 'Sin número';
+export function buildDecreePdf(
+  decree: IDecree,
+  context?: IDecreePdfContext,
+): string {
+  const generatedAt = formatInTimeZone(
+    new Date(),
+    APP_TIMEZONE,
+    "d 'de' MMMM 'de' yyyy, HH:mm",
+    { locale: es },
+  );
+  const decreeText = decree.isReserved
+    ? "Este decreto está reservado y no puede ser visualizado."
+    : stripHtml(decree.textoDecreto ?? "") || "Sin texto disponible.";
+  const nroDecree = decree.nroDecreto ?? "Sin número";
 
-    const contextBlock = context
-        ? `
+  const contextBlock = context
+    ? `
 <div class="caratula-box">
   <div class="caratula-label">Expediente</div>
   <div class="caratula-text">${esc(context.expedienteIue)}</div>
@@ -509,7 +523,7 @@ export function buildDecreePdf(decree: IDecree, context?: IDecreePdfContext): st
 <div class="meta-row">
   <div class="meta-cell">
     <div class="meta-label">Carátula</div>
-    <div class="meta-value" style="font-size:10px;">${esc(stripHtml(context.caratula) || '—')}</div>
+    <div class="meta-value" style="font-size:10px;">${esc(stripHtml(context.caratula) || "—")}</div>
   </div>
 </div>
 <div class="meta-row">
@@ -522,26 +536,26 @@ export function buildDecreePdf(decree: IDecree, context?: IDecreePdfContext): st
     <div class="meta-value">${esc(context.movementTipo)}</div>
   </div>
 </div>`
-        : '';
+    : "";
 
-    const reservedBlock = decree.isReserved
-        ? `
+  const reservedBlock = decree.isReserved
+    ? `
 <div class="reserved-box">
   <div class="reserved-label">⚠️ Decreto reservado</div>
   <div class="reserved-text">Este decreto está reservado y no puede ser visualizado.</div>
 </div>`
-        : '';
+    : "";
 
-    const deadlineBlock =
-        decree.deadline?.hasDeadline && decree.deadline.detectedText
-            ? `
+  const deadlineBlock =
+    decree.deadline?.hasDeadline && decree.deadline.detectedText
+      ? `
 <div class="deadline-box">
   <div class="deadline-label">Plazo detectado</div>
   <div class="deadline-text">${esc(decree.deadline.detectedText)}</div>
 </div>`
-            : '';
+      : "";
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>

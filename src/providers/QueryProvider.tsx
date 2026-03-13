@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { useMemo } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // ─── QueryClient Configuration ────────────────────────────────────────────────
 // staleTime: 5 min → no refetch while data is fresh
@@ -7,29 +7,29 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // retry: 2 → retry failed requests twice before showing error
 
 const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 1000 * 60 * 5,
-            gcTime: 1000 * 60 * 30,
-            retry: 2,
-            refetchOnWindowFocus: false,
-            refetchOnReconnect: true,
-        },
-        mutations: {
-            retry: 0,
-        },
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
+      retry: 2,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
     },
+    mutations: {
+      retry: 0,
+    },
+  },
 });
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 interface QueryProviderProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export function QueryProvider({ children }: QueryProviderProps) {
-    const client = useMemo(() => queryClient, []);
-    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  const client = useMemo(() => queryClient, []);
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 
 export { queryClient };

@@ -4,13 +4,16 @@
  * y en NOTIFICATION_TYPES de notifications.tsx.
  */
 export interface INotificationPreferences {
-    pushEnabled: boolean;
-    expedienteUpdates: boolean;
-    notifyDecrees: boolean;
-    notifyAudiences: boolean;
-    notifyNotifications: boolean;
-    notifyWritings: boolean;
-    notifyInternal: boolean;
+  pushEnabled: boolean;
+  expedienteUpdates: boolean;
+  notifyDecrees: boolean;
+  notifyAudiences: boolean;
+  notifyNotifications: boolean;
+  notifyWritings: boolean;
+  notifyInternal: boolean;
+  emailWeeklyDigest: boolean;
+  digestDay: number;
 }
 
-export type UpdateNotificationPreferencesPayload = Partial<INotificationPreferences>;
+export type UpdateNotificationPreferencesPayload =
+  Partial<INotificationPreferences>;

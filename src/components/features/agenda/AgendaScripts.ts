@@ -13,7 +13,7 @@
  * ⚠️  These strings run in the WEB context, NOT in React Native.
  */
 
-import type { IueData } from '@app-types/agenda.types';
+import type { IueData } from "@app-types/agenda.types";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Private step builders (each returns a JS code block, not a full IIFE)
@@ -24,7 +24,7 @@ import type { IueData } from '@app-types/agenda.types';
  * Defines the `sendToApp(type, payload)` function available to all other steps.
  */
 function buildBridgeHelperStep(): string {
-    return `
+  return `
     function sendToApp(type, payload) {
         if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
             window.ReactNativeWebView.postMessage(
@@ -40,7 +40,7 @@ function buildBridgeHelperStep(): string {
  * and fills it with "oficina", triggering events so the framework reacts.
  */
 function buildAutoFillOficinaStep(): string {
-    return `
+  return `
     (function autoFillOficina() {
         var FIELD_ID = 'W0006W0014vBUSQUEDAOFICINA';
         var attempts = 0;
@@ -67,7 +67,7 @@ function buildAutoFillOficinaStep(): string {
  * selects it automatically.
  */
 function buildSelectOficinaStep(): string {
-    return `
+  return `
     (function autoSelectOfgecen() {
         var SELECT_ID  = 'W0006W0014vOFICINAID';
         var MATCH_TEXT = 'OFGECEN'; // unique substring in the target option
@@ -105,7 +105,7 @@ function buildSelectOficinaStep(): string {
  * Useful for future smart-fill triggers and UX analytics.
  */
 function buildFocusTrackerStep(): string {
-    return `
+  return `
     document.addEventListener('focusin', function(event) {
         var t = event.target;
         if (t && (t.tagName === 'INPUT' || t.tagName === 'SELECT' || t.tagName === 'TEXTAREA')) {
@@ -120,7 +120,7 @@ function buildFocusTrackerStep(): string {
  * and show the booking confirmation toast.
  */
 function buildSubmitListenerStep(): string {
-    return `
+  return `
     document.addEventListener('submit', function() {
         sendToApp('FORM_SUBMITTED', {
             success: true,
@@ -135,7 +135,7 @@ function buildSubmitListenerStep(): string {
  * Identifies "Datos del Interesado" fields and fills them with user profile data.
  */
 function buildAutoFillPersonalDataStep(): string {
-    return `
+  return `
     (function autoFillPersonalData() {
         if (!window.IUE_DATA) return;
         var data = window.IUE_DATA.userData || {};
@@ -199,7 +199,7 @@ function buildAutoFillPersonalDataStep(): string {
  * value back to the app so they can be restored if the view resets.
  */
 function buildInputPersistenceStep(): string {
-    return `
+  return `
     document.addEventListener('input', function(event) {
         var t = event.target;
         if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) {
@@ -223,9 +223,9 @@ function buildInputPersistenceStep(): string {
  * To add a new step: write a `buildXxxStep()` above and include it here.
  */
 export function buildInjectedScript(data: IueData): string {
-    const jsonData = JSON.stringify(data);
+  const jsonData = JSON.stringify(data);
 
-    return `
+  return `
 (function() {
     'use strict';
 

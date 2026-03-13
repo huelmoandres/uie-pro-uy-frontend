@@ -23,6 +23,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "requireFullScreen": true,
       "bundleIdentifier": "com.iueprouy.app",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
@@ -51,6 +52,19 @@
       "androidMode": "default"
     },
     "plugins": [
+      [
+        "expo-screen-orientation",
+        { "initialOrientation": "PORTRAIT" }
+      ],
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": ["en", "es"],
+            "android": ["en", "es"]
+          }
+        }
+      ],
       "expo-router",
       "expo-secure-store",
       [
@@ -61,7 +75,8 @@
         }
       ],
       "expo-image",
-      "expo-sharing"
+      "expo-sharing",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true
