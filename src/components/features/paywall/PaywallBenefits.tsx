@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Pressable } from "react-native";
 import {
   FileText,
   Bell,
@@ -14,8 +14,12 @@ import {
   MapPin,
   Map,
   Mail,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
+
+const PREVIEW_COUNT = 3;
 
 const BENEFITS: {
   icon: LucideIcon;
@@ -92,30 +96,92 @@ const BENEFITS: {
   },
 ];
 
+function BenefitItem({
+  icon: Icon,
+  title,
+  description,
+  compact,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  compact: boolean;
+}) {
+  return (
+    <View
+      className={`flex-row gap-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-primary/40 ${
+        compact ? "items-center p-3" : "items-start p-4"
+      }`}
+    >
+      <View className="h-10 w-10 items-center justify-center rounded-xl bg-accent/10 shrink-0">
+        <Icon size={20} color="#B89146" />
+      </View>
+      <View className="flex-1">
+        <View className="flex-row items-center gap-2">
+          <Check size={14} color="#15803D" />
+          <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">
+            {title}
+          </Text>
+        </View>
+        {!compact && (
+          <Text className="mt-1.5 text-[12px] font-sans text-slate-500 dark:text-slate-400">
+            {description}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
 export function PaywallBenefits() {
+  const [expanded, setExpanded] = useState(false);
+  const preview = BENEFITS.slice(0, PREVIEW_COUNT);
+
   return (
     <View className="mb-8 gap-4">
-      {BENEFITS.map((b, i) => (
-        <View
-          key={i}
-          className="flex-row items-start gap-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-primary/40 p-4"
-        >
-          <View className="h-10 w-10 items-center justify-center rounded-xl bg-accent/10 shrink-0">
-            <b.icon size={20} color="#B89146" />
-          </View>
-          <View className="flex-1">
-            <View className="flex-row items-center gap-2 mb-1">
-              <Check size={14} color="#15803D" />
-              <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">
-                {b.title}
-              </Text>
-            </View>
-            <Text className="text-[12px] font-sans text-slate-500 dark:text-slate-400">
-              {b.description}
+      {expanded ? (
+        <>
+          {BENEFITS.map((b, i) => (
+            <BenefitItem
+              key={i}
+              icon={b.icon}
+              title={b.title}
+              description={b.description}
+              compact={false}
+            />
+          ))}
+          <Pressable
+            className="flex-row items-center justify-center gap-2 py-2 active:opacity-70"
+            onPress={() => setExpanded(false)}
+          >
+            <ChevronUp size={18} color="#64748B" />
+            <Text className="text-[13px] font-sans-semi text-slate-500 dark:text-slate-400">
+              Ver menos
             </Text>
-          </View>
-        </View>
-      ))}
+          </Pressable>
+        </>
+      ) : (
+        <>
+          {preview.map((b, i) => (
+            <BenefitItem
+              key={i}
+              icon={b.icon}
+              title={b.title}
+              description={b.description}
+              compact
+            />
+          ))}
+          <Pressable
+            className="flex-row items-center justify-center gap-2 rounded-2xl border border-accent/30 bg-accent/5 py-3.5 active:opacity-70"
+            onPress={() => setExpanded(true)}
+          >
+            <Text className="text-[13px] font-sans-semi text-accent">
+              Ver todos los beneficios
+            </Text>
+            <ChevronDown size={18} color="#B89146" />
+          </Pressable>
+        </>
+      )}
     </View>
   );
 }
