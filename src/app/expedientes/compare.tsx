@@ -8,7 +8,6 @@ import {
   Platform,
 } from "react-native";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
-import * as ScreenOrientation from "expo-screen-orientation";
 import { GitCompare } from "lucide-react-native";
 import { useExpedienteCompare, useDeadlineAgenda } from "@hooks";
 import { CompareExpedientePanel } from "@components/features";
@@ -50,19 +49,30 @@ export default function CompareExpedientesScreen() {
 
   const handleBack = () => router.back();
 
-  // Rotar a landscape al comparar; restaurar a portrait al salir (evita errores)
+  // Rotar a landscape al comparar; restaurar a portrait al salir.
+  // Opcional: expo-screen-orientation requiere dev build; en Expo Go no está disponible.
   useFocusEffect(
     React.useCallback(() => {
       if (Platform.OS === "web" || !isValidSelection) return;
 
-      void ScreenOrientation.lockAsync(
-        ScreenOrientation.OrientationLock.LANDSCAPE,
-      );
+      let cleanup: (() => void) | undefined;
+      import("expo-screen-orientation")
+        .then((ScreenOrientation) => {
+          void ScreenOrientation.lockAsync(
+            ScreenOrientation.OrientationLock.LANDSCAPE,
+          );
+          cleanup = () => {
+            void ScreenOrientation.lockAsync(
+              ScreenOrientation.OrientationLock.PORTRAIT_UP,
+            );
+          };
+        })
+        .catch(() => {
+          // Módulo no disponible (Expo Go, etc.) — no bloquear orientación
+        });
 
       return () => {
-        void ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP,
-        );
+        if (cleanup) cleanup();
       };
     }, [isValidSelection]),
   );

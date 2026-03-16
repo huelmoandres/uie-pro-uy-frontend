@@ -1,39 +1,33 @@
 import React from "react";
-import { View, ScrollView, ViewProps } from "react-native";
+import { View, ScrollView, ViewProps, ScrollViewProps, KeyboardAvoidingView } from "react-native";
+import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 interface PageContainerProps extends ViewProps {
   children: React.ReactNode;
   scrollable?: boolean;
   withHeader?: boolean;
   keyboardAware?: boolean;
-  refreshControl?: React.ReactElement;
+  refreshControl?: ScrollViewProps["refreshControl"];
 }
 
 /**
  * Standardized container for application pages.
  * Enforces Rule 12 and consistent padding.
  * Handles keyboard avoiding and auto-scroll when requested.
- * Uses Premium Background tokens.
+ * Uses KeyboardAvoidingView + ScrollView instead of KeyboardAwareScrollView
+ * to avoid viewIsDescendantOf() errors in modals/sheets.
  */
 export function PageContainer({
   children,
   scrollable = false,
   withHeader = false,
   keyboardAware = false,
+  refreshControl,
   className = "",
   ...props
 }: PageContainerProps) {
   const insets = useSafeAreaInsets();
-
-  // Decide which container to use
-  let Container: any = View;
-  if (keyboardAware) {
-    Container = KeyboardAwareScrollView;
-  } else if (scrollable) {
-    Container = ScrollView;
-  }
 
   // Rule: Standard horizontal padding is px-6
   const baseClassName = `flex-1 px-6 ${className}`;
@@ -51,21 +45,58 @@ export function PageContainer({
           paddingBottom: insets.bottom,
         };
 
+  const scrollProps =
+    scrollable || keyboardAware
+      ? {
+          contentContainerStyle,
+          showsVerticalScrollIndicator: false,
+          keyboardShouldPersistTaps: "handled" as const,
+        }
+      : {};
+
+  if (keyboardAware) {
+    return (
+      <View className="flex-1 bg-background-light dark:bg-background-dark">
+        <KeyboardAvoidingView
+          {...KEYBOARD_AVOIDING_VIEW_PROPS}
+          className="flex-1"
+        >
+          <ScrollView
+            className={baseClassName}
+            {...scrollProps}
+            refreshControl={refreshControl}
+          >
+            {children}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
+    );
+  }
+
+  if (scrollable) {
+    return (
+      <View className="flex-1 bg-background-light dark:bg-background-dark">
+        <ScrollView
+          className={baseClassName}
+          {...scrollProps}
+          refreshControl={refreshControl}
+        >
+          {children}
+        </ScrollView>
+      </View>
+    );
+  }
+
   return (
-    <View className="flex-1 bg-background-light dark:bg-background-dark">
-      <Container
-        className={baseClassName}
-        contentContainerStyle={contentContainerStyle}
-        // KeyboardAwareScrollView: desactivar scroll automático al input para evitar
-        // "Error measuring text field" con OtpInput y otros inputs complejos
-        enableAutomaticScroll={false}
-        enableOnAndroid={true}
-        extraScrollHeight={50}
-        keyboardShouldPersistTaps="handled"
-        {...props}
-      >
-        {children}
-      </Container>
+    <View
+      className={`flex-1 bg-background-light dark:bg-background-dark ${baseClassName}`}
+      style={{
+        paddingTop: withHeader ? 0 : insets.top,
+        paddingBottom: insets.bottom,
+      }}
+      {...props}
+    >
+      {children}
     </View>
   );
 }

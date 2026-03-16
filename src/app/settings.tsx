@@ -3,9 +3,10 @@ import {
   View,
   Text,
   Pressable,
-  ScrollView,
   TextInput,
   ActivityIndicator,
+  ScrollView,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Stack } from "expo-router";
 import { useAppColorScheme } from "@hooks/useAppColorScheme";
@@ -35,6 +36,7 @@ import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
 import { ManageTagsModal } from "@components/features";
 import { InfoButton, ConfirmationModal } from "@components/ui";
+import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
 import { INFO_HINTS } from "@constants/InfoHints";
 
 export default function SettingsScreen() {
@@ -128,8 +130,14 @@ export default function SettingsScreen() {
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <Stack.Screen options={{ title: "Configuración" }} />
-      <ScrollView className="flex-1">
-        <View className="p-4 pt-6">
+      <KeyboardAvoidingView {...KEYBOARD_AVOIDING_VIEW_PROPS} className="flex-1">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="p-4 pt-6">
           {/* User Profile Section */}
           <Text className="ml-2 mb-2 text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
             Mi Perfil
@@ -395,7 +403,8 @@ export default function SettingsScreen() {
             </Text>
           </Pressable>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <ConfirmationModal
         visible={deleteAccountModalVisible}

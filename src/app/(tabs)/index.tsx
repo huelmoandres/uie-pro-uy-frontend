@@ -334,8 +334,6 @@ export default function ExpedientesScreen() {
                 }
               />
             )}
-            // @ts-ignore
-            estimatedItemSize={180}
             contentContainerStyle={{ paddingTop: 24, paddingBottom: 0 }}
             onRefresh={handleRefresh}
             refreshing={isRefetching}

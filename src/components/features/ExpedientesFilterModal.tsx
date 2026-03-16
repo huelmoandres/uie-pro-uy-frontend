@@ -17,6 +17,7 @@ import type {
   FollowStatus,
 } from "@app-types/expediente.types";
 import { useTags } from "@hooks";
+import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
 import { TagBadge } from "@components/ui";
 
 interface Props {
@@ -40,6 +41,8 @@ export const ExpedientesFilterModal = React.memo(
         setDraft(currentFilters);
       }
     }, [visible, currentFilters]);
+
+    useModalKeyboardDismiss(visible);
 
     const updateDraft = (key: keyof IExpedientesQuery, value: any) => {
       setDraft((prev) => ({ ...prev, [key]: value }));
@@ -124,6 +127,7 @@ export const ExpedientesFilterModal = React.memo(
             <ScrollView
               className="px-6 py-5 flex-1"
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
               {/* Order & OrderBy */}
               <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-3">

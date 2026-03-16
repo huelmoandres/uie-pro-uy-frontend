@@ -20,6 +20,14 @@ export interface IUser {
 export interface ILoginRequest {
   email: string;
   password: string;
+  deviceId: string;
+  deviceName?: string;
+}
+
+/** Respuesta cuando el límite de dispositivos está alcanzado y se requiere OTP. */
+export interface ILoginRequiresOtpResponse {
+  requiresOtp: true;
+  tempToken: string;
 }
 
 export interface IRegisterRequest {
@@ -36,10 +44,10 @@ export interface IUpdateUserRequest {
   cedula?: string;
 }
 
-/** Respuesta de login: solo tokens. El usuario se obtiene con getMe(). */
-export interface ILoginResponse extends IAuthTokens {
-  token?: string; // Alias legacy para accessToken
-}
+/** Respuesta de login: tokens o requiresOtp si se superó el límite de dispositivos. */
+export type ILoginResponse =
+  | (IAuthTokens & { token?: string })
+  | ILoginRequiresOtpResponse;
 
 export interface IRegisterResponse {
   message: string;
@@ -50,4 +58,13 @@ export interface IRegisterResponse {
 export interface IRefreshResponse {
   accessToken: string;
   refreshToken?: string;
+}
+
+/** Sesión activa (dispositivo vinculado). */
+export interface ISession {
+  id: string;
+  deviceId: string;
+  deviceName: string | null;
+  lastUsedAt: string;
+  createdAt: string;
 }

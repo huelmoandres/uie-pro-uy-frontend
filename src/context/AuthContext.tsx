@@ -4,6 +4,7 @@ import { AuthService } from "@services";
 import { SECURE_STORE_KEYS, setGlobalSignOut } from "@api/client";
 import { logout as apiLogout } from "@api/auth.api";
 import { queryClient } from "@providers/QueryProvider";
+import { getDeviceId } from "@utils/deviceId";
 import type { IUser } from "@app-types/auth.types";
 
 interface AuthContextData {
@@ -49,7 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Limpiar cache primero para evitar que se muestren datos de otro usuario
     queryClient.clear();
     try {
-      await apiLogout();
+      const deviceId = await getDeviceId().catch(() => undefined);
+      await apiLogout(deviceId);
     } catch {
       // Ignorar errores de red; lo importante es limpiar el estado local.
     } finally {

@@ -13,6 +13,7 @@ import {
   Shield,
   HelpCircle,
   Crown,
+  Smartphone,
 } from "lucide-react-native";
 import { INFO_HINTS } from "@/constants/InfoHints";
 
@@ -49,6 +50,12 @@ export default function ProfileScreen() {
       label: "Notificaciones",
       color: "#64748B",
       route: "/notifications",
+    },
+    {
+      icon: Smartphone,
+      label: "Dispositivos vinculados",
+      color: "#64748B",
+      route: "/linked-devices",
     },
     { icon: Shield, label: "Privacidad", color: "#64748B", route: "/privacy" },
     {
@@ -104,7 +111,7 @@ export default function ProfileScreen() {
             {menuItems.map((item, index) => (
               <Pressable
                 key={index}
-                onPress={() => item.route && router.push(item.route as any)}
+                onPress={() => item.route && router.push(item.route as never)}
                 className={`flex-row items-center justify-between p-4 px-6 active:bg-slate-50 dark:active:bg-white/5 ${index !== menuItems.length - 1 ? "border-b border-slate-50 dark:border-white/5" : ""}`}
               >
                 <View className="flex-row items-center">

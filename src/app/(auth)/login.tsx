@@ -20,6 +20,8 @@ import {
   EMAIL_NOT_VERIFIED_MESSAGE,
   LOGIN_ERROR_FALLBACK,
 } from "@constants/auth";
+import { getDeviceId, getDeviceName } from "@utils/deviceId";
+import { isLoginRequiresOtp } from "@api/auth.api";
 
 /**
  * Premium Login Screen
@@ -44,9 +46,22 @@ export default function LoginScreen() {
   const onSubmit = async (data: LoginFormData) => {
     setShowVerifyEmailPrompt(false);
     try {
-      await loginMutation(data);
+      const deviceId = await getDeviceId();
+      const deviceName = await getDeviceName();
+      const result = await loginMutation({
+        ...data,
+        deviceId,
+        deviceName,
+      });
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace("/(tabs)");
+      if (isLoginRequiresOtp(result)) {
+        router.push({
+          pathname: "/(auth)/login-verify-otp",
+          params: { tempToken: result.tempToken },
+        } as never);
+      } else {
+        router.replace("/(tabs)");
+      }
     } catch (error) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       const msg = extractApiErrorMessage(error, LOGIN_ERROR_FALLBACK);

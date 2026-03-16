@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { X, SlidersHorizontal } from "lucide-react-native";
+import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
 import { modalBottomSheetStyles } from "@utils/modalStyles";
 import type { IVenuesQuery, IVenueFilters } from "@app-types/venue.types";
 
@@ -30,6 +31,8 @@ export const SedesFilterModal = React.memo(
         setDraft(currentFilters);
       }
     }, [visible, currentFilters]);
+
+    useModalKeyboardDismiss(visible);
 
     const updateDraft = (key: keyof IVenuesQuery, value: unknown) => {
       setDraft((prev) => ({ ...prev, [key]: value }));
@@ -99,6 +102,7 @@ export const SedesFilterModal = React.memo(
             <ScrollView
               className="px-6 py-5 flex-1"
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
               <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-3">
                 Búsqueda

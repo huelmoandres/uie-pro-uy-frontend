@@ -147,7 +147,6 @@ export default function SedesScreen() {
             renderItem={({ item }: { item: IVenue }) => (
               <VenueCard venue={item} />
             )}
-            estimatedItemSize={180}
             contentContainerStyle={{ paddingTop: 24, paddingBottom: 0 }}
             onRefresh={handleRefresh}
             refreshing={isRefetching}

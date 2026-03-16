@@ -8,7 +8,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { useForm, Controller } from "react-hook-form";
@@ -21,6 +20,8 @@ import {
   followExpedienteSchema,
   type FollowExpedienteFormData,
 } from "@schemas/auth.schema";
+import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
+import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
 import { ExpedienteService } from "@services";
 
 interface FollowExpedienteModalProps {
@@ -54,6 +55,8 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
     reset();
     onClose();
   };
+
+  useModalKeyboardDismiss(visible);
 
   const onSubmit = async ({ iue }: FollowExpedienteFormData) => {
     // Convert user-facing slash format to colon for the API (avoids URL encoding issues)
@@ -102,10 +105,7 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
           <View style={styles.backdropDim} />
         </Pressable>
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="w-full"
-        >
+        <KeyboardAvoidingView {...KEYBOARD_AVOIDING_VIEW_PROPS} className="w-full">
           <View className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-100 dark:border-white/5 shadow-2xl pb-10 px-6 pt-6">
             {/* Handle */}
             <View className="items-center mb-6">

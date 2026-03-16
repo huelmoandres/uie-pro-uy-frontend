@@ -153,8 +153,25 @@ function handleNotificationResponse(response: any) {
     return;
   }
 
-  if (type === "EXPEDIENTE_UPDATE" && iue) {
-    navigateToExpedienteFromNotification(iue);
+  if (type === "EXPEDIENTE_UPDATE") {
+    const grouped = data.grouped as boolean | undefined;
+    const route = data.route as string | undefined;
+    const iuesPayload = data.iues as string[] | string | undefined;
+    const iues = Array.isArray(iuesPayload)
+      ? iuesPayload
+      : typeof iuesPayload === "string"
+        ? iuesPayload.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
+    if (grouped && route === "/expedientes/updates" && iues.length > 0) {
+      router.push({
+        pathname: "/expedientes/updates",
+        params: { iues: iues.join(",") },
+      } as any);
+      return;
+    }
+    if (iue) {
+      navigateToExpedienteFromNotification(iue);
+    }
     return;
   }
 

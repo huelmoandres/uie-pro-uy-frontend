@@ -1,15 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Modal,
   Pressable,
+  ScrollView,
   Text,
   View,
   StyleSheet,
   ActivityIndicator,
   TextInput,
   Platform,
+  KeyboardAvoidingView,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { BlurView } from "expo-blur";
 import { Bell, X, CalendarClock, ChevronLeft } from "lucide-react-native";
 import DateTimePicker, {
@@ -34,6 +35,8 @@ import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import { APP_TIMEZONE } from "@constants/timezone";
 import { useColorScheme } from "@/components/base/useColorScheme";
+import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
+import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
 import type { IAgendaItem } from "@app-types/deadline-agenda.types";
 
 type ViewMode = "simple" | "full";
@@ -63,7 +66,21 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
   const colorScheme = useColorScheme();
   const themeVariant = colorScheme === "dark" ? "dark" : "light";
   const createReminder = useCreateReminder();
-  const scrollRef = useRef<KeyboardAwareScrollView>(null);
+  const scrollRef = useRef<ScrollView>(null);
+
+  const scrollToInput = useCallback((y: number) => {
+    setTimeout(
+      () => scrollRef.current?.scrollTo({ y, animated: true }),
+      100,
+    );
+  }, []);
+
+  const scrollToEnd = useCallback(() => {
+    setTimeout(
+      () => scrollRef.current?.scrollToEnd({ animated: true }),
+      100,
+    );
+  }, []);
 
   const iue = agendaItem?.iue ?? iueProp ?? null;
   const caratula = agendaItem?.caratula ?? caratulaProp ?? null;
@@ -88,6 +105,8 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
       setShowPicker(false);
     }
   }, [visible, isPlazoContext]);
+
+  useModalKeyboardDismiss(visible);
 
   const openAndroidDateTimePicker = () => {
     const minDate = new Date();
@@ -229,15 +248,12 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
       )}
     </View>
   ) : (
-    <KeyboardAwareScrollView
+    <ScrollView
       ref={scrollRef}
-      className="px-6"
-      contentContainerStyle={{ paddingTop: 20, paddingBottom: 24 }}
+      className="flex-1 px-6"
+      contentContainerStyle={{ paddingTop: 20, paddingBottom: 16, flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      enableAutomaticScroll={true}
-      enableOnAndroid={true}
-      extraScrollHeight={40}
     >
       {iue && (
         <>
@@ -294,7 +310,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
               } else {
                 setShowPicker(true);
                 setTimeout(
-                  () => scrollRef.current?.scrollToPosition?.(0, 260, true),
+                  () => scrollRef.current?.scrollTo?.({ y: 260, animated: true }),
                   100,
                 );
               }
@@ -339,6 +355,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
           <TextInput
             value={title}
             onChangeText={setTitle}
+            onFocus={() => scrollToInput(300)}
             placeholder={`Ej: Recordatorio: ${iue}`}
             placeholderTextColor="#94A3B8"
             className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 font-sans text-[14px] text-slate-700 dark:text-slate-200 mb-4"
@@ -350,6 +367,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
           <TextInput
             value={body}
             onChangeText={setBody}
+            onFocus={scrollToEnd}
             placeholder="Ej: Revisar documentación antes de la audiencia"
             placeholderTextColor="#94A3B8"
             multiline
@@ -373,7 +391,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
           </Pressable>
         </>
       )}
-    </KeyboardAwareScrollView>
+    </ScrollView>
   );
 
   return (
@@ -390,11 +408,15 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
           <View style={modalBottomSheetStyles.backdrop} />
         </Pressable>
 
-        <View
-          className={`w-full rounded-t-[32px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden pb-10 ${
-            viewMode === "full" ? "max-h-[90%]" : ""
-          }`}
+        <KeyboardAvoidingView
+          {...KEYBOARD_AVOIDING_VIEW_PROPS}
+          style={{ flex: 1, width: "100%", justifyContent: "flex-end" }}
         >
+          <View
+            className={`w-full rounded-t-[32px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden ${
+              viewMode === "full" ? "flex-1 max-h-[90%] pb-4" : "pb-10"
+            }`}
+          >
           <View className="items-center pt-4 pb-2">
             <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />
           </View>
@@ -424,8 +446,13 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
             </Pressable>
           </View>
 
-          {Content}
-        </View>
+          {viewMode === "full" ? (
+            <View className="flex-1 min-h-0">{Content}</View>
+          ) : (
+            Content
+          )}
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );

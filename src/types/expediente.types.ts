@@ -177,4 +177,6 @@ export interface IExpedientesQuery {
   onlyPinned?: boolean;
   /** IDs de tags para filtrar. Solo muestra expedientes que tengan ALGUNA de estas etiquetas. */
   tagIds?: string[];
+  /** IUEs específicos para filtrar (ej. desde push de novedades). Solo muestra estos expedientes. */
+  iues?: string[];
 }

@@ -2,14 +2,13 @@ import React, { useEffect } from "react";
 import {
   Modal,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
-  ScrollView,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { useForm, Controller } from "react-hook-form";
@@ -22,6 +21,8 @@ import {
   type ContactSupportFormData,
 } from "@schemas/support.schema";
 import { useSupportMutation } from "@hooks/useSupportMutation";
+import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
+import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
 import { useAuth } from "@context/AuthContext";
 
 interface ContactSupportModalProps {
@@ -67,6 +68,8 @@ export const ContactSupportModal: React.FC<ContactSupportModalProps> = ({
     }
   }, [user, reset]);
 
+  useModalKeyboardDismiss(visible);
+
   const handleClose = () => {
     reset({ name: user?.name ?? "", email: user?.email ?? "", message: "" });
     onClose();
@@ -110,10 +113,7 @@ export const ContactSupportModal: React.FC<ContactSupportModalProps> = ({
           <View style={styles.backdropDim} />
         </Pressable>
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="w-full"
-        >
+        <KeyboardAvoidingView {...KEYBOARD_AVOIDING_VIEW_PROPS} className="w-full">
           <View className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-200 dark:border-white/5 shadow-2xl px-6 pt-6 pb-10">
             {/* Handle */}
             <View className="items-center mb-5">
@@ -146,6 +146,7 @@ export const ContactSupportModal: React.FC<ContactSupportModalProps> = ({
             <ScrollView
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 24 }}
             >
               {/* Name */}
               <View className="mb-4">

@@ -18,6 +18,9 @@ export async function getExpedientes(
   if (queryParams.tagIds && Array.isArray(queryParams.tagIds)) {
     queryParams.tagIds = queryParams.tagIds.join(",") as any;
   }
+  if (queryParams.iues && Array.isArray(queryParams.iues)) {
+    queryParams.iues = queryParams.iues.join(",") as any;
+  }
   const { data } = await apiClient.get<IPaginatedExpedientes>("/expedientes", {
     params: queryParams,
   });

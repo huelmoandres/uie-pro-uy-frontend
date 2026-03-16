@@ -7,13 +7,20 @@ import type {
   IRegisterResponse,
   IUser,
   IUpdateUserRequest,
+  ISession,
 } from "@app-types/auth.types";
 import { apiClient } from "./client";
+
+export function isLoginRequiresOtp(
+  res: ILoginResponse,
+): res is ILoginResponse & { requiresOtp: true; tempToken: string } {
+  return "requiresOtp" in res && res.requiresOtp === true;
+}
 
 // ─── Auth Endpoints ──────────────────────────────────────────────────────────
 
 /**
- * Authenticates a user and returns access and refresh tokens.
+ * Authenticates a user. Returns tokens or requiresOtp+tempToken when device limit reached.
  */
 export async function login(
   credentials: ILoginRequest,
@@ -21,6 +28,20 @@ export async function login(
   const { data } = await apiClient.post<ILoginResponse>(
     "/auth/login",
     credentials,
+  );
+  return data;
+}
+
+/**
+ * Completes login with OTP when device limit was reached.
+ */
+export async function verifyLoginOtp(
+  tempToken: string,
+  otp: string,
+): Promise<IAuthTokens> {
+  const { data } = await apiClient.post<IAuthTokens>(
+    "/auth/login/verify-otp",
+    { tempToken, otp },
   );
   return data;
 }
@@ -65,11 +86,10 @@ export async function refreshAccessToken(
 }
 
 /**
- * Cierra sesión en el servidor (blacklist del access token).
- * El backend usa el access token del header Authorization.
+ * Cierra sesión en el servidor. Si deviceId se provee, invalida también la sesión.
  */
-export async function logout(): Promise<void> {
-  await apiClient.post("/auth/logout");
+export async function logout(deviceId?: string): Promise<void> {
+  await apiClient.post("/auth/logout", deviceId ? { deviceId } : {});
 }
 
 /**
@@ -114,6 +134,34 @@ export async function updateProfile(
  */
 export async function deleteAccount(): Promise<void> {
   await apiClient.delete("/users/me");
+}
+
+// ─── Sessions (Dispositivos vinculados) ──────────────────────────────────────
+
+/**
+ * Lista las sesiones (dispositivos) donde el usuario está logueado.
+ */
+export async function getSessions(): Promise<
+  ISession[]
+> {
+  const { data } = await apiClient.get<ISession[]>(
+    "/auth/sessions",
+  );
+  return data;
+}
+
+/**
+ * Cierra la sesión en un dispositivo específico.
+ */
+export async function deleteSession(sessionId: string): Promise<void> {
+  await apiClient.delete(`/auth/sessions/${sessionId}`);
+}
+
+/**
+ * Cierra la sesión en todos los demás dispositivos (mantiene el actual).
+ */
+export async function revokeOtherSessions(deviceId: string): Promise<void> {
+  await apiClient.post("/auth/sessions/revoke-others", { deviceId });
 }
 
 export type { IAuthTokens };

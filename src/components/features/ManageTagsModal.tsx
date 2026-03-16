@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from "react-native";
 import { X, Tag, Plus, Pencil, Trash2, Check } from "lucide-react-native";
 import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
@@ -15,6 +16,8 @@ import { useTags } from "@hooks/useTags";
 import { useTagMutations } from "@hooks/useTagMutations";
 import { TagBadge } from "@components/ui/TagBadge";
 import { ConfirmationModal } from "@components/ui";
+import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
+import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
 import type { ITag } from "@app-types/tag.types";
 
 // Paleta de colores predefinidos para el picker de color
@@ -116,6 +119,8 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
 
   const isSaving = createTag.isPending || updateTag.isPending;
 
+  useModalKeyboardDismiss(visible, resetForm);
+
   return (
     <>
       <Modal
@@ -131,10 +136,14 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
         >
           <Pressable className="flex-1" onPress={onClose} />
 
-          <Animated.View
-            entering={SlideInDown.duration(280).springify()}
-            className="bg-white dark:bg-slate-900 rounded-t-[28px] overflow-hidden"
+          <KeyboardAvoidingView
+            {...KEYBOARD_AVOIDING_VIEW_PROPS}
+            style={{ width: "100%" }}
           >
+            <Animated.View
+              entering={SlideInDown.duration(280).springify()}
+              className="bg-white dark:bg-slate-900 rounded-t-[28px] overflow-hidden"
+            >
             {/* Handle */}
             <View className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-700 self-center mt-3" />
 
@@ -157,8 +166,13 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
 
             <ScrollView
               className="max-h-80"
-              contentContainerClassName="px-5 py-4 gap-2"
+              contentContainerStyle={{
+                paddingHorizontal: 20,
+                paddingVertical: 16,
+                gap: 8,
+              }}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
               {/* Lista de tags existentes */}
               {isLoading ? (
@@ -246,6 +260,7 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
             {/* Bottom safe area */}
             <View className="h-6" />
           </Animated.View>
+          </KeyboardAvoidingView>
         </Animated.View>
       </Modal>
 
@@ -293,7 +308,6 @@ const InlineTagForm = ({
       placeholder="Nombre de la etiqueta..."
       placeholderTextColor="#94A3B8"
       maxLength={40}
-      autoFocus
       className="text-[13px] font-sans text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900"
     />
 

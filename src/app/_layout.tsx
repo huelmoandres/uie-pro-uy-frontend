@@ -175,7 +175,13 @@ function RootLayoutNav() {
           name="expedientes/compare"
           options={{ title: "Comparar expedientes" }}
         />
+        <Stack.Screen
+          name="expedientes/updates"
+          options={{ title: "Expedientes con novedades" }}
+        />
         <Stack.Screen name="notifications" />
+        <Stack.Screen name="linked-devices" />
+        <Stack.Screen name="settings" />
         <Stack.Screen name="dashboard" />
         <Stack.Screen name="paywall" options={{ title: "IUE.uy Pro" }} />
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
