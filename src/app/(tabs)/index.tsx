@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Pressable, Text, TextInput, View, Modal } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { useExpedientes, useDebounce, usePinExpediente } from "@hooks";
 import {
@@ -13,8 +13,6 @@ import {
   Star,
   GitCompare,
 } from "lucide-react-native";
-import { useColorScheme } from "@/components/base/useColorScheme";
-import Colors from "@/constants/Colors";
 import { Skeleton, PageContainer, Paginator, InfoButton } from "@components/ui";
 import { INFO_HINTS } from "@/constants/InfoHints";
 import {
@@ -25,6 +23,7 @@ import {
   TagPickerModal,
   CreateReminderModal,
 } from "@components/features";
+import { EducationalEmptyState } from "@components/shared/EducationalEmptyState";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import type {
@@ -54,11 +53,20 @@ export function ExpedienteSkeleton() {
 type TabFilter = "all" | "pinned";
 
 export default function ExpedientesScreen() {
-  const colorScheme = useColorScheme();
-  const secondaryIconColor = Colors[colorScheme].tabIconDefault;
+  const { openAddExpediente } = useLocalSearchParams<{
+    openAddExpediente?: string;
+  }>();
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState<TabFilter>("all");
   const [showFollowModal, setShowFollowModal] = useState(false);
+
+  // Expediente-First: abrir modal de agregar expediente al venir del onboarding
+  useEffect(() => {
+    if (openAddExpediente === "1") {
+      setShowFollowModal(true);
+    }
+  }, [openAddExpediente]);
+  
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedIues, setSelectedIues] = useState<string[]>([]);
   const [showBulkAgenda, setShowBulkAgenda] = useState(false);
@@ -290,36 +298,35 @@ export default function ExpedientesScreen() {
             </Pressable>
           </View>
         ) : expedientes.length === 0 ? (
-          <View className="flex-1 items-center justify-center pt-20">
-            {activeTab === "pinned" ? (
-              <>
-                <Star size={48} color="#B89146" fill="transparent" />
-                <Text className="mt-4 font-sans-semi text-slate-500">
-                  No tenés favoritos
-                </Text>
-                <Text className="mt-2 text-[12px] font-sans text-slate-400 text-center px-8">
-                  Presioná la estrella ★ en un expediente para marcarlo como
-                  favorito
-                </Text>
-              </>
-            ) : (
-              <>
-                <FolderOpen size={48} color="#94A3B8" />
-                <Text className="mt-4 font-sans-semi text-slate-500">
-                  No hay expedientes
-                </Text>
-                <Text className="mt-2 text-[12px] font-sans text-slate-400">
-                  Presioná el botón + para agregar uno
-                </Text>
-              </>
-            )}
-          </View>
+          activeTab === "pinned" ? (
+            <View className="flex-1 items-center justify-center pt-20">
+              <Star size={48} color="#B89146" fill="transparent" />
+              <Text className="mt-4 font-sans-semi text-slate-500">
+                No tenés favoritos
+              </Text>
+              <Text className="mt-2 text-[12px] font-sans text-slate-400 text-center px-8">
+                Presioná la estrella ★ en un expediente para marcarlo como
+                favorito
+              </Text>
+            </View>
+          ) : (
+            <EducationalEmptyState
+              title="Todavía no seguís ningún expediente"
+              description="Ingresá un IUE y nosotros nos encargamos de avisarte cuando haya novedades."
+              icon={FolderOpen}
+              iconColor="#94A3B8"
+              primaryCta={{
+                label: "Buscar expediente por IUE",
+                onPress: () => setShowFollowModal(true),
+              }}
+            />
+          )
         ) : (
           <FlashList
             data={expedientes}
             keyExtractor={(item: IExpediente) => item.iue}
             extraData={selectedIues}
-            renderItem={({ item }: { item: IExpediente }) => (
+            renderItem={({ item, index }: { item: IExpediente; index: number }) => (
               <ExpedienteCard
                 item={item}
                 isSelected={selectedIues.includes(item.iue)}
@@ -332,6 +339,7 @@ export default function ExpedientesScreen() {
                 onAddReminder={
                   selectedIues.length === 0 ? setReminderModalItem : undefined
                 }
+                showPinTooltip={index === 0}
               />
             )}
             contentContainerStyle={{ paddingTop: 24, paddingBottom: 0 }}

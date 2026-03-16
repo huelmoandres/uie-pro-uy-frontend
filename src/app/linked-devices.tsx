@@ -112,6 +112,12 @@ export default function LinkedDevicesScreen() {
   const otherSessions =
     sessions?.filter((s) => s.deviceId !== currentDeviceId) ?? [];
   const hasOthers = otherSessions.length > 0;
+  const isCurrentInList =
+    !!currentDeviceId &&
+    !!sessions?.some((s) => s.deviceId === currentDeviceId);
+  // Si el dispositivo actual no está en la lista, fue revocado (sesión borrada).
+  // No permitir revocar otros: el usuario verá solo el dispositivo que lo revocó.
+  const canRevokeOthers = hasOthers && isCurrentInList;
 
   const handleConfirmDelete = () => {
     if (sessionToDelete) {
@@ -139,6 +145,7 @@ export default function LinkedDevicesScreen() {
   const renderSessionItem = ({ item, index }: { item: ISession; index: number }) => {
     const isCurrent = item.deviceId === currentDeviceId;
     const isLast = index === (sessions?.length ?? 0) - 1;
+    const canDeleteThis = !isCurrent && canRevokeOthers;
 
     return (
       <View
@@ -164,7 +171,7 @@ export default function LinkedDevicesScreen() {
             </Text>
           </View>
         </View>
-        {!isCurrent && (
+        {canDeleteThis && (
           <Pressable
             onPress={() => {
               void Haptics.impactAsync(
@@ -182,8 +189,21 @@ export default function LinkedDevicesScreen() {
     );
   };
 
+  const wasRevoked =
+    hasOthers && !!currentDeviceId && !isCurrentInList;
+
   const listHeader = (
     <>
+      {wasRevoked && (
+        <View className="mb-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
+          <Text className="text-sm font-sans-semi text-amber-800 dark:text-amber-200">
+            Tu sesión fue cerrada desde otro dispositivo
+          </Text>
+          <Text className="text-xs font-sans text-amber-700 dark:text-amber-300 mt-1">
+            Vas a ser redirigido al login en breve. No podés cerrar sesión en otros dispositivos.
+          </Text>
+        </View>
+      )}
       <View className="mb-6">
         <Text className="text-sm font-sans text-slate-600 dark:text-slate-400 leading-relaxed">
           Acá podés ver en qué dispositivos está iniciada tu sesión y cerrar
@@ -195,7 +215,7 @@ export default function LinkedDevicesScreen() {
     </>
   );
 
-  const listFooter = hasOthers ? (
+  const listFooter = canRevokeOthers ? (
     <Pressable
       onPress={() => setRevokeOthersModalVisible(true)}
       className="flex-row items-center justify-center bg-danger/10 border border-danger/20 rounded-2xl py-4 active:bg-danger/20 mt-4"

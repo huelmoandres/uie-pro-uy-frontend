@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react";
+import { router } from "expo-router";
 import {
   LayoutAnimation,
   Platform,
@@ -31,6 +32,7 @@ import {
   CreateReminderModal,
   ReminderCard,
 } from "@components/features";
+import { EducationalEmptyState } from "@components/shared/EducationalEmptyState";
 import {
   PageContainer,
   InfoButton,
@@ -455,20 +457,27 @@ export default function DeadlineAgendaScreen() {
                 />
               ))}
             </View>
+          ) : activeFilter === "all" ? (
+            <EducationalEmptyState
+              title="Tu agenda procesal"
+              description="A medida que la IA detecte plazos en tus decretos, o cuando crees recordatorios, aparecerán ordenados acá."
+              icon={CalendarClock}
+              iconColor="#94A3B8"
+              primaryCta={{
+                label: "Buscar expediente por IUE",
+                onPress: () =>
+                  router.replace({
+                    pathname: "/(tabs)",
+                    params: { openAddExpediente: "1" },
+                  }),
+              }}
+            />
           ) : (
             <View className="items-center py-16 px-8">
               <CheckCircle size={40} color="#10B981" />
               <Text className="mt-3 text-sm font-sans-semi text-slate-500">
-                {activeFilter === "all"
-                  ? "No hay plazos registrados"
-                  : "No hay plazos en esta categoría"}
+                No hay plazos en esta categoría
               </Text>
-              {activeFilter === "all" && (
-                <Text className="mt-1 text-[11px] font-sans text-slate-400 text-center">
-                  Los plazos se detectan automáticamente al sincronizar expedientes
-                  con decretos.
-                </Text>
-              )}
             </View>
           ))}
       </ScrollView>

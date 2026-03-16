@@ -15,6 +15,9 @@ import {
 import type { IExpediente } from "@app-types/expediente.types";
 import { formatRelativeDate, stripHtml } from "@utils/formatters";
 import { TagBadge } from "@components/ui/TagBadge";
+import { ContextualTooltip } from "@components/shared/ContextualTooltip";
+import { TOOLTIP_KEYS } from "@/constants/onboarding";
+import { useTooltipSeen } from "@hooks/useTooltipSeen";
 
 interface Props {
   item: IExpediente;
@@ -26,6 +29,8 @@ interface Props {
   onTagsPress?: (iue: string) => void;
   /** Si se provee, muestra un botón para agregar recordatorio al expediente. */
   onAddReminder?: (item: IExpediente) => void;
+  /** Mostrar tooltip contextual en el icono de estrella (favorito) */
+  showPinTooltip?: boolean;
 }
 
 /**
@@ -41,7 +46,10 @@ export const ExpedienteCard = React.memo(
     onPin,
     onTagsPress,
     onAddReminder,
+    showPinTooltip = false,
   }: Props) => {
+    const { shouldShow: shouldShowPinTooltip, markSeen: markPinTooltipSeen } =
+      useTooltipSeen(TOOLTIP_KEYS.EXPEDIENTE_PIN_STAR);
     const handlePress = useCallback(() => {
       if (isSelectionMode) {
         onSelect?.(item.iue);
@@ -58,9 +66,10 @@ export const ExpedienteCard = React.memo(
     }, [isSelectionMode, item.iue, onSelect]);
 
     const handlePin = useCallback(() => {
+      markPinTooltipSeen();
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       onPin?.(item.iue, !item.isPinned);
-    }, [item.iue, item.isPinned, onPin]);
+    }, [item.iue, item.isPinned, onPin, markPinTooltipSeen]);
 
     const handleTagsPress = useCallback(() => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -133,9 +142,22 @@ export const ExpedienteCard = React.memo(
                 </Pressable>
               )}
               {onPin && (
-                <Pressable onPress={handlePin} hitSlop={10} className="p-1">
-                  <Star size={15} color={starColor} fill={starFill} />
-                </Pressable>
+                showPinTooltip && shouldShowPinTooltip ? (
+                  <ContextualTooltip
+                    message="Fijá este expediente para tenerlo siempre a mano"
+                    visible={showPinTooltip && shouldShowPinTooltip}
+                    onDismiss={markPinTooltipSeen}
+                    placement="bottom"
+                  >
+                    <Pressable onPress={handlePin} hitSlop={10} className="p-1">
+                      <Star size={15} color={starColor} fill={starFill} />
+                    </Pressable>
+                  </ContextualTooltip>
+                ) : (
+                  <Pressable onPress={handlePin} hitSlop={10} className="p-1">
+                    <Star size={15} color={starColor} fill={starFill} />
+                  </Pressable>
+                )
               )}
             </View>
           )}

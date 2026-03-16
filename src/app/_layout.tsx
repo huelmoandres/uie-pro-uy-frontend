@@ -22,6 +22,7 @@ import {
   useNotifications,
   requestAndRegisterNotifications,
 } from "@hooks/useNotifications";
+import { OnboardingProvider, useOnboarding } from "@context/OnboardingContext";
 import { useAppUpdates } from "@hooks/useAppUpdates";
 import { useRestoreColorScheme } from "@hooks/useAppColorScheme";
 import Toast from "react-native-toast-message";
@@ -79,13 +80,15 @@ export default function RootLayout() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <SubscriptionWrapper>
-          <RootLayoutNav />
-          <LoadingOverlay
-            visible={isDownloading}
-            message="Descargando actualización..."
-          />
-        </SubscriptionWrapper>
+        <OnboardingProvider>
+          <SubscriptionWrapper>
+            <RootLayoutNav />
+            <LoadingOverlay
+              visible={isDownloading}
+              message="Descargando actualización..."
+            />
+          </SubscriptionWrapper>
+        </OnboardingProvider>
       </AuthProvider>
     </QueryProvider>
   );
@@ -116,6 +119,7 @@ function RootLayoutNav() {
     isInTrial,
     isLoading: isSubscriptionLoading,
   } = useSubscription();
+  const { hasSeenOnboarding } = useOnboarding();
 
   useNotifications(isAuthenticated);
 
@@ -125,6 +129,7 @@ function RootLayoutNav() {
 
   const inAuthGroup = segments[0] === "(auth)";
   const inPaywall = (segments as string[]).includes("paywall");
+  const inOnboarding = (segments as string[]).includes("onboarding");
 
   // Usuario autenticado sin suscripción → bloquear en Paywall (onboarding de pago)
   const mustSeePaywall =
@@ -184,6 +189,10 @@ function RootLayoutNav() {
         <Stack.Screen name="settings" />
         <Stack.Screen name="dashboard" />
         <Stack.Screen name="paywall" options={{ title: "IUE.uy Pro" }} />
+        <Stack.Screen
+          name="onboarding"
+          options={{ headerShown: false, animation: "fade" }}
+        />
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
         <Stack.Screen name="+not-found" />
       </Stack>
@@ -195,6 +204,12 @@ function RootLayoutNav() {
       */}
       {!isAuthenticated && !inAuthGroup && <Redirect href="/(auth)/login" />}
       {mustSeePaywall && <Redirect href="/paywall" />}
+      {isAuthenticated &&
+        !mustSeePaywall &&
+        !inOnboarding &&
+        hasSeenOnboarding === false && (
+          <Redirect href={"/onboarding" as any} />
+        )}
 
       <Toast config={toastConfig} topOffset={Platform.OS === "ios" ? 60 : 40} />
 

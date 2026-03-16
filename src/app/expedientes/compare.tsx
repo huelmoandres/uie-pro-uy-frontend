@@ -11,6 +11,7 @@ import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { GitCompare } from "lucide-react-native";
 import { useExpedienteCompare, useDeadlineAgenda } from "@hooks";
 import { CompareExpedientePanel } from "@components/features";
+import { EducationalEmptyState } from "@components/shared/EducationalEmptyState";
 import { PageContainer } from "@components/ui";
 import type { IAgendaItem } from "@app-types/deadline-agenda.types";
 
@@ -79,28 +80,18 @@ export default function CompareExpedientesScreen() {
 
   if (!isValidSelection) {
     return (
-      <>
-        <PageContainer scrollable withHeader>
-          <View className="flex-1 items-center justify-center py-20">
-            <GitCompare size={48} color="#94A3B8" />
-            <Text className="mt-4 text-center font-sans-bold text-slate-900 dark:text-white">
-              Seleccioná 2 o 3 expedientes
-            </Text>
-            <Text className="mt-2 px-8 text-center text-[13px] font-sans text-slate-500 dark:text-slate-400">
-              Volvé a la lista de expedientes, mantené presionado para
-              seleccionar entre 2 y 3, y tocá "Comparar".
-            </Text>
-            <Pressable
-              onPress={handleBack}
-              className="mt-8 rounded-xl bg-accent px-6 py-3 shadow-md shadow-accent/20 active:scale-[0.97]"
-            >
-              <Text className="font-sans-bold text-sm text-white">
-                Volver a expedientes
-              </Text>
-            </Pressable>
-          </View>
-        </PageContainer>
-      </>
+      <PageContainer scrollable withHeader>
+        <EducationalEmptyState
+          title="Comparar expedientes lado a lado"
+          description="Acá vas a poder ver expedientes lado a lado para analizar diferencias. Seleccionalos desde tu lista principal para empezar."
+          icon={GitCompare}
+          iconColor="#94A3B8"
+          primaryCta={{
+            label: "Volver a expedientes",
+            onPress: handleBack,
+          }}
+        />
+      </PageContainer>
     );
   }
 

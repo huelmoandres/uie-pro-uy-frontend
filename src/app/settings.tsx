@@ -8,7 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
 } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { useAppColorScheme } from "@hooks/useAppColorScheme";
 import {
   Monitor,
@@ -23,8 +23,10 @@ import {
   Tag,
   ChevronRight,
   Trash2,
+  RotateCcw,
 } from "lucide-react-native";
 import { useAuth } from "@context/AuthContext";
+import { useOnboarding } from "@context/OnboardingContext";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -41,6 +43,7 @@ import { INFO_HINTS } from "@constants/InfoHints";
 
 export default function SettingsScreen() {
   const { user, updateUserState, signOut } = useAuth();
+  const { resetOnboarding } = useOnboarding();
   const { colorScheme, setColorScheme } = useAppColorScheme();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -390,6 +393,29 @@ export default function SettingsScreen() {
             })}
           </View>
         </View>
+
+        {/* Dev: Ver onboarding de nuevo */}
+        {__DEV__ && (
+          <View className="mt-6 px-4">
+            <Pressable
+              onPress={async () => {
+                await resetOnboarding();
+                Toast.show({
+                  type: "info",
+                  text1: "Onboarding reseteado",
+                  text2: "Volvé al inicio para verlo de nuevo.",
+                });
+                router.replace("/onboarding");
+              }}
+              className="flex-row items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 py-3 dark:border-white/10 dark:bg-white/5 active:opacity-70"
+            >
+              <RotateCcw size={16} color="#64748B" />
+              <Text className="font-sans-semi text-slate-600 text-sm ml-2 dark:text-slate-400">
+                Ver onboarding de nuevo
+              </Text>
+            </Pressable>
+          </View>
+        )}
 
         {/* Eliminar cuenta — Apple Guideline 5.1.1(v) */}
         <View className="mt-8 mb-12 px-4">

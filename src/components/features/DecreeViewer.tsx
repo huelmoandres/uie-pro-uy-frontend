@@ -23,7 +23,10 @@ import {
 import type { IDecree, IDecreeSummary } from "@app-types/expediente.types";
 import { stripHtml } from "@utils/formatters";
 import { InfoButton } from "@components/ui";
+import { ContextualTooltip } from "@components/shared/ContextualTooltip";
 import { INFO_HINTS } from "@/constants/InfoHints";
+import { TOOLTIP_KEYS } from "@/constants/onboarding";
+import { useTooltipSeen } from "@hooks/useTooltipSeen";
 import { DeadlineBadge } from "./DeadlineBadge";
 import { useDecreeSummary } from "@hooks/useDecreeSummary";
 import { useExportDecreePdf } from "@hooks";
@@ -41,9 +44,13 @@ interface Props {
  * Tapping it opens the full text in a premium bottom-sheet Modal.
  * A "Resumir con IA" button generates an executive summary via OpenAI.
  */
+const LONG_DECREE_THRESHOLD = 600;
+
 export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
   const [visible, setVisible] = useState(false);
   const [summary, setSummary] = useState<IDecreeSummary | null>(null);
+  const { shouldShow: shouldShowAiTooltip, markSeen: markAiTooltipSeen } =
+    useTooltipSeen(TOOLTIP_KEYS.DECREE_AI_SUMMARY);
 
   const {
     mutate: summarize,
@@ -64,6 +71,7 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
   const canSummarize = !decree.isReserved && !!decree.textoDecreto?.trim();
 
   function handleSummarize() {
+    markAiTooltipSeen();
     summarize(decree.id, {
       onSuccess: (data) => setSummary(data),
     });
@@ -177,15 +185,26 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
                 <View className="mb-5">
                   {!summary && !isSummarizing && !summaryError && (
                     <View className="flex-row items-center gap-2">
-                      <Pressable
-                        onPress={handleSummarize}
-                        className="flex-row items-center gap-2 self-start rounded-xl border border-violet-400/30 bg-violet-50 dark:bg-violet-500/10 px-4 py-2.5 active:opacity-70"
+                      <ContextualTooltip
+                        message="Tocá acá para que la IA te haga un resumen de este texto"
+                        visible={
+                          visible &&
+                          decreeText.length > LONG_DECREE_THRESHOLD &&
+                          shouldShowAiTooltip
+                        }
+                        onDismiss={markAiTooltipSeen}
+                        placement="bottom"
                       >
-                        <Sparkles size={14} color="#7C3AED" />
-                        <Text className="text-[12px] font-sans-bold text-violet-700 dark:text-violet-400">
-                          Resumir con IA
-                        </Text>
-                      </Pressable>
+                        <Pressable
+                          onPress={handleSummarize}
+                          className="flex-row items-center gap-2 self-start rounded-xl border border-violet-400/30 bg-violet-50 dark:bg-violet-500/10 px-4 py-2.5 active:opacity-70"
+                        >
+                          <Sparkles size={14} color="#7C3AED" />
+                          <Text className="text-[12px] font-sans-bold text-violet-700 dark:text-violet-400">
+                            Resumir con IA
+                          </Text>
+                        </Pressable>
+                      </ContextualTooltip>
                       <InfoButton
                         title={INFO_HINTS.resumenIA.title}
                         description={INFO_HINTS.resumenIA.description}
