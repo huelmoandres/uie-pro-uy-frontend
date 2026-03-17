@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pressable, Text, View } from "react-native";
+import { type ScrollView, Pressable, Text, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
@@ -29,6 +29,7 @@ import {
 import { extractApiErrorMessage } from "@utils/apiError";
 
 export default function VerifyEmailScreen() {
+  const scrollRef = useRef<ScrollView>(null);
   const params = useLocalSearchParams<{ email?: string }>();
   const emailParam = typeof params.email === "string" ? params.email : "";
 
@@ -104,7 +105,7 @@ export default function VerifyEmailScreen() {
   };
 
   return (
-    <PageContainer keyboardAware={true} className="px-0">
+    <PageContainer ref={scrollRef} keyboardAware={true} className="px-0">
       <Stack.Screen options={{ headerShown: false }} />
 
       <AuthScreenHeader
@@ -122,6 +123,7 @@ export default function VerifyEmailScreen() {
             placeholder={EMAIL_PLACEHOLDER}
             autoCapitalize="none"
             keyboardType="email-address"
+            textContentType="emailAddress"
             disabled={isLoading}
             error={errors.email?.message}
           />
@@ -137,7 +139,9 @@ export default function VerifyEmailScreen() {
                 <OtpInput
                   value={value}
                   onChange={onChange}
-                  disabled={isLoading}
+                  disabled={isLoading || isResending}
+                  onComplete={handleSubmit(onSubmit)}
+                  scrollViewRef={scrollRef}
                 />
               )}
             />

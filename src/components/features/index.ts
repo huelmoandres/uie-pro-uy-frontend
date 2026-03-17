@@ -1,4 +1,6 @@
 export * from "./ExpedienteCard";
+export * from "./ExpedienteSkeleton";
+export * from "./expedientes";
 export * from "./CompareExpedientePanel";
 export * from "./VenueCard";
 export * from "./SedesFilterModal";
@@ -18,3 +20,4 @@ export * from "./ManageTagsModal";
 export * from "./CreateReminderModal";
 export * from "./ReminderCard";
 export * from "./FaqAccordion";
+export * from "./TributoCard";

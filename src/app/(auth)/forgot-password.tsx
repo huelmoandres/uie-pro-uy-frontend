@@ -94,6 +94,7 @@ export default function ForgotPasswordScreen() {
                 placeholder={EMAIL_PLACEHOLDER}
                 autoCapitalize="none"
                 keyboardType="email-address"
+                textContentType="emailAddress"
                 disabled={isLoading}
                 error={errors.email?.message}
               />

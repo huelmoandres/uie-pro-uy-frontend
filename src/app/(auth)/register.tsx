@@ -87,6 +87,7 @@ export default function RegisterScreen() {
             placeholder="correo@ejemplo.com"
             autoCapitalize="none"
             keyboardType="email-address"
+            textContentType="emailAddress"
             disabled={isLoading}
             error={errors.email?.message}
           />
@@ -97,6 +98,8 @@ export default function RegisterScreen() {
             label="Contraseña"
             placeholder="••••••••"
             secureTextEntry
+            textContentType="newPassword"
+            autoComplete="new-password"
             disabled={isLoading}
             error={errors.password?.message}
           />
@@ -106,6 +109,8 @@ export default function RegisterScreen() {
             label="Confirmar Contraseña"
             placeholder="••••••••"
             secureTextEntry
+            textContentType="newPassword"
+            autoComplete="new-password"
             disabled={isLoading}
             error={errors.confirmPassword?.message}
           />

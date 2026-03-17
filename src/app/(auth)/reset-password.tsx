@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pressable, Text, View } from "react-native";
+import { type ScrollView, Pressable, Text, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
@@ -23,6 +23,7 @@ import { EMAIL_PLACEHOLDER, OTP_INVALID_FALLBACK } from "@constants/auth";
 import { extractApiErrorMessage } from "@utils/apiError";
 
 export default function ResetPasswordScreen() {
+  const scrollRef = useRef<ScrollView>(null);
   const params = useLocalSearchParams<{ email?: string }>();
   const emailParam = typeof params.email === "string" ? params.email : "";
 
@@ -66,7 +67,7 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <PageContainer keyboardAware={true} className="px-0">
+    <PageContainer ref={scrollRef} keyboardAware={true} className="px-0">
       <Stack.Screen options={{ headerShown: false }} />
 
       <AuthScreenHeader
@@ -84,6 +85,7 @@ export default function ResetPasswordScreen() {
             placeholder={EMAIL_PLACEHOLDER}
             autoCapitalize="none"
             keyboardType="email-address"
+            textContentType="emailAddress"
             disabled={isLoading}
             error={errors.email?.message}
           />
@@ -100,6 +102,7 @@ export default function ResetPasswordScreen() {
                   value={value}
                   onChange={onChange}
                   disabled={isLoading}
+                  scrollViewRef={scrollRef}
                 />
               )}
             />
@@ -116,6 +119,8 @@ export default function ResetPasswordScreen() {
             label="Nueva contraseña"
             placeholder="Mínimo 8 caracteres"
             secureTextEntry
+            textContentType="newPassword"
+            autoComplete="new-password"
             disabled={isLoading}
             error={errors.newPassword?.message}
           />
@@ -125,6 +130,8 @@ export default function ResetPasswordScreen() {
             label="Confirmar contraseña"
             placeholder="Repetí la contraseña"
             secureTextEntry
+            textContentType="newPassword"
+            autoComplete="new-password"
             disabled={isLoading}
             error={errors.confirmPassword?.message}
           />

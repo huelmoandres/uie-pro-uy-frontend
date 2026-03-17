@@ -96,6 +96,15 @@ export function getYearInAppTimezone(isoDate: string | Date): number {
   return parseInt(str, 10);
 }
 
+/**
+ * Obtiene el año actual en hora Uruguay (America/Montevideo).
+ * Usar en lugar de new Date().getFullYear() para consistencia con el timezone de la app.
+ */
+export function getCurrentYearInAppTimezone(): number {
+  const str = formatInTimeZone(new Date(), APP_TIMEZONE, "yyyy");
+  return parseInt(str, 10);
+}
+
 // ─── Movement types ───────────────────────────────────────────────────────────
 
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {

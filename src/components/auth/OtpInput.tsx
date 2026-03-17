@@ -7,30 +7,48 @@ interface OtpInputProps {
   onChange: (value: string) => void;
   length?: number;
   disabled?: boolean;
+  /** Llamado cuando el OTP está completo (6 dígitos). Usar para auto-submit. */
+  onComplete?: () => void;
+  /** Ref del ScrollView padre para hacer scroll al enfocar y mostrar el input. */
+  scrollViewRef?: React.RefObject<{ scrollToEnd: () => void } | null>;
 }
 
 /**
  * Input de OTP con cuadrados individuales para cada dígito.
- * Usa un TextInput oculto para capturar el teclado y soportar pegado.
+ * Usa un TextInput oculto para capturar el teclado.
+ * - Al completar el 6.º dígito, llama onComplete para auto-submit.
+ * - Al enfocar, hace scroll para que el input sea visible.
+ * - Pegar en iOS: el teclado numérico no muestra pegar. Requiere nuevo build con expo-clipboard.
  */
 export function OtpInput({
   value,
   onChange,
   length = OTP_LENGTH,
   disabled = false,
+  onComplete,
+  scrollViewRef,
 }: OtpInputProps) {
   const inputRef = useRef<TextInput>(null);
 
   const digits = value.split("").concat(Array(length - value.length).fill(""));
 
   const handleChange = (text: string) => {
-    onChange(text.replace(/\D/g, "").slice(0, length));
+    const digitsOnly = text.replace(/\D/g, "").slice(0, length);
+    onChange(digitsOnly);
+    if (digitsOnly.length === length && onComplete) {
+      // Defer para que el form state se actualice antes del submit
+      setTimeout(onComplete, 0);
+    }
+  };
+
+  const handleFocus = () => {
+    scrollViewRef?.current?.scrollToEnd();
   };
 
   return (
     <Pressable
       onPress={() => inputRef.current?.focus()}
-      className="flex-row gap-2"
+      className="flex-row gap-2 relative"
     >
       {digits.map((digit, index) => {
         const isFilled = Boolean(digit);
@@ -58,11 +76,19 @@ export function OtpInput({
         ref={inputRef}
         value={value}
         onChangeText={handleChange}
+        onFocus={handleFocus}
         keyboardType="number-pad"
-        maxLength={length}
         editable={!disabled}
-        className="absolute opacity-0 h-0 w-0"
         autoComplete="one-time-code"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0,
+          fontSize: 1,
+        }}
       />
     </Pressable>
   );

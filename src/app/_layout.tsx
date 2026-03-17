@@ -1,14 +1,17 @@
 import "../../global.css"; // Primary entry for NativeWind
+import { initErrorTracking } from "@utils/errorTracking";
+
+initErrorTracking();
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Redirect, Stack, useSegments } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
-import { Platform } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { Platform, StyleSheet, Pressable } from "react-native";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/components/base/useColorScheme";
@@ -22,15 +25,16 @@ import {
   useNotifications,
   requestAndRegisterNotifications,
 } from "@hooks/useNotifications";
-import { OnboardingProvider, useOnboarding } from "@context/OnboardingContext";
+import { OnboardingProvider } from "@context/OnboardingContext";
 import { useAppUpdates } from "@hooks/useAppUpdates";
+import { useNavigationRedirects } from "@hooks/useNavigationRedirects";
+import { getStackScreenOptions } from "@/navigation/stackScreenOptions";
 import { useRestoreColorScheme } from "@hooks/useAppColorScheme";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "@components/ui/ToastConfig";
 import { LoadingOverlay } from "@components/shared/LoadingOverlay";
 import { AppLoadingScreen } from "@components/shared/AppLoadingScreen";
 import { NetworkBanner } from "@components/shared/NetworkBanner";
-import { HeaderBackButton } from "@components/shared/HeaderBackButton";
 import { NotificationPermissionModal } from "@components/shared/NotificationPermissionModal";
 
 import {
@@ -80,15 +84,15 @@ export default function RootLayout() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <OnboardingProvider>
-          <SubscriptionWrapper>
+        <SubscriptionWrapper>
+          <OnboardingProvider>
             <RootLayoutNav />
             <LoadingOverlay
               visible={isDownloading}
               message="Descargando actualización..."
             />
-          </SubscriptionWrapper>
-        </OnboardingProvider>
+          </OnboardingProvider>
+        </SubscriptionWrapper>
       </AuthProvider>
     </QueryProvider>
   );
@@ -97,11 +101,12 @@ export default function RootLayout() {
 // ─── Subscription wrapper (needs AuthContext) ───────────────────────────────────
 
 function SubscriptionWrapper({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   return (
     <SubscriptionProvider
       userId={user?.id ?? null}
       userEmail={user?.email ?? null}
+      isAuthLoading={isAuthLoading}
     >
       {children}
     </SubscriptionProvider>
@@ -112,61 +117,48 @@ function SubscriptionWrapper({ children }: { children: React.ReactNode }) {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const segments = useSegments();
-  const { isAuthenticated, isLoading } = useAuth();
-  const {
-    isPro,
-    isInTrial,
-    isLoading: isSubscriptionLoading,
-  } = useSubscription();
-  const { hasSeenOnboarding } = useOnboarding();
+  const { isAuthenticated, signOut } = useAuth();
+  const [emergencyTapCount, setEmergencyTapCount] = useState(0);
 
   useNotifications(isAuthenticated);
 
-  if (isLoading) {
-    return <AppLoadingScreen />;
-  }
-
-  const inAuthGroup = segments[0] === "(auth)";
-  const inPaywall = (segments as string[]).includes("paywall");
-  const inOnboarding = (segments as string[]).includes("onboarding");
-
-  // Usuario autenticado sin suscripción → bloquear en Paywall (onboarding de pago)
-  const mustSeePaywall =
-    isAuthenticated &&
-    !isSubscriptionLoading &&
-    !isPro &&
-    !isInTrial &&
-    !inPaywall;
-
-  if (isAuthenticated && isSubscriptionLoading) {
-    return <AppLoadingScreen message="Verificando suscripción..." />;
-  }
+  const redirects = useNavigationRedirects();
+  const {
+    showLoadingOverlay,
+    loadingMessage,
+    redirectTarget,
+    shouldRedirect,
+  } = redirects;
 
   const isDark = colorScheme === "dark";
 
+  const { isPro, isInTrial } = useSubscription();
+
+  // Bloquear volver atrás desde paywall cuando el usuario no tiene acceso.
+  // Evita loop: usuario vuelve → redirect a paywall → vuelve → redirect...
+  const blockPaywallBack =
+    isAuthenticated && !isPro && !isInTrial;
+
+  useEffect(() => {
+    if (!showLoadingOverlay) setEmergencyTapCount(0);
+  }, [showLoadingOverlay]);
+
+  // Escape de emergencia: 5 toques en el overlay para cerrar sesión si está atascado
+  const handleOverlayPress = useCallback(() => {
+    if (!isAuthenticated) return;
+    setEmergencyTapCount((c) => {
+      const next = c + 1;
+      if (next >= 5) {
+        void signOut();
+        return 0;
+      }
+      return next;
+    });
+  }, [isAuthenticated, signOut]);
+
   return (
     <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
-      <Stack
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: isDark ? "#0B1120" : "#FFFFFF",
-            borderBottomWidth: 1,
-            borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9",
-          } as any,
-          headerTitleStyle: {
-            fontFamily: "Inter_600SemiBold",
-            fontSize: 16,
-            color: isDark ? "#F8FAFC" : "#0F172A",
-          },
-          headerTitleAlign: "center",
-          headerShadowVisible: false,
-          headerBackTitle: "",
-          headerBackVisible: false,
-          headerLeft: ({ canGoBack }) =>
-            canGoBack ? <HeaderBackButton /> : null,
-        }}
-      >
+      <Stack screenOptions={getStackScreenOptions(isDark)}>
         {/* Protected area */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         {/* Auth flow */}
@@ -188,7 +180,14 @@ function RootLayoutNav() {
         <Stack.Screen name="linked-devices" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="dashboard" />
-        <Stack.Screen name="paywall" options={{ title: "IUE.uy Pro" }} />
+        <Stack.Screen
+          name="paywall"
+          options={{
+            title: "IUE.uy Pro",
+            headerLeft: blockPaywallBack ? () => null : undefined,
+            gestureEnabled: !blockPaywallBack,
+          }}
+        />
         <Stack.Screen
           name="onboarding"
           options={{ headerShown: false, animation: "fade" }}
@@ -197,19 +196,20 @@ function RootLayoutNav() {
         <Stack.Screen name="+not-found" />
       </Stack>
 
-      {/* 
-        Refined Redirection Logic:
-        Only redirect if NOT authenticated AND NOT already in the auth flow.
-        Prevents full-tree re-renders/flickers during login errors.
-      */}
-      {!isAuthenticated && !inAuthGroup && <Redirect href="/(auth)/login" />}
-      {mustSeePaywall && <Redirect href="/paywall" />}
-      {isAuthenticated &&
-        !mustSeePaywall &&
-        !inOnboarding &&
-        hasSeenOnboarding === false && (
-          <Redirect href={"/onboarding" as any} />
-        )}
+      {showLoadingOverlay && (
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={handleOverlayPress}
+          accessible={false}
+        >
+          <AppLoadingScreen message={loadingMessage} />
+        </Pressable>
+      )}
+
+      {/* Un solo Redirect para evitar loops por competencia entre múltiples Redirects */}
+      {shouldRedirect && redirectTarget && (
+        <Redirect href={redirectTarget as any} />
+      )}
 
       <Toast config={toastConfig} topOffset={Platform.OS === "ios" ? 60 : 40} />
 

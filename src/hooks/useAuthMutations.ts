@@ -28,18 +28,15 @@ export const useLoginMutation = () => {
           tokens.refreshToken,
         );
       }
+      // Actualizar estado ANTES de que mutateAsync resuelva, para evitar que
+      // router.replace navegue con isAuthenticated=false y el layout redirija al login.
+      const user = await AuthService.getCurrentUser();
+      updateUserState(user, tokens.accessToken);
+      queryClient.setQueryData(["currentUser"], user);
       return result;
     },
     onSuccess: async (data) => {
       if (isLoginRequiresOtp(data)) return;
-
-      const user = await AuthService.getCurrentUser();
-      updateUserState(
-        user,
-        await SecureStore.getItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN),
-      );
-      queryClient.setQueryData(["currentUser"], user);
-
       try {
         await requestAndRegisterNotifications();
       } catch (e) {
@@ -66,16 +63,13 @@ export const useVerifyLoginOtpMutation = () => {
           result.refreshToken,
         );
       }
+      // Actualizar estado ANTES de que mutateAsync resuelva (mismo fix que login).
+      const user = await AuthService.getCurrentUser();
+      updateUserState(user, result.accessToken);
+      queryClient.setQueryData(["currentUser"], user);
       return result;
     },
     onSuccess: async () => {
-      const user = await AuthService.getCurrentUser();
-      updateUserState(
-        user,
-        await SecureStore.getItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN),
-      );
-      queryClient.setQueryData(["currentUser"], user);
-
       try {
         await requestAndRegisterNotifications();
       } catch (e) {

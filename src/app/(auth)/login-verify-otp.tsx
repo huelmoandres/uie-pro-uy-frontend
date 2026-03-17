@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
+import type { ScrollView } from "react-native";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Text, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -23,6 +24,7 @@ const loginVerifyOtpSchema = z.object({ otp: otpSchema });
 type LoginVerifyOtpFormData = z.infer<typeof loginVerifyOtpSchema>;
 
 export default function LoginVerifyOtpScreen() {
+  const scrollRef = useRef<ScrollView>(null);
   const params = useLocalSearchParams<{ tempToken?: string }>();
   const tempToken = typeof params.tempToken === "string" ? params.tempToken : "";
 
@@ -52,7 +54,7 @@ export default function LoginVerifyOtpScreen() {
     try {
       await verifyOtpMutation({ tempToken, otp: data.otp });
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace("/(tabs)");
+      // El layout redirige a (tabs) cuando isAuthenticated pasa a true
     } catch (err: unknown) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
@@ -64,7 +66,7 @@ export default function LoginVerifyOtpScreen() {
   };
 
   return (
-    <PageContainer keyboardAware={true} className="px-0">
+    <PageContainer ref={scrollRef} keyboardAware={true} className="px-0">
       <Stack.Screen options={{ headerShown: false }} />
 
       <AuthScreenHeader
@@ -87,6 +89,8 @@ export default function LoginVerifyOtpScreen() {
                   value={value}
                   onChange={onChange}
                   disabled={isLoading}
+                  onComplete={handleSubmit(onSubmit)}
+                  scrollViewRef={scrollRef}
                 />
               )}
             />

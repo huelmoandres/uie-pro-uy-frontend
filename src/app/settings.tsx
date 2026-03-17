@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ import {
   ChevronRight,
   Trash2,
   RotateCcw,
+  Bug,
 } from "lucide-react-native";
 import { useAuth } from "@context/AuthContext";
 import { useOnboarding } from "@context/OnboardingContext";
@@ -40,6 +41,11 @@ import { ManageTagsModal } from "@components/features";
 import { InfoButton, ConfirmationModal } from "@components/ui";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
 import { INFO_HINTS } from "@constants/InfoHints";
+import {
+  isSimulateCancelledTrialEnabled,
+  setSimulateCancelledTrial,
+} from "@utils/debugSubscription";
+import * as Updates from "expo-updates";
 
 export default function SettingsScreen() {
   const { user, updateUserState, signOut } = useAuth();
@@ -51,6 +57,14 @@ export default function SettingsScreen() {
   const [deleteAccountModalVisible, setDeleteAccountModalVisible] =
     useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [debugSimulateEnabled, setDebugSimulateEnabled] = useState(false);
+  const [debugSimulateLoading, setDebugSimulateLoading] = useState(false);
+
+  useEffect(() => {
+    if (__DEV__) {
+      isSimulateCancelledTrialEnabled().then(setDebugSimulateEnabled);
+    }
+  }, []);
 
   const {
     control,
@@ -396,7 +410,7 @@ export default function SettingsScreen() {
 
         {/* Dev: Ver onboarding de nuevo */}
         {__DEV__ && (
-          <View className="mt-6 px-4">
+          <View className="mt-6 px-4 gap-3">
             <Pressable
               onPress={async () => {
                 await resetOnboarding();
@@ -412,6 +426,54 @@ export default function SettingsScreen() {
               <RotateCcw size={16} color="#64748B" />
               <Text className="font-sans-semi text-slate-600 text-sm ml-2 dark:text-slate-400">
                 Ver onboarding de nuevo
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={async () => {
+                setDebugSimulateLoading(true);
+                try {
+                  const next = !debugSimulateEnabled;
+                  await setSimulateCancelledTrial(next);
+                  setDebugSimulateEnabled(next);
+                  Toast.show({
+                    type: "info",
+                    text1: next
+                      ? "Simulación activada"
+                      : "Simulación desactivada",
+                    text2: next
+                      ? "Recargando para reproducir error 'stale'..."
+                      : "Recargando...",
+                  });
+                  if (typeof Updates.reloadAsync === "function") {
+                    await Updates.reloadAsync();
+                  } else {
+                    Toast.show({
+                      type: "info",
+                      text1: "Cerrá y volvé a abrir la app",
+                    });
+                  }
+                } catch (e) {
+                  Toast.show({
+                    type: "error",
+                    text1: "Error",
+                    text2: "Cerrá y volvé a abrir la app manualmente.",
+                  });
+                } finally {
+                  setDebugSimulateLoading(false);
+                }
+              }}
+              disabled={debugSimulateLoading}
+              className="flex-row items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 py-3 dark:border-amber-900/50 dark:bg-amber-950/30 active:opacity-70"
+            >
+              {debugSimulateLoading ? (
+                <ActivityIndicator size="small" color="#B45309" />
+              ) : (
+                <Bug size={16} color="#B45309" />
+              )}
+              <Text className="font-sans-semi text-amber-800 text-sm ml-2 dark:text-amber-400">
+                {debugSimulateEnabled
+                  ? "Desactivar simulación trial cancelado"
+                  : "Simular trial cancelado (reproducir error stale)"}
               </Text>
             </Pressable>
           </View>

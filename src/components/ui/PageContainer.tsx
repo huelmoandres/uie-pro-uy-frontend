@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { View, ScrollView, ViewProps, ScrollViewProps, KeyboardAvoidingView } from "react-native";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,8 +17,9 @@ interface PageContainerProps extends ViewProps {
  * Handles keyboard avoiding and auto-scroll when requested.
  * Uses KeyboardAvoidingView + ScrollView instead of KeyboardAwareScrollView
  * to avoid viewIsDescendantOf() errors in modals/sheets.
+ * Con keyboardAware, ref apunta al ScrollView para scrollTo/scrollToEnd.
  */
-export function PageContainer({
+export const PageContainer = forwardRef<ScrollView, PageContainerProps>(function PageContainer({
   children,
   scrollable = false,
   withHeader = false,
@@ -26,7 +27,7 @@ export function PageContainer({
   refreshControl,
   className = "",
   ...props
-}: PageContainerProps) {
+}, ref) {
   const insets = useSafeAreaInsets();
 
   // Rule: Standard horizontal padding is px-6
@@ -62,6 +63,7 @@ export function PageContainer({
           className="flex-1"
         >
           <ScrollView
+            ref={ref}
             className={baseClassName}
             {...scrollProps}
             refreshControl={refreshControl}
@@ -77,6 +79,7 @@ export function PageContainer({
     return (
       <View className="flex-1 bg-background-light dark:bg-background-dark">
         <ScrollView
+          ref={ref}
           className={baseClassName}
           {...scrollProps}
           refreshControl={refreshControl}
@@ -99,4 +102,4 @@ export function PageContainer({
       {children}
     </View>
   );
-}
+});

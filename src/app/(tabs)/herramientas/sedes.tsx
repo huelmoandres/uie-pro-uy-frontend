@@ -1,16 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { useVenues, useVenuesFilters, useDebounce } from "@hooks";
-import {
-  Search,
-  RefreshCw,
-  MapPin,
-  SlidersHorizontal,
-} from "lucide-react-native";
+import { Search, RefreshCw, MapPin, SlidersHorizontal, ArrowLeft } from "lucide-react-native";
 import { PageContainer, Paginator, Skeleton, InfoButton } from "@components/ui";
 import { INFO_HINTS } from "@/constants/InfoHints";
 import { VenueCard, SedesFilterModal } from "@components/features";
+import { useVenues, useVenuesFilters, useDebounce } from "@hooks";
 import type { IVenue, IVenuesQuery } from "@app-types/venue.types";
 
 function VenueSkeleton() {
@@ -65,7 +61,13 @@ export default function SedesScreen() {
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <View className="border-b border-slate-100 bg-white px-5 pb-4 pt-14 dark:bg-primary dark:border-white/5">
-        <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center">
+          <Pressable
+            onPress={() => router.back()}
+            className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-white/10 active:scale-95"
+          >
+            <ArrowLeft size={20} color="#64748B" />
+          </Pressable>
           <View className="flex-1">
             <Text className="text-[10px] font-sans-bold uppercase tracking-[2px] text-accent">
               Directorio
@@ -123,9 +125,9 @@ export default function SedesScreen() {
             </Text>
             <Pressable
               onPress={handleRefresh}
-              className="mt-4 rounded-full bg-slate-200 px-6 py-2"
+              className="mt-4 rounded-full bg-slate-200 px-6 py-2 dark:bg-white/10"
             >
-              <Text className="text-xs font-sans-bold text-slate-900">
+              <Text className="text-xs font-sans-bold text-slate-900 dark:text-white">
                 Reintentar
               </Text>
             </Pressable>
@@ -133,7 +135,7 @@ export default function SedesScreen() {
         ) : venues.length === 0 ? (
           <View className="flex-1 items-center justify-center pt-20">
             <MapPin size={48} color="#94A3B8" />
-            <Text className="mt-4 font-sans-semi text-slate-500">
+            <Text className="mt-4 font-sans-semi text-slate-500 dark:text-slate-400">
               No hay sedes
             </Text>
             <Text className="mt-2 text-[12px] font-sans text-slate-400 text-center px-8">

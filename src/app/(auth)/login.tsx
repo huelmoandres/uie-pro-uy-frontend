@@ -59,9 +59,8 @@ export default function LoginScreen() {
           pathname: "/(auth)/login-verify-otp",
           params: { tempToken: result.tempToken },
         } as never);
-      } else {
-        router.replace("/(tabs)");
       }
+      // Si no requiere OTP: el layout redirige a (tabs) cuando isAuthenticated pasa a true
     } catch (error) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       const msg = extractApiErrorMessage(error, LOGIN_ERROR_FALLBACK);
@@ -97,6 +96,7 @@ export default function LoginScreen() {
             placeholder="ejemplo@estudio.com"
             autoCapitalize="none"
             keyboardType="email-address"
+            textContentType="emailAddress"
             disabled={isLoading}
             error={errors.email?.message}
           />
@@ -107,6 +107,8 @@ export default function LoginScreen() {
               label="Contraseña"
               placeholder="••••••••"
               secureTextEntry
+              textContentType="password"
+              autoComplete="password"
               disabled={isLoading}
               error={errors.password?.message}
             />

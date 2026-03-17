@@ -6,13 +6,13 @@ import {
   User,
   CalendarClock,
   LayoutDashboard,
-  MapPin,
+  Wrench,
 } from "lucide-react-native";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/base/useColorScheme";
 
 /**
- * Premium Tab Layout — three tabs: Expedientes, Agenda Procesal, Mi Perfil.
+ * Premium Tab Layout — Expedientes, Agenda, Utilidades, Dashboard, Mi Perfil.
  */
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -20,7 +20,7 @@ export default function TabLayout() {
   const activeColor = Colors[colorScheme].tint;
   const inactiveColor = Colors[colorScheme].tabIconDefault;
 
-  const tabBarContentHeight = 56;
+  const tabBarContentHeight = 48;
   const tabBarHeight = tabBarContentHeight + Math.max(insets.bottom, 10);
 
   return (
@@ -40,12 +40,7 @@ export default function TabLayout() {
           elevation: 0,
           shadowOpacity: 0,
         },
-        tabBarLabelStyle: {
-          fontFamily: "Inter_600SemiBold",
-          fontSize: 10,
-          letterSpacing: 0.5,
-          marginTop: 4,
-        },
+        tabBarShowLabel: false,
       }}
     >
       <Tabs.Screen
@@ -71,11 +66,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="sedes"
+        name="herramientas"
         options={{
-          title: "Sedes",
+          title: "Utilidades",
           tabBarIcon: ({ color, focused }) => (
-            <MapPin size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+            <Wrench size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
