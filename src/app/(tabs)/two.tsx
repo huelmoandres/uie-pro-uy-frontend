@@ -154,7 +154,7 @@ export default function ProfileScreen() {
 
         <View className="mt-12 items-center">
           <Text className="text-[10px] font-sans text-slate-400 uppercase tracking-widest">
-            UIE Pro Uy v1.0.0
+            UIE Pro Uy v1.0.1
           </Text>
         </View>
       </ScrollView>

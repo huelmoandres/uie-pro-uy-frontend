@@ -3,7 +3,7 @@ import * as Device from "expo-device";
 import type * as NotificationsType from "expo-notifications";
 import { router } from "expo-router";
 import Constants, { ExecutionEnvironment } from "expo-constants";
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { apiClient, SECURE_STORE_KEYS } from "../api/client";
 import { navigateToExpedienteFromNotification } from "@utils/navigation";
@@ -39,12 +39,24 @@ if (Notifications) {
   });
 }
 
+export type RegisterNotificationsResult =
+  | { ok: true }
+  | { ok: false; reason: string };
+
 /**
  * Requests push notification permissions and registers the device token.
  * Called from NotificationPermissionModal after the user taps "Activar".
  */
-export async function requestAndRegisterNotifications(): Promise<boolean> {
-  if (isExpoGo || !Notifications || !Device.isDevice) return false;
+export async function requestAndRegisterNotifications(): Promise<RegisterNotificationsResult> {
+  if (isExpoGo) {
+    return {
+      ok: false,
+      reason: "Las notificaciones no funcionan en Expo Go. Usá un development build.",
+    };
+  }
+  if (!Notifications || !Device.isDevice) {
+    return { ok: false, reason: "No se detectó un dispositivo físico." };
+  }
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("expedientes", {
       name: "Expedientes Judiciales",
@@ -53,21 +65,48 @@ export async function requestAndRegisterNotifications(): Promise<boolean> {
       lightColor: "#1E3A5F",
     });
   }
-  const { status } = await Notifications.requestPermissionsAsync();
-  if (status !== "granted") return false;
+  // Primero leer estado actual (getPermissionsAsync); si undetermined, pedir (requestPermissionsAsync).
+  // Así evitamos que requestPermissionsAsync devuelva "denied" cacheado cuando el usuario ya habilitó en Settings.
+  let { status } = await Notifications.getPermissionsAsync();
+  if (status === "undetermined") {
+    const { status: requested } = await Notifications.requestPermissionsAsync();
+    status = requested;
+  }
+  if (status !== "granted") {
+    return {
+      ok: false,
+      reason: "Permisos denegados. Activá las notificaciones en Configuración del dispositivo y volvé a la app.",
+    };
+  }
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-  if (!projectId) return false;
+  if (!projectId) {
+    return {
+      ok: false,
+      reason: "Configuración de la app incompleta (projectId).",
+    };
+  }
   const accessToken = await SecureStore.getItemAsync(
     SECURE_STORE_KEYS.ACCESS_TOKEN,
   );
-  if (!accessToken) return false;
+  if (!accessToken) {
+    return {
+      ok: false,
+      reason: "Sesión expirada. Volvé a iniciar sesión.",
+    };
+  }
   try {
     const token = await Notifications.getExpoPushTokenAsync({ projectId });
     await apiClient.post("/users/me/push-token", { token: token.data });
-    return true;
+    return { ok: true };
   } catch (error) {
     console.error("[Notifications] Failed to register token:", error);
-    return false;
+    const msg =
+      error && typeof error === "object" && "response" in error
+        ? (error as { response?: { status?: number } }).response?.status === 401
+          ? "Sesión expirada. Volvé a iniciar sesión."
+          : "Error de conexión. Verificá tu internet e intentá de nuevo."
+        : "Error al conectar con el servidor. Intentá de nuevo.";
+    return { ok: false, reason: msg };
   }
 }
 
@@ -120,7 +159,16 @@ export function useNotifications(isAuthenticated: boolean = false) {
       },
     );
 
+    const appStateSub = isAuthenticated
+      ? AppState.addEventListener("change", (nextState) => {
+          if (nextState === "active") {
+            void registerForPushNotifications();
+          }
+        })
+      : null;
+
     return () => {
+      appStateSub?.remove();
       notificationListener.current?.remove();
       responseListener.current?.remove();
     };

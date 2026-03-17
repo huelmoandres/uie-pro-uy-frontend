@@ -6,6 +6,8 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
+  Linking,
+  AppState,
 } from "react-native";
 import { Stack } from "expo-router";
 import { Bell, BellOff, Mail } from "lucide-react-native";
@@ -59,14 +61,31 @@ export default function NotificationsScreen() {
   // Al entrar a la pantalla con push activado y sin token, intentar registrar (por si se perdió)
   useEffect(() => {
     if (prefs?.pushEnabled && !prefs?.hasDeviceToken) {
-      void requestAndRegisterNotifications().then((ok) => {
-        if (ok) {
+      void requestAndRegisterNotifications().then((result) => {
+        if (result.ok) {
           void queryClient.invalidateQueries({
             queryKey: ["notification-preferences"],
           });
         }
       });
     }
+  }, [prefs?.pushEnabled, prefs?.hasDeviceToken, queryClient]);
+
+  // Al volver de Configuración del dispositivo: re-intentar registro (el usuario pudo haber habilitado permisos)
+  useEffect(() => {
+    if (!prefs?.pushEnabled || prefs?.hasDeviceToken) return;
+    const sub = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        void requestAndRegisterNotifications().then((result) => {
+          if (result.ok) {
+            void queryClient.invalidateQueries({
+              queryKey: ["notification-preferences"],
+            });
+          }
+        });
+      }
+    });
+    return () => sub.remove();
   }, [prefs?.pushEnabled, prefs?.hasDeviceToken, queryClient]);
 
   const handleToggle = (
@@ -77,8 +96,8 @@ export default function NotificationsScreen() {
     updatePrefs({ [key]: value });
     // Al activar push, registrar el token en device_tokens (por si se perdió)
     if (key === "pushEnabled" && value) {
-      void requestAndRegisterNotifications().then((ok) => {
-        if (ok) {
+      void requestAndRegisterNotifications().then((result) => {
+        if (result.ok) {
           void queryClient.invalidateQueries({
             queryKey: ["notification-preferences"],
           });
@@ -262,32 +281,42 @@ export default function NotificationsScreen() {
         )}
 
         {masterEnabled && !prefs?.hasDeviceToken && (
-          <Pressable
-            onPress={async () => {
-              const ok = await requestAndRegisterNotifications();
-              if (ok) {
-                await queryClient.invalidateQueries({
-                  queryKey: ["notification-preferences"],
-                });
-                Toast.show({
-                  type: "success",
-                  text1: "Token registrado",
-                  text2: "Las notificaciones deberían funcionar correctamente.",
-                });
-              } else {
-                Toast.show({
-                  type: "error",
-                  text1: "No se pudo registrar",
-                  text2: "Verificá los permisos en Configuración del dispositivo.",
-                });
-              }
-            }}
-            className="mt-6 mx-4 py-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10"
-          >
-            <Text className="text-center text-[13px] font-sans-semi text-slate-600 dark:text-slate-400">
-              Registrar dispositivo de nuevo
-            </Text>
-          </Pressable>
+          <View className="mt-6 mx-4 gap-3">
+            <Pressable
+              onPress={async () => {
+                const result = await requestAndRegisterNotifications();
+                if (result.ok) {
+                  await queryClient.invalidateQueries({
+                    queryKey: ["notification-preferences"],
+                  });
+                  Toast.show({
+                    type: "success",
+                    text1: "Token registrado",
+                    text2: "Las notificaciones deberían funcionar correctamente.",
+                  });
+                } else {
+                  Toast.show({
+                    type: "error",
+                    text1: "No se pudo registrar",
+                    text2: result.reason,
+                  });
+                }
+              }}
+              className="py-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10"
+            >
+              <Text className="text-center text-[13px] font-sans-semi text-slate-600 dark:text-slate-400">
+                Registrar dispositivo de nuevo
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => void Linking.openSettings()}
+              className="py-2.5"
+            >
+              <Text className="text-center text-[12px] font-sans-semi text-accent">
+                Abrir configuración del dispositivo
+              </Text>
+            </Pressable>
+          </View>
         )}
       </View>
     </PageContainer>
