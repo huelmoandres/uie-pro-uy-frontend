@@ -8,6 +8,7 @@ import { INFO_HINTS } from "@/constants/InfoHints";
 import { VenueCard, SedesFilterModal } from "@components/features";
 import { useVenues, useVenuesFilters, useDebounce } from "@hooks";
 import type { IVenue, IVenuesQuery } from "@app-types/venue.types";
+import { COLORS } from "@/constants/Colors";
 
 function VenueSkeleton() {
   return (
@@ -66,7 +67,7 @@ export default function SedesScreen() {
             onPress={() => router.back()}
             className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-white/10 active:scale-95"
           >
-            <ArrowLeft size={20} color="#64748B" />
+            <ArrowLeft size={20} color={COLORS.slate[500]} />
           </Pressable>
           <View className="flex-1">
             <Text className="text-[10px] font-sans-bold uppercase tracking-[2px] text-accent">
@@ -85,11 +86,11 @@ export default function SedesScreen() {
 
         <View className="mt-5 flex-row gap-2.5">
           <View className="flex-1 h-11 flex-row items-center rounded-xl border border-slate-100 bg-slate-50 px-3.5 dark:border-white/10 dark:bg-white/5">
-            <Search size={16} color="#94A3B8" />
+            <Search size={16} color={COLORS.slate[400]} />
             <TextInput
               className="flex-1 h-full px-2.5 font-sans text-[14px] text-slate-900 dark:text-white"
               placeholder="Buscar por nombre o dirección..."
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={COLORS.slate[400]}
               value={searchText}
               onChangeText={setSearchText}
               returnKeyType="search"
@@ -103,7 +104,7 @@ export default function SedesScreen() {
           >
             <SlidersHorizontal
               size={18}
-              color={hasActiveFilters ? "#FFFFFF" : "#64748B"}
+              color={hasActiveFilters ? COLORS.white : COLORS.slate[500]}
               strokeWidth={hasActiveFilters ? 2.5 : 2}
             />
           </Pressable>
@@ -119,7 +120,7 @@ export default function SedesScreen() {
           </View>
         ) : isError ? (
           <View className="flex-1 items-center justify-center pt-20">
-            <RefreshCw size={40} color="#EF4444" />
+            <RefreshCw size={40} color={COLORS.danger} />
             <Text className="mt-4 font-sans-bold text-slate-900 dark:text-white">
               Error al cargar
             </Text>
@@ -134,7 +135,7 @@ export default function SedesScreen() {
           </View>
         ) : venues.length === 0 ? (
           <View className="flex-1 items-center justify-center pt-20">
-            <MapPin size={48} color="#94A3B8" />
+            <MapPin size={48} color={COLORS.slate[400]} />
             <Text className="mt-4 font-sans-semi text-slate-500 dark:text-slate-400">
               No hay sedes
             </Text>

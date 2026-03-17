@@ -184,8 +184,9 @@ function RootLayoutNav() {
           name="paywall"
           options={{
             title: "IUE.uy Pro",
-            headerLeft: blockPaywallBack ? () => null : undefined,
-            gestureEnabled: !blockPaywallBack,
+            ...(blockPaywallBack
+              ? { headerLeft: () => null, gestureEnabled: false }
+              : {}),
           }}
         />
         <Stack.Screen

@@ -44,7 +44,10 @@ export const ExpedientesFilterModal = React.memo(
 
     useModalKeyboardDismiss(visible);
 
-    const updateDraft = (key: keyof IExpedientesQuery, value: any) => {
+    const updateDraft = (
+      key: keyof IExpedientesQuery,
+      value: IExpedientesQuery[keyof IExpedientesQuery],
+    ) => {
       setDraft((prev) => ({ ...prev, [key]: value }));
     };
 

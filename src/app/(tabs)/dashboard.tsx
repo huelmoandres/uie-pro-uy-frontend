@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -19,6 +18,7 @@ import {
 } from "lucide-react-native";
 import { useDashboard } from "@hooks/useDashboard";
 import { PageContainer, InfoButton } from "@components/ui";
+import { DashboardSkeleton } from "@components/features";
 import { INFO_HINTS } from "@/constants/InfoHints";
 import { formatDate, stripHtml } from "@utils/formatters";
 import type {
@@ -234,11 +234,8 @@ export default function DashboardScreen() {
         </View>
 
         {isLoading && (
-          <View className="items-center py-20">
-            <ActivityIndicator size="large" color="#B89146" />
-            <Text className="mt-3 text-[13px] font-sans text-slate-400">
-              Cargando dashboard...
-            </Text>
+          <View className="py-4">
+            <DashboardSkeleton />
           </View>
         )}
 

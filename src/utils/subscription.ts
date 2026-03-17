@@ -5,6 +5,7 @@ import {
   PRODUCT_ID_MONTHLY,
 } from "@/constants/revenuecat";
 
+
 /**
  * Obtiene la fecha de expiración de la suscripción/trial desde CustomerInfo.
  * Devuelve null si no hay fecha de expiración o no es válida.
@@ -62,7 +63,12 @@ export function parseProFromCustomerInfo(info: CustomerInfo): ProStatus {
     info.activeSubscriptions?.includes(PRODUCT_ID_MONTHLY) ?? false;
 
   // Fallback: suscripción cancelada pero con acceso hasta expiry (ej. hasta el 23)
-  const allExpDates = (info as any).allExpirationDatesByProduct ?? (info as any).allExpirationDates;
+  const infoExt = info as {
+    allExpirationDatesByProduct?: Record<string, string>;
+    allExpirationDates?: Record<string, string>;
+  };
+  const allExpDates =
+    infoExt.allExpirationDatesByProduct ?? infoExt.allExpirationDates;
   const hasProFromExpiration =
     (() => {
       const exp = allExpDates?.[PRODUCT_ID_MONTHLY];
@@ -76,7 +82,7 @@ export function parseProFromCustomerInfo(info: CustomerInfo): ProStatus {
     entFromAll &&
     !entFromAll.isActive &&
     (() => {
-      const exp = (entFromAll as any).expirationDate;
+      const exp = (entFromAll as { expirationDate?: string }).expirationDate;
       if (!exp) return false;
       const expDate = typeof exp === "string" ? parseISO(exp) : exp;
       return isValid(expDate) && isAfter(expDate, new Date());

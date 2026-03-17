@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -15,12 +15,15 @@ import {
   useNotificationPreferences,
   useUpdateNotificationPreferences,
 } from "@hooks/useNotificationPreferences";
+import { useQueryClient } from "@tanstack/react-query";
+import { requestAndRegisterNotifications } from "@hooks/useNotifications";
 import type { INotificationPreferences } from "@app-types/notification-preferences.types";
 import { InfoBanner } from "@components/shared/InfoBanner";
 import {
   NOTIFICATION_TYPES,
   DIGEST_DAYS,
 } from "@constants/notifications.constants";
+import Toast from "react-native-toast-message";
 
 /** Título de sección reutilizable */
 function SectionTitle({ children }: { children: string }) {
@@ -51,6 +54,20 @@ function SectionCard({
 export default function NotificationsScreen() {
   const { data: prefs, isLoading } = useNotificationPreferences();
   const { mutate: updatePrefs } = useUpdateNotificationPreferences();
+  const queryClient = useQueryClient();
+
+  // Al entrar a la pantalla con push activado y sin token, intentar registrar (por si se perdió)
+  useEffect(() => {
+    if (prefs?.pushEnabled && !prefs?.hasDeviceToken) {
+      void requestAndRegisterNotifications().then((ok) => {
+        if (ok) {
+          void queryClient.invalidateQueries({
+            queryKey: ["notification-preferences"],
+          });
+        }
+      });
+    }
+  }, [prefs?.pushEnabled, prefs?.hasDeviceToken, queryClient]);
 
   const handleToggle = (
     key: keyof INotificationPreferences,
@@ -58,6 +75,16 @@ export default function NotificationsScreen() {
   ) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updatePrefs({ [key]: value });
+    // Al activar push, registrar el token en device_tokens (por si se perdió)
+    if (key === "pushEnabled" && value) {
+      void requestAndRegisterNotifications().then((ok) => {
+        if (ok) {
+          void queryClient.invalidateQueries({
+            queryKey: ["notification-preferences"],
+          });
+        }
+      });
+    }
   };
 
   const handleDigestDayChange = (day: number) => {
@@ -225,6 +252,43 @@ export default function NotificationsScreen() {
           sistema operativo. Si no las recibís, verificá la configuración de tu
           dispositivo.
         </Text>
+
+        {masterEnabled && prefs?.hasDeviceToken && (
+          <View className="mt-6 mx-4 py-3 rounded-xl bg-green-500/10 border border-green-500/20 flex-row items-center justify-center gap-2">
+            <Text className="text-[13px] font-sans-semi text-green-700 dark:text-green-400">
+              Dispositivo registrado correctamente
+            </Text>
+          </View>
+        )}
+
+        {masterEnabled && !prefs?.hasDeviceToken && (
+          <Pressable
+            onPress={async () => {
+              const ok = await requestAndRegisterNotifications();
+              if (ok) {
+                await queryClient.invalidateQueries({
+                  queryKey: ["notification-preferences"],
+                });
+                Toast.show({
+                  type: "success",
+                  text1: "Token registrado",
+                  text2: "Las notificaciones deberían funcionar correctamente.",
+                });
+              } else {
+                Toast.show({
+                  type: "error",
+                  text1: "No se pudo registrar",
+                  text2: "Verificá los permisos en Configuración del dispositivo.",
+                });
+              }
+            }}
+            className="mt-6 mx-4 py-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10"
+          >
+            <Text className="text-center text-[13px] font-sans-semi text-slate-600 dark:text-slate-400">
+              Registrar dispositivo de nuevo
+            </Text>
+          </Pressable>
+        )}
       </View>
     </PageContainer>
   );

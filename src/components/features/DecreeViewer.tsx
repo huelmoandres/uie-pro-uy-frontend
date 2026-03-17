@@ -31,7 +31,8 @@ import { DeadlineBadge } from "./DeadlineBadge";
 import { useDecreeSummary } from "@hooks/useDecreeSummary";
 import { useExportDecreePdf } from "@hooks";
 import type { IDecreePdfContext } from "@utils/pdf-template";
-import axios from "axios";
+import { isQuotaError } from "@utils/apiError";
+import { COLORS } from "@/constants/Colors";
 
 interface Props {
   decree: IDecree;
@@ -60,9 +61,7 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
   } = useDecreeSummary();
   const { isExporting, export: exportPdf } = useExportDecreePdf();
 
-  const isQuotaError =
-    axios.isAxiosError(summaryRawError) &&
-    summaryRawError.response?.status === 402;
+  const isQuotaExceeded = isQuotaError(summaryRawError);
 
   const decreeText = decree.isReserved
     ? "Este decreto está reservado y no puede ser visualizado."
@@ -84,7 +83,7 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
         className="mt-3 flex-row items-center gap-2 self-start rounded-xl border border-accent/25 bg-accent/8 px-3 py-2 active:opacity-70"
         onPress={() => setVisible(true)}
       >
-        <FileText size={13} color="#B89146" />
+        <FileText size={13} color={COLORS.accent} />
         <Text className="text-[11px] font-sans-bold uppercase tracking-[1px] text-accent">
           {decree.nroDecreto ? `Decreto ${decree.nroDecreto}` : "Ver Decreto"}
         </Text>
@@ -224,7 +223,7 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
 
                   {summaryError &&
                     !summary &&
-                    (isQuotaError ? (
+                    (isQuotaExceeded ? (
                       <View className="flex-row items-start gap-2.5 rounded-xl border border-amber-300/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-3">
                         <CreditCard
                           size={14}

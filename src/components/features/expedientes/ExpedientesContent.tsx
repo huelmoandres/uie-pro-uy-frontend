@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Pressable, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { RefreshCw, Star, FolderOpen } from "lucide-react-native";
@@ -8,6 +8,7 @@ import { ExpedienteSkeleton } from "@components/features/ExpedienteSkeleton";
 import { EducationalEmptyState } from "@components/shared/EducationalEmptyState";
 import type { IExpediente } from "@app-types/expediente.types";
 import type { TabFilter } from "@hooks/useExpedientesScreen";
+import { COLORS } from "@/constants/Colors";
 
 interface ExpedientesContentProps {
   isLoading: boolean;
@@ -54,7 +55,7 @@ export function ExpedientesContent({
     return (
       <PageContainer withHeader={true}>
         <View className="flex-1 items-center justify-center pt-20">
-          <RefreshCw size={40} color="#EF4444" />
+          <RefreshCw size={40} color={COLORS.danger} />
           <Text className="mt-4 font-sans-bold text-slate-900 dark:text-white">
             Error al cargar
           </Text>
@@ -76,7 +77,7 @@ export function ExpedientesContent({
       return (
         <PageContainer withHeader={true}>
           <View className="flex-1 items-center justify-center pt-20">
-            <Star size={48} color="#B89146" fill="transparent" />
+            <Star size={48} color={COLORS.accent} fill="transparent" />
             <Text className="mt-4 font-sans-semi text-slate-500">
               No tenés favoritos
             </Text>
@@ -94,7 +95,7 @@ export function ExpedientesContent({
           title="Todavía no seguís ningún expediente"
           description="Ingresá un IUE y nosotros nos encargamos de avisarte cuando haya novedades."
           icon={FolderOpen}
-          iconColor="#94A3B8"
+          iconColor={COLORS.slate[400]}
           primaryCta={{
             label: "Buscar expediente por IUE",
             onPress: onAddPress,
@@ -104,26 +105,31 @@ export function ExpedientesContent({
     );
   }
 
+  const renderItem = useCallback(
+    ({ item, index }: { item: IExpediente; index: number }) => (
+      <ExpedienteCard
+        item={item}
+        isSelected={selectedIues.includes(item.iue)}
+        isSelectionMode={selectedIues.length > 0}
+        onSelect={onSelect}
+        onPin={onPin}
+        onTagsPress={selectedIues.length === 0 ? onTagsPress : undefined}
+        onAddReminder={
+          selectedIues.length === 0 ? onAddReminder : undefined
+        }
+        showPinTooltip={index === 0}
+      />
+    ),
+    [selectedIues, onSelect, onPin, onTagsPress, onAddReminder],
+  );
+
   return (
     <PageContainer withHeader={true}>
       <FlashList
         data={expedientes}
         keyExtractor={(item) => item.iue}
         extraData={selectedIues}
-        renderItem={({ item, index }) => (
-          <ExpedienteCard
-            item={item}
-            isSelected={selectedIues.includes(item.iue)}
-            isSelectionMode={selectedIues.length > 0}
-            onSelect={onSelect}
-            onPin={onPin}
-            onTagsPress={selectedIues.length === 0 ? onTagsPress : undefined}
-            onAddReminder={
-              selectedIues.length === 0 ? onAddReminder : undefined
-            }
-            showPinTooltip={index === 0}
-          />
-        )}
+        renderItem={renderItem}
         contentContainerStyle={{ paddingTop: 24, paddingBottom: 0 }}
         onRefresh={onRefresh}
         refreshing={isRefetching}

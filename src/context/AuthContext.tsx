@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import * as SecureStore from "expo-secure-store";
 import { AuthService } from "@services";
 import { SECURE_STORE_KEYS, setGlobalSignOut } from "@api/client";
@@ -23,10 +29,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const signOut = useCallback(async () => {
+    queryClient.clear();
+    try {
+      const deviceId = await getDeviceId().catch(() => undefined);
+      await apiLogout(deviceId);
+    } catch {
+      // Ignorar errores de red; lo importante es limpiar el estado local.
+    } finally {
+      await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
+      await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+      setToken(null);
+      setUser(null);
+    }
+  }, []);
+
   useEffect(() => {
     void restoreSession();
     setGlobalSignOut(signOut);
-  }, []);
+  }, [signOut]);
 
   async function restoreSession() {
     try {
@@ -45,22 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   }
-
-  const signOut = async () => {
-    // Limpiar cache primero para evitar que se muestren datos de otro usuario
-    queryClient.clear();
-    try {
-      const deviceId = await getDeviceId().catch(() => undefined);
-      await apiLogout(deviceId);
-    } catch {
-      // Ignorar errores de red; lo importante es limpiar el estado local.
-    } finally {
-      await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
-      await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
-      setToken(null);
-      setUser(null);
-    }
-  };
 
   const updateUserState = (
     updatedUser: IUser | null,

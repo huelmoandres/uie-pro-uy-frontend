@@ -43,8 +43,8 @@ if (Notifications) {
  * Requests push notification permissions and registers the device token.
  * Called from NotificationPermissionModal after the user taps "Activar".
  */
-export async function requestAndRegisterNotifications(): Promise<void> {
-  if (isExpoGo || !Notifications || !Device.isDevice) return;
+export async function requestAndRegisterNotifications(): Promise<boolean> {
+  if (isExpoGo || !Notifications || !Device.isDevice) return false;
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("expedientes", {
       name: "Expedientes Judiciales",
@@ -54,18 +54,20 @@ export async function requestAndRegisterNotifications(): Promise<void> {
     });
   }
   const { status } = await Notifications.requestPermissionsAsync();
-  if (status !== "granted") return;
+  if (status !== "granted") return false;
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-  if (!projectId) return;
+  if (!projectId) return false;
   const accessToken = await SecureStore.getItemAsync(
     SECURE_STORE_KEYS.ACCESS_TOKEN,
   );
-  if (!accessToken) return;
+  if (!accessToken) return false;
   try {
     const token = await Notifications.getExpoPushTokenAsync({ projectId });
     await apiClient.post("/users/me/push-token", { token: token.data });
+    return true;
   } catch (error) {
     console.error("[Notifications] Failed to register token:", error);
+    return false;
   }
 }
 

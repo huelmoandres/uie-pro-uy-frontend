@@ -1,4 +1,16 @@
 /**
+ * Indica si el error es un 402 (quota/cuota excedida) de una respuesta Axios.
+ */
+export function isQuotaError(err: unknown): boolean {
+  return (
+    err != null &&
+    typeof err === "object" &&
+    "response" in err &&
+    (err as { response?: { status?: number } }).response?.status === 402
+  );
+}
+
+/**
  * Extrae el mensaje de error de una respuesta de API (Axios u otro cliente HTTP).
  */
 export function extractApiErrorMessage(

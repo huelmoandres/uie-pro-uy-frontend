@@ -13,6 +13,8 @@ export interface INotificationPreferences {
   notifyInternal: boolean;
   emailWeeklyDigest: boolean;
   digestDay: number;
+  /** true si el usuario tiene al menos un token en device_tokens (solo lectura) */
+  hasDeviceToken: boolean;
 }
 
 export type UpdateNotificationPreferencesPayload =

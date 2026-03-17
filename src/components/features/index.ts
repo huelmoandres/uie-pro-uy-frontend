@@ -1,5 +1,7 @@
 export * from "./ExpedienteCard";
 export * from "./ExpedienteSkeleton";
+export * from "./DashboardSkeleton";
+export * from "./AgendaSkeleton";
 export * from "./expedientes";
 export * from "./CompareExpedientePanel";
 export * from "./VenueCard";

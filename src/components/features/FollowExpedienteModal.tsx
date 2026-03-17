@@ -22,6 +22,7 @@ import {
 } from "@schemas/auth.schema";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
+import { extractApiErrorMessage } from "@utils/apiError";
 import { ExpedienteService } from "@services";
 
 interface FollowExpedienteModalProps {
@@ -77,11 +78,12 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
       });
 
       handleClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      const msg: string =
-        err?.response?.data?.message ??
-        "No se pudo agregar el expediente. Verificá el IUE ingresado.";
+      const msg = extractApiErrorMessage(
+        err,
+        "No se pudo agregar el expediente. Verificá el IUE ingresado.",
+      );
 
       // Set error inline instead of Toast to avoid Z-index issues with the Modal
       setError("iue", { type: "manual", message: msg });

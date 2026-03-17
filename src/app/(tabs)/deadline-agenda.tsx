@@ -9,7 +9,6 @@ import {
   Text,
   UIManager,
   View,
-  ActivityIndicator,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -29,6 +28,7 @@ import { useRemindersInfinite } from "@hooks/useReminders";
 import { useDeleteReminder } from "@hooks/useReminderMutations";
 import {
   AgendaItemCard,
+  AgendaSkeleton,
   CreateReminderModal,
   ReminderCard,
 } from "@components/features";
@@ -398,11 +398,8 @@ export default function DeadlineAgendaScreen() {
     return (
       <PageContainer withHeader={false}>
         {header}
-        <View className="items-center py-16">
-          <ActivityIndicator size="large" color="#B89146" />
-          <Text className="mt-3 text-[13px] font-sans text-slate-400">
-            Cargando agenda...
-          </Text>
+        <View className="py-4 px-4">
+          <AgendaSkeleton />
         </View>
       </PageContainer>
     );

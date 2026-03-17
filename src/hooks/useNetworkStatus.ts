@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 
+const DEBOUNCE_MS = 1500;
+
 interface NetworkStatus {
   /** true si hay conexión activa (puede ser wifi, celular, etc.) */
   isOnline: boolean;
@@ -10,30 +12,50 @@ interface NetworkStatus {
 
 /**
  * Detecta el estado de conectividad de red en tiempo real.
- * - `isOnline`: se actualiza inmediatamente al cambiar la conexión.
- * - `justReconnected`: true por un frame cuando vuelve la conexión,
- *    lo que permite disparar refetch/retry automáticos.
+ * Usa debounce para evitar parpadeos: NetInfo.isInternetReachable puede
+ * devolver false brevemente (timeouts, latencia) y provocar flicker.
  */
 export function useNetworkStatus(): NetworkStatus {
   const [isOnline, setIsOnline] = useState(true);
   const [justReconnected, setJustReconnected] = useState(false);
   const prevOnline = useRef(true);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingRaw = useRef<boolean | null>(null);
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      const connected =
-        state.isConnected === true && state.isInternetReachable !== false;
+    const applyState = (connected: boolean) => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+      }
+      pendingRaw.current = null;
 
       if (!prevOnline.current && connected) {
         setJustReconnected(true);
         setTimeout(() => setJustReconnected(false), 100);
       }
-
       prevOnline.current = connected;
       setIsOnline(connected);
+    };
+
+    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+      const connected =
+        state.isConnected === true && state.isInternetReachable !== false;
+
+      if (pendingRaw.current === connected) return;
+      pendingRaw.current = connected;
+
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+
+      debounceRef.current = setTimeout(() => {
+        applyState(connected);
+      }, DEBOUNCE_MS);
     });
 
-    return unsubscribe;
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      unsubscribe();
+    };
   }, []);
 
   return { isOnline, justReconnected };
