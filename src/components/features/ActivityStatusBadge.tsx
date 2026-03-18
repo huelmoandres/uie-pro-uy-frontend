@@ -63,3 +63,4 @@ export const ActivityStatusBadge = React.memo(({ status }: Props) => {
     </View>
   );
 });
+ActivityStatusBadge.displayName = "ActivityStatusBadge";

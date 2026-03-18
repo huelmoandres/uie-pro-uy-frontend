@@ -6,8 +6,7 @@ import {
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useAuth } from "@context/AuthContext";
-import { TagService } from "@services";
-import { ExpedienteService } from "@services";
+import { TagService , ExpedienteService } from "@services";
 import type {
   ITag,
   ICreateTagPayload,

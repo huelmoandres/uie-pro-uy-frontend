@@ -5,6 +5,8 @@
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
+import type { ITag } from "./tag.types";
+
 export enum FollowStatus {
   PENDING = "PENDING",
   IN_PROGRESS = "IN_PROGRESS",
@@ -117,8 +119,6 @@ export interface ICaratulaComponents {
   defendant: string | null;
   caseType: string | null;
 }
-
-import type { ITag } from "./tag.types";
 
 export interface IExpediente {
   iue: string;

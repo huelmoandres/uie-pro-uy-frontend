@@ -43,10 +43,10 @@ export interface IPaginatedVenues {
 }
 
 export interface IVenueFilters {
-  departments: Array<{
+  departments: {
     id: string;
     name: string;
-    cities: Array<{ id: string; name: string }>;
-  }>;
-  subjects: Array<{ id: string; name: string }>;
+    cities: { id: string; name: string }[];
+  }[];
+  subjects: { id: string; name: string }[];
 }

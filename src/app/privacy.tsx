@@ -6,7 +6,6 @@ import {
   Lock,
   EyeOff,
   Server,
-  FileText,
   Bell,
   Sparkles,
   Trash2,

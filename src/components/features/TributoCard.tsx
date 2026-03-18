@@ -137,3 +137,4 @@ export const TributoCard = React.memo(({ item, isExpanded, onToggle }: Props) =>
     </Pressable>
   );
 });
+TributoCard.displayName = "TributoCard";

@@ -41,6 +41,7 @@ export function LoadingOverlay({
     } else {
       pulse.value = 1;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pulse SharedValue estable
   }, [visible]);
 
   const iconStyle = useAnimatedStyle(() => ({

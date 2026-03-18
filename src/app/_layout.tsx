@@ -1,7 +1,5 @@
 import "../../global.css"; // Primary entry for NativeWind
 import { initErrorTracking } from "@utils/errorTracking";
-
-initErrorTracking();
 import {
   DarkTheme,
   DefaultTheme,
@@ -42,6 +40,8 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
+
+initErrorTracking();
 
 export { ErrorBoundary } from "expo-router";
 
@@ -119,7 +119,7 @@ function SubscriptionWrapper({ children }: { children: React.ReactNode }) {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, signOut } = useAuth();
-  const [emergencyTapCount, setEmergencyTapCount] = useState(0);
+  const [, setEmergencyTapCount] = useState(0);
 
   useNotifications(isAuthenticated);
 
@@ -221,7 +221,9 @@ function RootLayoutNav() {
       {/* Notification permission pre-prompt — only shown to authenticated users */}
       {isAuthenticated && (
         <NotificationPermissionModal
-          onRequestPermission={requestAndRegisterNotifications}
+          onRequestPermission={async () => {
+            await requestAndRegisterNotifications();
+          }}
         />
       )}
     </ThemeProvider>

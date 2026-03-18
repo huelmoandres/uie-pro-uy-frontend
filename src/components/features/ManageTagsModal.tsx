@@ -278,6 +278,7 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
     </>
   );
 });
+ManageTagsModal.displayName = "ManageTagsModal";
 
 // ─── InlineTagForm ────────────────────────────────────────────────────────────
 
@@ -349,3 +350,4 @@ const InlineTagForm = ({
     </View>
   </View>
 );
+InlineTagForm.displayName = "InlineTagForm";

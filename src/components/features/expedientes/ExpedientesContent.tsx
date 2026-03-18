@@ -45,6 +45,36 @@ export function ExpedientesContent({
   onTagsPress,
   onAddReminder,
 }: ExpedientesContentProps) {
+  const renderItem = useCallback(
+    ({ item, index }: { item: IExpediente; index: number }) => (
+      <ExpedienteCard
+        item={item}
+        isSelected={selectedIues.includes(item.iue)}
+        isSelectionMode={selectedIues.length > 0}
+        onSelect={onSelect}
+        onPin={onPin}
+        onTagsPress={selectedIues.length === 0 ? onTagsPress : undefined}
+        onAddReminder={
+          selectedIues.length === 0 ? onAddReminder : undefined
+        }
+        showPinTooltip={index === 0}
+      />
+    ),
+    [selectedIues, onSelect, onPin, onTagsPress, onAddReminder],
+  );
+
+  const ListFooterComponent = useCallback(() => {
+    if (!isFetchingNextPage || !hasNextPage) return null;
+    return (
+      <View className="py-4 items-center">
+        <ActivityIndicator size="small" color={COLORS.accent} />
+        <Text className="mt-2 text-[11px] font-sans text-slate-500">
+          Cargando más...
+        </Text>
+      </View>
+    );
+  }, [isFetchingNextPage, hasNextPage]);
+
   if (isLoading) {
     return (
       <PageContainer withHeader={true}>
@@ -110,36 +140,6 @@ export function ExpedientesContent({
       </PageContainer>
     );
   }
-
-  const renderItem = useCallback(
-    ({ item, index }: { item: IExpediente; index: number }) => (
-      <ExpedienteCard
-        item={item}
-        isSelected={selectedIues.includes(item.iue)}
-        isSelectionMode={selectedIues.length > 0}
-        onSelect={onSelect}
-        onPin={onPin}
-        onTagsPress={selectedIues.length === 0 ? onTagsPress : undefined}
-        onAddReminder={
-          selectedIues.length === 0 ? onAddReminder : undefined
-        }
-        showPinTooltip={index === 0}
-      />
-    ),
-    [selectedIues, onSelect, onPin, onTagsPress, onAddReminder],
-  );
-
-  const ListFooterComponent = useCallback(() => {
-    if (!isFetchingNextPage || !hasNextPage) return null;
-    return (
-      <View className="py-4 items-center">
-        <ActivityIndicator size="small" color={COLORS.accent} />
-        <Text className="mt-2 text-[11px] font-sans text-slate-500">
-          Cargando más...
-        </Text>
-      </View>
-    );
-  }, [isFetchingNextPage, hasNextPage]);
 
   return (
     <PageContainer withHeader={true}>

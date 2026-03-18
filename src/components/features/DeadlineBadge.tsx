@@ -27,3 +27,4 @@ export const DeadlineBadge = React.memo(({ deadline }: Props) => {
     </View>
   );
 });
+DeadlineBadge.displayName = "DeadlineBadge";

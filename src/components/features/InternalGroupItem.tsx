@@ -76,3 +76,4 @@ export const InternalGroupItem = React.memo(
     );
   },
 );
+InternalGroupItem.displayName = "InternalGroupItem";

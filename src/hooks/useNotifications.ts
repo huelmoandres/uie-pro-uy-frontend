@@ -18,6 +18,7 @@ const isExpoGo =
 const getNotificationsModule = () => {
   if (isExpoGo) return null;
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy load para evitar crash en Expo Go
     return require("expo-notifications");
   } catch (e) {
     console.error("[Notifications] Failed to load module:", e);

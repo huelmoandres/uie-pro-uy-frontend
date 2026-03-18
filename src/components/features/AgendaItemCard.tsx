@@ -180,3 +180,4 @@ export const AgendaItemCard = React.memo(({ item, onAddReminder }: Props) => {
     </Pressable>
   );
 });
+AgendaItemCard.displayName = "AgendaItemCard";

@@ -48,3 +48,4 @@ export const TagBadge = React.memo(({ tag, onRemove, size = "sm" }: Props) => {
     </View>
   );
 });
+TagBadge.displayName = "TagBadge";

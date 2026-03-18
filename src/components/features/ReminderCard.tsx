@@ -51,3 +51,4 @@ export const ReminderCard = React.memo(({ reminder, onDelete }: Props) => {
     </View>
   );
 });
+ReminderCard.displayName = "ReminderCard";

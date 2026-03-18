@@ -129,3 +129,4 @@ export const MovementItem = React.memo(
     );
   },
 );
+MovementItem.displayName = "MovementItem";

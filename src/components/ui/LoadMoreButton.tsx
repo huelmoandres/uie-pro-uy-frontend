@@ -57,3 +57,4 @@ export const LoadMoreButton: React.FC<LoadMoreButtonProps> = React.memo(
     );
   },
 );
+LoadMoreButton.displayName = "LoadMoreButton";

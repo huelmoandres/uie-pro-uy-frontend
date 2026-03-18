@@ -4,8 +4,7 @@ import {
   Pressable,
   Text,
   View,
-  StyleSheet,
-  Dimensions,
+  StyleSheet
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { BlurView } from "expo-blur";

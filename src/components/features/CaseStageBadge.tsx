@@ -85,3 +85,4 @@ export const CaseStageBadge = React.memo(({ stage }: Props) => {
     </View>
   );
 });
+CaseStageBadge.displayName = "CaseStageBadge";

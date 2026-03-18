@@ -53,7 +53,7 @@ const AGENDA_BASE_URL = "https://agenda.poderjudicial.gub.uy";
  */
 let NativeWebView: typeof import("react-native-webview").WebView | null = null;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- dynamic require para fallback en Expo Go
   NativeWebView = require("react-native-webview").WebView;
 } catch {
   NativeWebView = null;
@@ -87,7 +87,7 @@ export function AgendaWebView({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const webViewRef = useRef<any>(null);
 
   const handleFormSubmitted = useCallback(

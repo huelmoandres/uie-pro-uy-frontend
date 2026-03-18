@@ -157,3 +157,4 @@ export const VenueCard = React.memo(({ venue }: Props) => {
     </View>
   );
 });
+VenueCard.displayName = "VenueCard";

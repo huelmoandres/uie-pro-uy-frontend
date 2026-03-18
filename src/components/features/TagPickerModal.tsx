@@ -10,11 +10,9 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { X, Tag, CheckCircle2, Circle } from "lucide-react-native";
-import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
 import { useTags } from "@hooks/useTags";
 import { useTagMutations } from "@hooks/useTagMutations";
 import { TagBadge } from "@components/ui/TagBadge";
-import type { ITag } from "@app-types/tag.types";
 
 interface Props {
   visible: boolean;
@@ -196,6 +194,7 @@ export const TagPickerModal = React.memo(
     );
   },
 );
+TagPickerModal.displayName = "TagPickerModal";
 
 const styles = StyleSheet.create({
   overlay: {

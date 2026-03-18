@@ -15,7 +15,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-} from "react-native";
+ ScrollView } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useExpedienteDetail, useExpedienteNotes, useExportPdf } from "@hooks";
@@ -35,7 +35,6 @@ import {
   ActivityStatusBadge,
   CreateReminderModal,
 } from "@components/features";
-import { ScrollView } from "react-native";
 import {
   Trash2,
   ChevronLeft,
@@ -376,7 +375,7 @@ export default function ExpedienteDetailScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={() => void refetch()}
+            onRefresh={handleRefresh}
             tintColor="#B89146"
           />
         }

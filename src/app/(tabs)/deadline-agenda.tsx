@@ -54,7 +54,7 @@ if (Platform.OS === "android") {
 type Filter = "all" | "urgent" | "open" | "expired";
 type AgendaTab = "reminders" | "plazos";
 
-const FILTER_OPTIONS: Array<{ key: Filter; label: string }> = [
+const FILTER_OPTIONS: { key: Filter; label: string }[] = [
   { key: "all", label: "Todos" },
   { key: "urgent", label: "Urgentes" },
   { key: "open", label: "Abiertos" },
@@ -197,7 +197,8 @@ export default function DeadlineAgendaScreen() {
     });
     setExpandedKeys((prev) => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   }, []);
@@ -521,13 +522,14 @@ function CollapsibleSection({
 }: CollapsibleSectionProps) {
   const rotation = useSharedValue(expanded ? 1 : 0);
 
-  // Sync rotation when expanded changes (e.g. when filter resets)
+  // Sync rotation when expanded changes (e.g. when filter resets).
+  // rotation es un SharedValue estable; incluirlo en deps puede causar loops.
   React.useEffect(() => {
     rotation.value = withTiming(expanded ? 1 : 0, {
       duration: 250,
       easing: Easing.inOut(Easing.ease),
     });
-  }, [expanded]);
+  }, [expanded, rotation]);
 
   const chevronStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value * 180}deg` }],

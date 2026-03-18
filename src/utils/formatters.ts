@@ -4,7 +4,7 @@
  * Todas las fechas de decretos, movimientos y expedientes son en hora Uruguay.
  * No side effects, fully testable.
  */
-import { format, formatDistanceToNow, parseISO, isValid } from "date-fns";
+import { formatDistanceToNow, parseISO, isValid } from "date-fns";
 import { es } from "date-fns/locale";
 import { formatInTimeZone } from "date-fns-tz";
 import { APP_TIMEZONE } from "@constants/timezone";

@@ -101,7 +101,7 @@ export default function SettingsScreen() {
         text1: "Perfil actualizado",
         text2: "Tus datos se guardaron correctamente.",
       });
-    } catch (error) {
+    } catch {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",
@@ -126,7 +126,7 @@ export default function SettingsScreen() {
         text2: "Tu cuenta y datos fueron eliminados correctamente.",
       });
       await signOut();
-    } catch (error) {
+    } catch {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",
@@ -452,7 +452,7 @@ export default function SettingsScreen() {
                       text1: "Cerrá y volvé a abrir la app",
                     });
                   }
-                } catch (e) {
+                } catch {
                   Toast.show({
                     type: "error",
                     text1: "Error",

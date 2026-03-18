@@ -69,8 +69,6 @@ export function useNavigationRedirects(): NavigationRedirectsState {
     !isInTrial &&
     !inPaywall;
 
-  const hasAccess = isPro || isInTrial;
-
   // Un solo destino de redirección para evitar loops por Redirects competidores
   const redirectTarget: RedirectTarget = (() => {
     if (!isAuthenticated && !inAuthGroup) return "/(auth)/login";

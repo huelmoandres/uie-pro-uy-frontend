@@ -35,7 +35,6 @@ export default function ExpedientesScreen() {
     setReminderModalItem,
     hasActiveFilters,
     expedientes,
-    data,
     paginationMeta,
     isLoading,
     isError,

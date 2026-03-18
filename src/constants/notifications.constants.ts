@@ -9,7 +9,7 @@ import {
 import type { INotificationPreferences } from "@app-types/notification-preferences.types";
 
 /** Tipos de notificación push. Para agregar uno nuevo: añadir aquí y en el schema del backend. */
-export const NOTIFICATION_TYPES: Array<{
+export const NOTIFICATION_TYPES: {
   key: keyof Omit<
     INotificationPreferences,
     "pushEnabled" | "emailWeeklyDigest" | "digestDay"
@@ -17,7 +17,7 @@ export const NOTIFICATION_TYPES: Array<{
   icon: typeof FileSearch;
   title: string;
   description: string;
-}> = [
+}[] = [
   {
     key: "expedienteUpdates",
     icon: FileSearch,

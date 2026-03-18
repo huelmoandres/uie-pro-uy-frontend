@@ -1,11 +1,6 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react-native";
+import { ChevronLeft, ChevronRight } from "lucide-react-native";
 
 export interface PaginatorProps {
   currentPage: number;
@@ -117,3 +112,4 @@ export const Paginator: React.FC<PaginatorProps> = React.memo(
     );
   },
 );
+Paginator.displayName = "Paginator";

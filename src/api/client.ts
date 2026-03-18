@@ -1,15 +1,19 @@
 import axios, {
   AxiosError,
   InternalAxiosRequestConfig,
-  type AxiosRequestConfig,
 } from "axios";
+import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import { queryClient } from "@providers/QueryProvider";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
+// API_URL viene de app.config.ts extra (evita que Metro sobrescriba con .env.development).
+// Fallback a process.env para EAS Build donde se inlinea correctamente.
+const API_URL =
+  Constants.expoConfig?.extra?.apiUrl ??
+  process.env.EXPO_PUBLIC_API_URL ??
+  "http://localhost:3000";
 
 if (__DEV__) {
   console.log("[API Client] Base URL:", API_URL);
@@ -72,7 +76,7 @@ apiClient.interceptors.request.use(
 // On 401: tries to refresh the access token once. If refresh fails, signs out.
 
 let isRefreshing = false;
-let refreshQueue: Array<(token: string) => void> = [];
+let refreshQueue: ((token: string) => void)[] = [];
 
 async function performSignOut() {
   queryClient.clear();

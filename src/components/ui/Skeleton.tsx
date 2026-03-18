@@ -33,6 +33,7 @@ export const Skeleton = ({
       -1,
       true,
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- opacity SharedValue estable, animación solo al montar
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({

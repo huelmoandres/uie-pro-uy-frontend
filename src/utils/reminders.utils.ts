@@ -1,5 +1,5 @@
 import { addDays } from "date-fns";
-import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
+import { fromZonedTime } from "date-fns-tz";
 import { APP_TIMEZONE } from "@constants/timezone";
 import { DEFAULT_REMINDER_HOUR, DEFAULT_REMINDER_MINUTE } from "@constants/reminders";
 import type { IAgendaItem } from "@app-types/deadline-agenda.types";

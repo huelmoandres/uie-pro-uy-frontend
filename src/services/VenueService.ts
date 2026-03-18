@@ -1,6 +1,5 @@
 import { getVenues, getVenuesFilters } from "@api/venues.api";
 import type {
-  IVenue,
   IVenuesQuery,
   IPaginatedVenues,
   IVenueFilters,

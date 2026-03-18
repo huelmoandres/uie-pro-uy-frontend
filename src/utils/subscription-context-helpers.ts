@@ -1,15 +1,20 @@
 /**
  * Helpers para SubscriptionContext (RevenueCat init, bypass, atributos).
  */
+import Constants from "expo-constants";
 import type { Dispatch, SetStateAction } from "react";
 import { Platform } from "react-native";
 import type { CustomerInfo } from "react-native-purchases";
 import { SUBSCRIPTION_BYPASS_EMAILS } from "@/constants/revenuecat";
 
 const REVENUECAT_API_KEY_IOS =
-  process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS ?? "";
+  Constants.expoConfig?.extra?.revenueCatIos ??
+  process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS ??
+  "";
 const REVENUECAT_API_KEY_ANDROID =
-  process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID ?? "";
+  Constants.expoConfig?.extra?.revenueCatAndroid ??
+  process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID ??
+  "";
 
 export function isBypassEmail(email: string | null | undefined): boolean {
   const lower = email?.trim().toLowerCase();

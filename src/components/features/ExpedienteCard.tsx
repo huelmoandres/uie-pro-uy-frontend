@@ -228,3 +228,4 @@ export const ExpedienteCard = React.memo(
     );
   },
 );
+ExpedienteCard.displayName = "ExpedienteCard";

@@ -87,7 +87,7 @@ export function usePaywallActions() {
           text2: "No se encontraron suscripciones para restaurar.",
         });
       }
-    } catch (err) {
+    } catch {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",

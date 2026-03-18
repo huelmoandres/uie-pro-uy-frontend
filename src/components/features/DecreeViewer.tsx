@@ -271,6 +271,7 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
     </>
   );
 });
+DecreeViewer.displayName = "DecreeViewer";
 
 // ── Sub-components ──────────────────────────────────────────────────────────
 

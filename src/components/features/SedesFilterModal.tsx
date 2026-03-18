@@ -241,4 +241,4 @@ export const SedesFilterModal = React.memo(
     );
   },
 );
-
+SedesFilterModal.displayName = "SedesFilterModal";

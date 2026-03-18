@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
 import { Hash, ChevronRight, FileText, Calendar } from "lucide-react-native";
-import type { IExpediente, TimelineEntry } from "@app-types/expediente.types";
+import type { IExpediente } from "@app-types/expediente.types";
 import type { IAgendaItem } from "@app-types/deadline-agenda.types";
 import { stripHtml, formatDate } from "@utils/formatters";
 import { MovementItem } from "./MovementItem";
@@ -136,3 +136,4 @@ export const CompareExpedientePanel = React.memo(
     );
   },
 );
+CompareExpedientePanel.displayName = "CompareExpedientePanel";

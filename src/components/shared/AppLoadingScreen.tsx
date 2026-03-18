@@ -65,6 +65,7 @@ export function AppLoadingScreen({ message }: Props = {}) {
         false,
       ),
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- SharedValues estables, animación solo al montar
   }, []);
 
   const iconStyle = useAnimatedStyle(() => ({

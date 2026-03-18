@@ -74,6 +74,7 @@ export function NetworkBanner() {
         // Initial state: already online, do nothing
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- translateY SharedValue estable
   }, [isOnline]);
 
   const animStyle = useAnimatedStyle(() => ({

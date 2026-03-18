@@ -11,11 +11,7 @@ import {
 import { BlurView } from "expo-blur";
 import { X, SlidersHorizontal, ArrowDownUp } from "lucide-react-native";
 import { modalBottomSheetStyles } from "@utils/modalStyles";
-import type {
-  IExpedientesQuery,
-  ExpedienteOrderByField,
-  FollowStatus,
-} from "@app-types/expediente.types";
+import type { IExpedientesQuery } from "@app-types/expediente.types";
 import { useTags } from "@hooks";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
 import { TagBadge } from "@components/ui";
@@ -285,4 +281,5 @@ export const ExpedientesFilterModal = React.memo(
     );
   },
 );
+ExpedientesFilterModal.displayName = "ExpedientesFilterModal";
 

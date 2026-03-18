@@ -47,6 +47,7 @@ export function NotificationPermissionModal({ onRequestPermission }: Props) {
       if (prompted) return;
 
       // Check current permission status
+      // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy load para evitar crash en Expo Go
       const Notifications = require("expo-notifications");
       const { status } = await Notifications.getPermissionsAsync();
       if (status === "granted") {
