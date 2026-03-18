@@ -6,6 +6,8 @@ import { SECURE_STORE_KEYS } from "@api/client";
 import { isLoginRequiresOtp } from "@api/auth.api";
 import type { ILoginRequest, IRegisterRequest } from "@app-types/auth.types";
 import { requestAndRegisterNotifications } from "@hooks/useNotifications";
+import Purchases from "react-native-purchases";
+import { getRevenueCatApiKey } from "@utils/subscription-context-helpers";
 
 export const useLoginMutation = () => {
   const queryClient = useQueryClient();
@@ -32,6 +34,19 @@ export const useLoginMutation = () => {
       // router.replace navegue con isAuthenticated=false y el layout redirija al login.
       const user = await AuthService.getCurrentUser();
       updateUserState(user, tokens.accessToken);
+
+      // Sincronizar identidad con RevenueCat (UUID de Postgres)
+      try {
+        const isConfigured = await Purchases.isConfigured();
+        if (!isConfigured) {
+          const apiKey = getRevenueCatApiKey();
+          if (apiKey) Purchases.configure({ apiKey });
+        }
+        await Purchases.logIn(user.id);
+      } catch (err) {
+        console.warn("[Auth] RevenueCat logIn failed:", err);
+      }
+
       queryClient.setQueryData(["currentUser"], user);
       return result;
     },
@@ -66,6 +81,19 @@ export const useVerifyLoginOtpMutation = () => {
       // Actualizar estado ANTES de que mutateAsync resuelva (mismo fix que login).
       const user = await AuthService.getCurrentUser();
       updateUserState(user, result.accessToken);
+
+      // Sincronizar identidad con RevenueCat (UUID de Postgres)
+      try {
+        const isConfigured = await Purchases.isConfigured();
+        if (!isConfigured) {
+          const apiKey = getRevenueCatApiKey();
+          if (apiKey) Purchases.configure({ apiKey });
+        }
+        await Purchases.logIn(user.id);
+      } catch (err) {
+        console.warn("[Auth] RevenueCat logIn failed:", err);
+      }
+
       queryClient.setQueryData(["currentUser"], user);
       return result;
     },

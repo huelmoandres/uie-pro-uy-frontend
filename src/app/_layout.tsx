@@ -106,6 +106,7 @@ function SubscriptionWrapper({ children }: { children: React.ReactNode }) {
     <SubscriptionProvider
       userId={user?.id ?? null}
       userEmail={user?.email ?? null}
+      userName={user?.name ?? null}
       isAuthLoading={isAuthLoading}
     >
       {children}

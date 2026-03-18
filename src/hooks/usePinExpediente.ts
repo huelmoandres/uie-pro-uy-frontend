@@ -2,6 +2,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { ExpedienteService } from "@services";
 import type { IPaginatedExpedientes } from "@app-types/expediente.types";
+import type { InfiniteData } from "@tanstack/react-query";
+
+function isInfiniteData(
+  data: unknown,
+): data is InfiniteData<IPaginatedExpedientes> {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "pages" in data &&
+    Array.isArray((data as InfiniteData<IPaginatedExpedientes>).pages)
+  );
+}
 
 export function usePinExpediente() {
   const queryClient = useQueryClient();
@@ -15,19 +27,31 @@ export function usePinExpediente() {
         queryKey: ExpedienteService.queryKeys.all,
       });
 
-      // Snapshot current cache for rollback
-      const previous = queryClient.getQueriesData<IPaginatedExpedientes>({
+      const previous = queryClient.getQueriesData({
         queryKey: ExpedienteService.queryKeys.all,
       });
 
-      // Optimistic update across all paginated list caches
-      queryClient.setQueriesData<IPaginatedExpedientes>(
+      queryClient.setQueriesData(
         { queryKey: ExpedienteService.queryKeys.all },
-        (old) => {
+        (old: unknown) => {
           if (!old) return old;
+          if (isInfiniteData(old)) {
+            return {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                data: page.data.map((e) =>
+                  e.iue === iue ? { ...e, isPinned } : e,
+                ),
+              })),
+            };
+          }
+          const paginated = old as IPaginatedExpedientes;
           return {
-            ...old,
-            data: old.data.map((e) => (e.iue === iue ? { ...e, isPinned } : e)),
+            ...paginated,
+            data: paginated.data.map((e) =>
+              e.iue === iue ? { ...e, isPinned } : e,
+            ),
           };
         },
       );

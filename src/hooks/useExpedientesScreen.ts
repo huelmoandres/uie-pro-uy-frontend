@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
-import { useExpedientes } from "./useExpedientes";
+import { useExpedientesInfinite } from "./useExpedientes";
 import { useDebounce } from "./useDebounce";
 import { usePinExpediente } from "./usePinExpediente";
 import type {
@@ -12,8 +12,7 @@ import type {
 
 export type TabFilter = "all" | "pinned";
 
-const INITIAL_QUERY: IExpedientesQuery = {
-  page: 1,
+const BASE_QUERY: Omit<IExpedientesQuery, "page"> = {
   limit: 20,
   order: "desc",
   orderBy: "lastSyncAt",
@@ -29,14 +28,27 @@ export function useExpedientesScreen() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedIues, setSelectedIues] = useState<string[]>([]);
   const [showBulkAgenda, setShowBulkAgenda] = useState(false);
-  const [queryParams, setQueryParams] = useState<IExpedientesQuery>(INITIAL_QUERY);
+  const [queryParams, setQueryParams] = useState<
+    Omit<IExpedientesQuery, "page">
+  >(BASE_QUERY);
   const [tagPickerIue, setTagPickerIue] = useState<string | null>(null);
   const [reminderModalItem, setReminderModalItem] =
     useState<IExpediente | null>(null);
 
   const debouncedSearch = useDebounce(searchText, 500);
-  const { data, isLoading, isError, refetch, isRefetching } =
-    useExpedientes(queryParams);
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useExpedientesInfinite({
+    ...queryParams,
+    search: debouncedSearch.trim() || undefined,
+  });
   const pinMutation = usePinExpediente();
 
   useEffect(() => {
@@ -49,7 +61,7 @@ export function useExpedientesScreen() {
     setQueryParams((prev) => {
       const newSearch = debouncedSearch.trim() || undefined;
       if (prev.search === newSearch) return prev;
-      return { ...prev, search: newSearch, page: 1 };
+      return { ...prev, search: newSearch };
     });
   }, [debouncedSearch]);
 
@@ -58,7 +70,6 @@ export function useExpedientesScreen() {
     setSelectedIues([]);
     setQueryParams((prev) => ({
       ...prev,
-      page: 1,
       onlyPinned: tab === "pinned" ? true : undefined,
     }));
   }, []);
@@ -66,6 +77,12 @@ export function useExpedientesScreen() {
   const handleRefresh = useCallback(() => {
     void refetch();
   }, [refetch]);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handlePin = useCallback(
     (iue: string, isPinned: boolean) => {
@@ -115,13 +132,23 @@ export function useExpedientesScreen() {
   }, [canCompare, selectedIues]);
 
   const expedientes = useMemo(() => {
-    const raw = data?.data ?? [];
+    const raw = data?.pages.flatMap((p) => p.data) ?? [];
     return [...raw].sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       return 0;
     });
-  }, [data?.data]);
+  }, [data?.pages]);
+
+  const paginationMeta = useMemo(() => {
+    const firstPage = data?.pages[0];
+    if (!firstPage) return null;
+    const loadedCount = expedientes.length;
+    return {
+      ...firstPage.meta,
+      loadedCount,
+    };
+  }, [data?.pages, expedientes.length]);
 
   const hasActiveFilters =
     !!queryParams.sede || !!queryParams.anio || (queryParams.tagIds?.length ?? 0) > 0;
@@ -148,13 +175,17 @@ export function useExpedientesScreen() {
     // Data
     expedientes,
     data,
+    paginationMeta,
     isLoading,
     isError,
     isRefetching,
+    hasNextPage,
+    isFetchingNextPage,
     canCompare,
     // Handlers
     handleTabChange,
     handleRefresh,
+    handleLoadMore,
     handlePin,
     toggleSelection,
     clearSelection,

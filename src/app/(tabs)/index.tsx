@@ -36,12 +36,16 @@ export default function ExpedientesScreen() {
     hasActiveFilters,
     expedientes,
     data,
+    paginationMeta,
     isLoading,
     isError,
     isRefetching,
+    hasNextPage,
+    isFetchingNextPage,
     canCompare,
     handleTabChange,
     handleRefresh,
+    handleLoadMore,
     handlePin,
     toggleSelection,
     clearSelection,
@@ -59,7 +63,7 @@ export default function ExpedientesScreen() {
         onAddPress={() => setShowFollowModal(true)}
         onFilterPress={() => setShowFilterModal(true)}
         hasActiveFilters={hasActiveFilters}
-        totalItems={data?.meta?.totalItems}
+        totalItems={paginationMeta?.totalItems}
       />
 
       <ExpedientesContent
@@ -70,6 +74,9 @@ export default function ExpedientesScreen() {
         activeTab={activeTab}
         selectedIues={selectedIues}
         onRefresh={handleRefresh}
+        onLoadMore={handleLoadMore}
+        hasNextPage={hasNextPage ?? false}
+        isFetchingNextPage={isFetchingNextPage}
         onAddPress={() => setShowFollowModal(true)}
         onSelect={toggleSelection}
         onPin={handlePin}
@@ -84,13 +91,10 @@ export default function ExpedientesScreen() {
           onCompare={handleCompare}
           onBulkAgenda={handleBulkAgenda}
           onClearSelection={clearSelection}
-          paginationMeta={data?.meta ?? null}
-          onPageChange={(p) =>
-            setQueryParams((prev) => ({ ...prev, page: p }))
-          }
-          onPageSizeChange={(s) =>
-            setQueryParams((prev) => ({ ...prev, limit: s, page: 1 }))
-          }
+          paginationMeta={paginationMeta}
+          onLoadMore={handleLoadMore}
+          hasNextPage={hasNextPage ?? false}
+          isFetchingNextPage={isFetchingNextPage}
           hasExpedientes={expedientes.length > 0}
         />
       </View>
@@ -104,7 +108,7 @@ export default function ExpedientesScreen() {
         visible={showFilterModal}
         currentFilters={queryParams}
         onClose={() => setShowFilterModal(false)}
-        onApply={(filters) => setQueryParams({ ...filters, page: 1 })}
+        onApply={(filters) => setQueryParams({ ...filters })}
       />
 
       <Modal

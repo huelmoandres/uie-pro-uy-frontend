@@ -26,6 +26,21 @@ export const setGlobalSignOut = (callback: () => Promise<void>) => {
   globalSignOut = callback;
 };
 
+// ─── Paywall Redirection (Debounce) ──────────────────────────────────────────
+
+let isNavigatingToPaywall = false;
+
+const handlePaywallRedirect = () => {
+  if (!isNavigatingToPaywall) {
+    isNavigatingToPaywall = true;
+    router.replace("/paywall");
+    // Liberar el flag después de un segundo para futuras navegaciones
+    setTimeout(() => {
+      isNavigatingToPaywall = false;
+    }, 1000);
+  }
+};
+
 // ─── Axios Instance ───────────────────────────────────────────────────────────
 
 export const apiClient = axios.create({
@@ -89,6 +104,12 @@ apiClient.interceptors.response.use(
       isAuthEndpoint ||
       originalConfig?._retry
     ) {
+      if (
+        error.response?.status === 403 &&
+        (error.response?.data as any)?.code === "PAY_001"
+      ) {
+        handlePaywallRedirect();
+      }
       return Promise.reject(error);
     }
 

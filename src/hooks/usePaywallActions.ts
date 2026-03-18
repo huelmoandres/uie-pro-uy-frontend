@@ -5,6 +5,7 @@ import Toast from "react-native-toast-message";
 import Purchases from "react-native-purchases";
 import { useSubscription } from "@context/SubscriptionContext";
 import { parseProFromCustomerInfo } from "@utils/subscription";
+import { queryClient } from "@providers/QueryProvider";
 
 const NAV_DELAY_MS = 300;
 
@@ -24,6 +25,10 @@ export function usePaywallActions() {
       const { customerInfo: purchasedInfo } =
         await Purchases.purchasePackage(pkg);
       applyCustomerInfo(purchasedInfo, { forcePro: true });
+      
+      // Invalidar todas las queries para que salten del error PAY_001 al éxito
+      void queryClient.invalidateQueries();
+
       // No llamar refreshSubscription: en web/testing getCustomerInfo puede fallar
       // y sobrescribir el estado correcto. applyCustomerInfo ya tiene los datos de la compra.
 
@@ -58,7 +63,11 @@ export function usePaywallActions() {
       const customerInfo = await Purchases.restorePurchases();
       const { isPro } = parseProFromCustomerInfo(customerInfo);
       applyCustomerInfo(customerInfo, { forcePro: isPro });
+      
       if (isPro) {
+        // Invalidar todas las queries
+        void queryClient.invalidateQueries();
+
         void Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success,
         );

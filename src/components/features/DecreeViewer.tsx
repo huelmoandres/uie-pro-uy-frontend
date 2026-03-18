@@ -31,7 +31,8 @@ import { DeadlineBadge } from "./DeadlineBadge";
 import { useDecreeSummary } from "@hooks/useDecreeSummary";
 import { useExportDecreePdf } from "@hooks";
 import type { IDecreePdfContext } from "@utils/pdf-template";
-import { isQuotaError } from "@utils/apiError";
+import { isDecreeQuotaError } from "@utils/apiError";
+import { router } from "expo-router";
 import { COLORS } from "@/constants/Colors";
 
 interface Props {
@@ -61,7 +62,7 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
   } = useDecreeSummary();
   const { isExporting, export: exportPdf } = useExportDecreePdf();
 
-  const isQuotaExceeded = isQuotaError(summaryRawError);
+  const isQuotaExceeded = isDecreeQuotaError(summaryRawError);
 
   const decreeText = decree.isReserved
     ? "Este decreto está reservado y no puede ser visualizado."
@@ -224,19 +225,25 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
                   {summaryError &&
                     !summary &&
                     (isQuotaExceeded ? (
-                      <View className="flex-row items-start gap-2.5 rounded-xl border border-amber-300/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-3">
+                      <Pressable
+                        onPress={() => router.push("/paywall")}
+                        className="flex-row items-start gap-2.5 rounded-xl border border-amber-300/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-3 active:opacity-80"
+                      >
                         <CreditCard
                           size={14}
                           color="#D97706"
                           style={{ marginTop: 1 }}
                         />
-                        <Text className="flex-1 text-[12px] font-sans text-amber-700 dark:text-amber-400 leading-relaxed">
-                          Sin créditos de IA. Recargá tu cuenta en{" "}
-                          <Text className="font-sans-bold">
-                            platform.openai.com
+                        <View className="flex-1">
+                          <Text className="text-[12px] font-sans text-amber-700 dark:text-amber-400 leading-relaxed">
+                            Límite de resúmenes alcanzado. Actualizá tu
+                            suscripción para continuar.
                           </Text>
-                        </Text>
-                      </View>
+                          <Text className="mt-1.5 text-[11px] font-sans-bold text-amber-600 dark:text-amber-500">
+                            Ir al plan Pro →
+                          </Text>
+                        </View>
+                      </Pressable>
                     ) : (
                       <Pressable
                         onPress={handleSummarize}

@@ -1,14 +1,14 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { Calendar as CalendarIcon, GitCompare } from "lucide-react-native";
-import { Paginator } from "@components/ui";
-import type { IExpedientesQuery } from "@app-types/expediente.types";
+import { COLORS } from "@/constants/Colors";
 
 interface PaginationMeta {
   currentPage: number;
   totalPages: number;
   itemsPerPage: number;
   totalItems: number;
+  loadedCount?: number;
 }
 
 interface ExpedienteSelectionBarProps {
@@ -18,8 +18,9 @@ interface ExpedienteSelectionBarProps {
   onBulkAgenda: () => void;
   onClearSelection: () => void;
   paginationMeta?: PaginationMeta | null;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
+  onLoadMore?: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
   hasExpedientes: boolean;
 }
 
@@ -30,8 +31,9 @@ export function ExpedienteSelectionBar({
   onBulkAgenda,
   onClearSelection,
   paginationMeta,
-  onPageChange,
-  onPageSizeChange,
+  onLoadMore,
+  hasNextPage,
+  isFetchingNextPage,
   hasExpedientes,
 }: ExpedienteSelectionBarProps) {
   if (selectedCount > 0) {
@@ -84,16 +86,42 @@ export function ExpedienteSelectionBar({
   }
 
   if (paginationMeta && hasExpedientes) {
+    const loadedCount = paginationMeta.loadedCount ?? paginationMeta.totalItems;
+    const showLoadMore =
+      hasNextPage && onLoadMore && !isFetchingNextPage;
+
     return (
-      <View className="pt-1">
-        <Paginator
-          currentPage={paginationMeta.currentPage}
-          totalPages={paginationMeta.totalPages}
-          pageSize={paginationMeta.itemsPerPage}
-          totalItems={paginationMeta.totalItems}
-          onPageChange={onPageChange}
-          onPageSizeChange={onPageSizeChange}
-        />
+      <View className="pt-1 gap-2">
+        <Text className="text-[11px] font-sans-semi text-slate-400 tracking-wider">
+          Mostrando{" "}
+          <Text className="font-sans-bold text-slate-600 dark:text-slate-300">
+            {loadedCount}
+          </Text>{" "}
+          de{" "}
+          <Text className="font-sans-bold text-slate-600 dark:text-slate-300">
+            {paginationMeta.totalItems}
+          </Text>{" "}
+          expedientes
+        </Text>
+        {showLoadMore && (
+          <Pressable
+            onPress={onLoadMore}
+            className="flex-row items-center justify-center gap-2 py-2 rounded-xl bg-slate-100 dark:bg-white/5 active:opacity-70"
+            accessibilityLabel="Cargar más expedientes"
+          >
+            <Text className="text-[12px] font-sans-semi text-slate-600 dark:text-slate-300">
+              Cargar más
+            </Text>
+          </Pressable>
+        )}
+        {isFetchingNextPage && (
+          <View className="flex-row items-center justify-center gap-2 py-2">
+            <ActivityIndicator size="small" color={COLORS.accent} />
+            <Text className="text-[11px] font-sans text-slate-500">
+              Cargando...
+            </Text>
+          </View>
+        )}
       </View>
     );
   }

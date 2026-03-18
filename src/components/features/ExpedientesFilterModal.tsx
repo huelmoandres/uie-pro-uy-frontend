@@ -22,7 +22,7 @@ import { TagBadge } from "@components/ui";
 
 interface Props {
   visible: boolean;
-  currentFilters: IExpedientesQuery;
+  currentFilters: Partial<IExpedientesQuery>;
   onClose: () => void;
   onApply: (filters: Partial<IExpedientesQuery>) => void;
 }

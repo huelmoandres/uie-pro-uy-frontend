@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { RefreshCw, Star, FolderOpen } from "lucide-react-native";
 import { PageContainer } from "@components/ui";
@@ -18,6 +18,9 @@ interface ExpedientesContentProps {
   activeTab: TabFilter;
   selectedIues: string[];
   onRefresh: () => void;
+  onLoadMore?: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
   onAddPress: () => void;
   onSelect: (iue: string) => void;
   onPin: (iue: string, isPinned: boolean) => void;
@@ -33,6 +36,9 @@ export function ExpedientesContent({
   activeTab,
   selectedIues,
   onRefresh,
+  onLoadMore,
+  hasNextPage,
+  isFetchingNextPage,
   onAddPress,
   onSelect,
   onPin,
@@ -123,6 +129,18 @@ export function ExpedientesContent({
     [selectedIues, onSelect, onPin, onTagsPress, onAddReminder],
   );
 
+  const ListFooterComponent = useCallback(() => {
+    if (!isFetchingNextPage || !hasNextPage) return null;
+    return (
+      <View className="py-4 items-center">
+        <ActivityIndicator size="small" color={COLORS.accent} />
+        <Text className="mt-2 text-[11px] font-sans text-slate-500">
+          Cargando más...
+        </Text>
+      </View>
+    );
+  }, [isFetchingNextPage, hasNextPage]);
+
   return (
     <PageContainer withHeader={true}>
       <FlashList
@@ -133,6 +151,11 @@ export function ExpedientesContent({
         contentContainerStyle={{ paddingTop: 24, paddingBottom: 0 }}
         onRefresh={onRefresh}
         refreshing={isRefetching}
+        onEndReached={
+          hasNextPage && !isFetchingNextPage ? onLoadMore : undefined
+        }
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={ListFooterComponent}
       />
     </PageContainer>
   );
