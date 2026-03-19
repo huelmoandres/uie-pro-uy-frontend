@@ -115,6 +115,7 @@ export default function PrivacyScreen() {
               "Notas personales que ingresás voluntariamente sobre cada expediente.",
               "Token de notificaciones push de tu dispositivo para enviarte alertas.",
               "Preferencias de notificaciones que configurás en la app.",
+              "Indicador de consumo del cupo gratuito de expedientes (para aplicar la regla freemium).",
             ]}
           />
           <Divider />

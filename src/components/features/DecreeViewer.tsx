@@ -16,6 +16,7 @@ import {
   CreditCard,
   Download,
   FileText,
+  Lock,
   Scissors,
   Sparkles,
   X,
@@ -29,11 +30,11 @@ import { TOOLTIP_KEYS } from "@/constants/onboarding";
 import { useTooltipSeen } from "@hooks/useTooltipSeen";
 import { DeadlineBadge } from "./DeadlineBadge";
 import { useDecreeSummary } from "@hooks/useDecreeSummary";
-import { useExportDecreePdf } from "@hooks";
+import { useExportDecreePdf, useAccessPolicy, usePremiumGate } from "@hooks";
 import type { IDecreePdfContext } from "@utils/pdf-template";
 import { isDecreeQuotaError } from "@utils/apiError";
-import { router } from "expo-router";
 import { COLORS } from "@/constants/Colors";
+import { PremiumGateModal } from "./PremiumGateModal";
 
 interface Props {
   decree: IDecree;
@@ -61,6 +62,13 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
     error: summaryRawError,
   } = useDecreeSummary();
   const { isExporting, export: exportPdf } = useExportDecreePdf();
+  const { hasPremiumAccess } = useAccessPolicy();
+  const {
+    showPremiumModal,
+    showModal: showPremiumGateModal,
+    featureParam,
+    hidePremiumModal,
+  } = usePremiumGate();
 
   const isQuotaExceeded = isDecreeQuotaError(summaryRawError);
 
@@ -71,6 +79,10 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
   const canSummarize = !decree.isReserved && !!decree.textoDecreto?.trim();
 
   function handleSummarize() {
+    if (!hasPremiumAccess) {
+      showPremiumModal("resumen-ia");
+      return;
+    }
     markAiTooltipSeen();
     summarize(decree.id, {
       onSuccess: (data) => setSummary(data),
@@ -138,9 +150,19 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
               </View>
               <View className="flex-row items-center gap-2">
                 <Pressable
-                  onPress={() => exportPdf(decree, decreeContext)}
+                  onPress={() => {
+                    if (!hasPremiumAccess) {
+                      showPremiumModal("export-pdf");
+                      return;
+                    }
+                    exportPdf(decree, decreeContext);
+                  }}
                   disabled={isExporting}
-                  className="flex-row items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 active:opacity-70 disabled:opacity-50"
+                  className={`flex-row items-center gap-2 rounded-xl border px-3 py-2 active:opacity-70 disabled:opacity-50 ${
+                    hasPremiumAccess
+                      ? "border-accent/30 bg-accent/10"
+                      : "border-amber-300/60 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10"
+                  }`}
                 >
                   {isExporting ? (
                     <ActivityIndicator size="small" color="#B89146" />
@@ -150,6 +172,9 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
                   <Text className="text-[11px] font-sans-bold text-accent">
                     {isExporting ? "Generando..." : "Exportar PDF"}
                   </Text>
+                  {!hasPremiumAccess && !isExporting && (
+                    <Lock size={12} color="#94A3B8" />
+                  )}
                 </Pressable>
                 <Pressable
                   onPress={() => setVisible(false)}
@@ -197,12 +222,28 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
                       >
                         <Pressable
                           onPress={handleSummarize}
-                          className="flex-row items-center gap-2 self-start rounded-xl border border-violet-400/30 bg-violet-50 dark:bg-violet-500/10 px-4 py-2.5 active:opacity-70"
+                          className={`flex-row items-center gap-2 self-start rounded-xl border px-4 py-2.5 active:opacity-70 ${
+                            hasPremiumAccess
+                              ? "border-violet-400/30 bg-violet-50 dark:bg-violet-500/10"
+                              : "border-amber-300/60 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10"
+                          }`}
                         >
-                          <Sparkles size={14} color="#7C3AED" />
-                          <Text className="text-[12px] font-sans-bold text-violet-700 dark:text-violet-400">
+                          <Sparkles
+                            size={14}
+                            color={hasPremiumAccess ? "#7C3AED" : "#B89146"}
+                          />
+                          <Text
+                            className={`text-[12px] font-sans-bold ${
+                              hasPremiumAccess
+                                ? "text-violet-700 dark:text-violet-400"
+                                : "text-accent"
+                            }`}
+                          >
                             Resumir con IA
                           </Text>
+                          {!hasPremiumAccess && (
+                            <Lock size={12} color="#94A3B8" />
+                          )}
                         </Pressable>
                       </ContextualTooltip>
                       <InfoButton
@@ -226,7 +267,7 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
                     !summary &&
                     (isQuotaExceeded ? (
                       <Pressable
-                        onPress={() => router.push("/paywall")}
+                        onPress={() => showPremiumModal("resumen-ia")}
                         className="flex-row items-start gap-2.5 rounded-xl border border-amber-300/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-3 active:opacity-80"
                       >
                         <CreditCard
@@ -268,6 +309,12 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
           </View>
         </View>
       </Modal>
+
+      <PremiumGateModal
+        visible={showPremiumGateModal}
+        onClose={hidePremiumModal}
+        feature={featureParam}
+      />
     </>
   );
 });

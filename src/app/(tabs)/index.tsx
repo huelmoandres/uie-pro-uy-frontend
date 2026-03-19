@@ -10,11 +10,14 @@ import {
   AgendaWebView,
   TagPickerModal,
   CreateReminderModal,
+  PremiumGateModal,
 } from "@components/features";
-import { useExpedientesScreen } from "@hooks";
+import { useAccessPolicy, useExpedientesScreen, usePremiumGate } from "@hooks";
 
 export default function ExpedientesScreen() {
   const screen = useExpedientesScreen();
+  const premiumGate = usePremiumGate();
+  const { canAddExpediente, hasPremiumAccess, getFreeQuotaUsage } = useAccessPolicy();
 
   const {
     searchText,
@@ -51,6 +54,61 @@ export default function ExpedientesScreen() {
     handleBulkAgenda,
     handleCompare,
   } = screen;
+  const {
+    hasAccess: hasPremiumFeatureAccess,
+    showPremiumModal,
+    showModal: showPremiumGateModal,
+    featureParam,
+    hidePremiumModal,
+  } = premiumGate;
+  const totalItems = paginationMeta?.totalItems ?? 0;
+  const canCreateMoreExpedientes = canAddExpediente(totalItems);
+  const freeQuotaLabel =
+    !hasPremiumAccess && totalItems > 0
+      ? `${getFreeQuotaUsage(totalItems).label} utilizado`
+      : undefined;
+
+  const handleOpenAddExpediente = () => {
+    if (!canCreateMoreExpedientes) {
+      showPremiumModal("add-expediente");
+      return;
+    }
+    setShowFollowModal(true);
+  };
+
+  const handleGuardedCompare = () => {
+    if (!hasPremiumFeatureAccess) {
+      showPremiumModal("compare");
+      return;
+    }
+    handleCompare();
+  };
+
+  const handleGuardedBulkAgenda = () => {
+    if (!hasPremiumFeatureAccess) {
+      showPremiumModal("agenda-turno");
+      return;
+    }
+    handleBulkAgenda();
+  };
+
+  const handleGuardedTagsPress = (iue: string | null) => {
+    if (!iue) return;
+    if (!hasPremiumFeatureAccess) {
+      showPremiumModal("tags");
+      return;
+    }
+    setTagPickerIue(iue);
+  };
+
+  const handleGuardedAddReminder = (item: Parameters<typeof setReminderModalItem>[0]) => {
+    if (!item) return;
+    if (!hasPremiumFeatureAccess) {
+      showPremiumModal("reminders");
+      return;
+    }
+    setReminderModalItem(item);
+  };
 
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
@@ -59,10 +117,11 @@ export default function ExpedientesScreen() {
         onSearchChange={setSearchText}
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        onAddPress={() => setShowFollowModal(true)}
+        onAddPress={handleOpenAddExpediente}
         onFilterPress={() => setShowFilterModal(true)}
         hasActiveFilters={hasActiveFilters}
         totalItems={paginationMeta?.totalItems}
+        freeQuotaLabel={freeQuotaLabel}
       />
 
       <ExpedientesContent
@@ -76,19 +135,21 @@ export default function ExpedientesScreen() {
         onLoadMore={handleLoadMore}
         hasNextPage={hasNextPage ?? false}
         isFetchingNextPage={isFetchingNextPage}
-        onAddPress={() => setShowFollowModal(true)}
+        onAddPress={handleOpenAddExpediente}
         onSelect={toggleSelection}
         onPin={handlePin}
-        onTagsPress={setTagPickerIue}
-        onAddReminder={setReminderModalItem}
+        onTagsPress={handleGuardedTagsPress}
+        onAddReminder={handleGuardedAddReminder}
+        hasPremiumAccess={hasPremiumFeatureAccess}
       />
 
       <View className="bg-white dark:bg-primary border-t border-slate-200/60 dark:border-white/10 z-10 px-5 pt-3 pb-4">
         <ExpedienteSelectionBar
           selectedCount={selectedIues.length}
           canCompare={canCompare}
-          onCompare={handleCompare}
-          onBulkAgenda={handleBulkAgenda}
+          hasPremiumAccess={hasPremiumFeatureAccess}
+          onCompare={handleGuardedCompare}
+          onBulkAgenda={handleGuardedBulkAgenda}
           onClearSelection={clearSelection}
           paginationMeta={paginationMeta}
           onLoadMore={handleLoadMore}
@@ -108,6 +169,11 @@ export default function ExpedientesScreen() {
         currentFilters={queryParams}
         onClose={() => setShowFilterModal(false)}
         onApply={(filters) => setQueryParams({ ...filters })}
+        hasPremiumAccess={hasPremiumFeatureAccess}
+        onPremiumTagsRequired={() => {
+          setShowFilterModal(false);
+          showPremiumModal("tags");
+        }}
       />
 
       <Modal
@@ -150,6 +216,12 @@ export default function ExpedientesScreen() {
         onClose={() => setReminderModalItem(null)}
         iue={reminderModalItem?.iue ?? null}
         caratula={reminderModalItem?.caratula ?? null}
+      />
+
+      <PremiumGateModal
+        visible={showPremiumGateModal}
+        onClose={hidePremiumModal}
+        feature={featureParam}
       />
     </View>
   );

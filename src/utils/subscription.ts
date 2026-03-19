@@ -45,6 +45,18 @@ export interface ProStatus {
   isInTrial: boolean;
 }
 
+export interface ProStatusDebug extends ProStatus {
+  hasProFromEntitlement: boolean;
+  hasProFromSubscriptions: boolean;
+  hasProFromExpiration: boolean;
+  hasProFromEntitlementExpiration: boolean;
+  activeSubscriptions: string[];
+  entitlementActive: boolean;
+  entitlementAllIsActive: boolean;
+  entitlementPeriodType: string | null;
+  entitlementAllPeriodType: string | null;
+}
+
 /**
  * Parsea CustomerInfo de RevenueCat y determina si el usuario tiene Pro y si está en trial.
  * Usa fallbacks para sandbox donde entitlements.active a veces no se actualiza.
@@ -53,6 +65,11 @@ export interface ProStatus {
  * hasta una fecha futura (ej. hasta el 23), se considera Pro hasta esa fecha.
  */
 export function parseProFromCustomerInfo(info: CustomerInfo): ProStatus {
+  const debug = getProStatusDebug(info);
+  return { isPro: debug.isPro, isInTrial: debug.isInTrial };
+}
+
+export function getProStatusDebug(info: CustomerInfo): ProStatusDebug {
   const ent =
     info.entitlements.active[ENTITLEMENT_PRO_ACCESS] ??
     (info.entitlements.all[ENTITLEMENT_PRO_ACCESS]?.isActive
@@ -100,5 +117,18 @@ export function parseProFromCustomerInfo(info: CustomerInfo): ProStatus {
     (!!hasProFromEntitlementExpiration &&
       ((entFromAll as { periodType?: string })?.periodType === "TRIAL" ||
         (entFromAll as { periodType?: string })?.periodType === "trial"));
-  return { isPro: isProUser, isInTrial };
+  return {
+    isPro: isProUser,
+    isInTrial,
+    hasProFromEntitlement,
+    hasProFromSubscriptions,
+    hasProFromExpiration,
+    hasProFromEntitlementExpiration,
+    activeSubscriptions: info.activeSubscriptions ?? [],
+    entitlementActive: !!ent,
+    entitlementAllIsActive: !!entFromAll?.isActive,
+    entitlementPeriodType: (ent as { periodType?: string })?.periodType ?? null,
+    entitlementAllPeriodType:
+      (entFromAll as { periodType?: string })?.periodType ?? null,
+  };
 }

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@context/AuthContext";
 import { TagService } from "@services";
 import type { ITag } from "@app-types/tag.types";
+import { useAccessPolicy } from "./useAccessPolicy";
 
 /**
  * Fetches and caches the current user's tag list.
@@ -10,11 +11,12 @@ import type { ITag } from "@app-types/tag.types";
 export function useTags() {
   const { user } = useAuth();
   const userId = user?.id ?? null;
+  const { hasPremiumAccess } = useAccessPolicy();
 
   return useQuery<ITag[]>({
     queryKey: [...TagService.queryKeys.lists(), userId],
     queryFn: () => TagService.getAll(),
     staleTime: 5 * 60 * 1000, // 5 min — tags rarely change
-    enabled: !!userId,
+    enabled: !!userId && hasPremiumAccess,
   });
 }

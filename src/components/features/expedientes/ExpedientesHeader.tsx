@@ -19,6 +19,7 @@ interface ExpedientesHeaderProps {
   onFilterPress: () => void;
   hasActiveFilters: boolean;
   totalItems?: number;
+  freeQuotaLabel?: string;
 }
 
 export function ExpedientesHeader({
@@ -30,6 +31,7 @@ export function ExpedientesHeader({
   onFilterPress,
   hasActiveFilters,
   totalItems,
+  freeQuotaLabel,
 }: ExpedientesHeaderProps) {
   return (
     <View className="border-b border-slate-100 bg-white px-5 pb-4 pt-14 dark:bg-primary dark:border-white/5">
@@ -132,6 +134,14 @@ export function ExpedientesHeader({
           size={14}
         />
       </View>
+
+      {freeQuotaLabel ? (
+        <View className="mt-3 self-start rounded-full border border-amber-300/70 bg-amber-50 px-3 py-1.5 dark:border-amber-500/40 dark:bg-amber-500/10">
+          <Text className="text-[10px] font-sans-bold uppercase tracking-[1px] text-amber-700 dark:text-amber-400">
+            {freeQuotaLabel}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }

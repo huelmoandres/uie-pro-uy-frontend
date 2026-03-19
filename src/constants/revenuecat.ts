@@ -22,7 +22,7 @@ export const SUBSCRIPTION_PRICE = "12.99 USD";
 /** Días de prueba gratuita configurados en App Store Connect */
 export const SUBSCRIPTION_TRIAL_DAYS = 7;
 
-/** Free trial: 7 días — configurado en App Store Connect. No hay tier gratuito; la app se compra y da acceso completo sin límites. */
+/** Free trial: 7 días — configurado en App Store Connect. Luego aplica modelo freemium (1 expediente gratis + features premium). */
 
 /**
  * Emails que no requieren suscripción (admins, testers, reviewers).

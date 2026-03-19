@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import { BlurView } from "expo-blur";
-import { X, SlidersHorizontal, ArrowDownUp } from "lucide-react-native";
+import { X, SlidersHorizontal, ArrowDownUp, Lock } from "lucide-react-native";
 import { modalBottomSheetStyles } from "@utils/modalStyles";
 import type { IExpedientesQuery } from "@app-types/expediente.types";
 import { useTags } from "@hooks";
@@ -21,10 +21,19 @@ interface Props {
   currentFilters: Partial<IExpedientesQuery>;
   onClose: () => void;
   onApply: (filters: Partial<IExpedientesQuery>) => void;
+  hasPremiumAccess?: boolean;
+  onPremiumTagsRequired?: () => void;
 }
 
 export const ExpedientesFilterModal = React.memo(
-  ({ visible, currentFilters, onClose, onApply }: Props) => {
+  ({
+    visible,
+    currentFilters,
+    onClose,
+    onApply,
+    hasPremiumAccess = true,
+    onPremiumTagsRequired,
+  }: Props) => {
     const { data: tags = [] } = useTags();
 
     // Local state to draft changes before applying
@@ -66,7 +75,8 @@ export const ExpedientesFilterModal = React.memo(
         // Clean up empty strings to undefined to not send them
         sede: draft.sede?.trim() || undefined,
         anio: draft.anio ? Number(draft.anio) : undefined,
-        tagIds: draft.tagIds?.length ? draft.tagIds : undefined,
+        tagIds:
+          hasPremiumAccess && draft.tagIds?.length ? draft.tagIds : undefined,
       });
       onClose();
     };
@@ -227,8 +237,24 @@ export const ExpedientesFilterModal = React.memo(
                 onChangeText={(text) => updateDraft("anio", text)}
               />
 
-              {/* Tags */}
-              {tags.length > 0 && (
+              {/* Tags (premium) */}
+              {!hasPremiumAccess && (
+                <>
+                  <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-3">
+                    Etiquetas
+                  </Text>
+                  <Pressable
+                    onPress={() => onPremiumTagsRequired?.()}
+                    className="flex-row items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 px-4 py-3 mb-10 active:opacity-70"
+                  >
+                    <Lock size={12} color="#64748B" />
+                    <Text className="text-[13px] font-sans-semi text-slate-600 dark:text-slate-300 flex-1">
+                      Filtrar por etiquetas es una función IUE Pro
+                    </Text>
+                  </Pressable>
+                </>
+              )}
+              {hasPremiumAccess && tags.length > 0 && (
                 <>
                   <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-3">
                     Etiquetas

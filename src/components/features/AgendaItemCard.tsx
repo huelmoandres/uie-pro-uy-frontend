@@ -7,6 +7,7 @@ import {
   XCircle,
   ChevronRight,
   Bell,
+  Lock,
 } from "lucide-react-native";
 import type { IAgendaItem } from "@app-types/deadline-agenda.types";
 import { formatDate, stripHtml } from "@utils/formatters";
@@ -15,6 +16,8 @@ import { navigateToExpediente } from "@utils/navigation";
 interface Props {
   item: IAgendaItem;
   onAddReminder?: (item: IAgendaItem) => void;
+  /** false = muestra candado (freemium); el padre debe interceptar y mostrar paywall */
+  hasPremiumAccess?: boolean;
 }
 
 function getUrgencyConfig(
@@ -94,18 +97,19 @@ const DEADLINE_TYPE_LABEL: Record<string, string> = {
   UNSPECIFIED: "días",
 };
 
-export const AgendaItemCard = React.memo(({ item, onAddReminder }: Props) => {
-  const config = getUrgencyConfig(item.daysRemaining, item.status);
-  const IconComponent = config.icon;
-  const typeLabel = DEADLINE_TYPE_LABEL[item.deadlineType] ?? "días";
-  const caratula = item.caratula ? stripHtml(item.caratula) : null;
-  const canAddReminder = item.status === "OPEN" && onAddReminder;
+export const AgendaItemCard = React.memo(
+  ({ item, onAddReminder, hasPremiumAccess = true }: Props) => {
+    const config = getUrgencyConfig(item.daysRemaining, item.status);
+    const IconComponent = config.icon;
+    const typeLabel = DEADLINE_TYPE_LABEL[item.deadlineType] ?? "días";
+    const caratula = item.caratula ? stripHtml(item.caratula) : null;
+    const canAddReminder = item.status === "OPEN" && onAddReminder;
 
-  return (
-    <Pressable
-      onPress={() => navigateToExpediente(item.iue)}
-      className={`rounded-[18px] border p-4 mb-2.5 active:opacity-75 ${config.bg} ${config.border}`}
-    >
+    return (
+      <Pressable
+        onPress={() => navigateToExpediente(item.iue)}
+        className={`rounded-[18px] border p-4 mb-2.5 active:opacity-75 ${config.bg} ${config.border}`}
+      >
       {/* Header row */}
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1">
@@ -132,6 +136,9 @@ export const AgendaItemCard = React.memo(({ item, onAddReminder }: Props) => {
               <Text className="text-[11px] font-sans-semi text-accent">
                 Recordatorio
               </Text>
+              {!hasPremiumAccess && (
+                <Lock size={12} color="#94A3B8" />
+              )}
             </Pressable>
           )}
           <View
@@ -177,7 +184,8 @@ export const AgendaItemCard = React.memo(({ item, onAddReminder }: Props) => {
           <ChevronRight size={10} color="#CBD5E1" />
         </View>
       </View>
-    </Pressable>
-  );
-});
+      </Pressable>
+    );
+  },
+);
 AgendaItemCard.displayName = "AgendaItemCard";

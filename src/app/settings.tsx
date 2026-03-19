@@ -21,6 +21,7 @@ import {
   Save,
   X,
   Tag,
+  Lock,
   ChevronRight,
   Trash2,
   RotateCcw,
@@ -34,10 +35,10 @@ import {
   updateProfileSchema,
   type UpdateProfileFormData,
 } from "@schemas/auth.schema";
-import { updateProfile, deleteAccount } from "@api/auth.api";
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
-import { ManageTagsModal } from "@components/features";
+import { ManageTagsModal, PremiumGateModal } from "@components/features";
+import { usePremiumGate, useUpdateProfile, useDeleteAccount } from "@hooks";
 import { InfoButton, ConfirmationModal } from "@components/ui";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
 import { INFO_HINTS } from "@constants/InfoHints";
@@ -48,15 +49,22 @@ import {
 import * as Updates from "expo-updates";
 
 export default function SettingsScreen() {
-  const { user, updateUserState, signOut } = useAuth();
+  const {
+    hasAccess: hasPremiumAccess,
+    showPremiumModal,
+    showModal: showPremiumGateModal,
+    featureParam,
+    hidePremiumModal,
+  } = usePremiumGate();
+  const { user } = useAuth();
   const { resetOnboarding } = useOnboarding();
   const { colorScheme, setColorScheme } = useAppColorScheme();
   const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [manageTagsVisible, setManageTagsVisible] = useState(false);
   const [deleteAccountModalVisible, setDeleteAccountModalVisible] =
     useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const updateProfileMutation = useUpdateProfile();
+  const deleteAccountMutation = useDeleteAccount();
   const [debugSimulateEnabled, setDebugSimulateEnabled] = useState(false);
   const [debugSimulateLoading, setDebugSimulateLoading] = useState(false);
 
@@ -89,53 +97,17 @@ export default function SettingsScreen() {
     setIsEditing(true);
   };
 
-  const onSubmit = async (data: UpdateProfileFormData) => {
-    setIsSaving(true);
-    try {
-      const updatedUser = await updateProfile(data);
-      updateUserState(updatedUser);
-      setIsEditing(false);
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Toast.show({
-        type: "success",
-        text1: "Perfil actualizado",
-        text2: "Tus datos se guardaron correctamente.",
-      });
-    } catch {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "No se pudo actualizar el perfil.",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+  const onSubmit = (data: UpdateProfileFormData) => {
+    updateProfileMutation.mutate(data, {
+      onSuccess: () => setIsEditing(false),
+    });
   };
 
-  const handleDeleteAccount = async () => {
-    if (isDeleting) return;
-    setIsDeleting(true);
-    try {
-      await deleteAccount();
-      setDeleteAccountModalVisible(false);
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Toast.show({
-        type: "success",
-        text1: "Cuenta eliminada",
-        text2: "Tu cuenta y datos fueron eliminados correctamente.",
-      });
-      await signOut();
-    } catch {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "No se pudo eliminar la cuenta. Intentá nuevamente.",
-      });
-    } finally {
-      setIsDeleting(false);
-    }
+  const handleDeleteAccount = () => {
+    if (deleteAccountMutation.isPending) return;
+    deleteAccountMutation.mutate(undefined, {
+      onSuccess: () => setDeleteAccountModalVisible(false),
+    });
   };
 
   const options = [
@@ -248,7 +220,7 @@ export default function SettingsScreen() {
                           onBlur={onBlur}
                           onChangeText={onChange}
                           value={value}
-                          editable={!isSaving}
+                          editable={!updateProfileMutation.isPending}
                         />
                       )}
                     />
@@ -275,7 +247,7 @@ export default function SettingsScreen() {
                           }
                           value={value || ""}
                           keyboardType="phone-pad"
-                          editable={!isSaving}
+                          editable={!updateProfileMutation.isPending}
                         />
                       )}
                     />
@@ -302,7 +274,7 @@ export default function SettingsScreen() {
                           }
                           value={value || ""}
                           keyboardType="number-pad"
-                          editable={!isSaving}
+                          editable={!updateProfileMutation.isPending}
                         />
                       )}
                     />
@@ -316,10 +288,10 @@ export default function SettingsScreen() {
 
                 <Pressable
                   onPress={handleSubmit(onSubmit)}
-                  disabled={isSaving}
+                  disabled={updateProfileMutation.isPending}
                   className="mt-8 flex-row items-center justify-center rounded-2xl bg-accent py-3.5 shadow-lg shadow-accent/30 active:scale-[0.98] disabled:opacity-50"
                 >
-                  {isSaving ? (
+                  {updateProfileMutation.isPending ? (
                     <ActivityIndicator color="white" size="small" />
                   ) : (
                     <>
@@ -348,6 +320,10 @@ export default function SettingsScreen() {
             <Pressable
               onPress={() => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                if (!hasPremiumAccess) {
+                  showPremiumModal("tags");
+                  return;
+                }
                 setManageTagsVisible(true);
               }}
               className="flex-row items-center p-4 active:bg-slate-50 dark:active:bg-white/5"
@@ -356,9 +332,14 @@ export default function SettingsScreen() {
                 <Tag size={16} color="#B89146" />
               </View>
               <View className="flex-1">
-                <Text className="text-[15px] font-sans-semi text-slate-700 dark:text-slate-300">
-                  Gestionar etiquetas
-                </Text>
+                <View className="flex-row items-center gap-1.5">
+                  <Text className="text-[15px] font-sans-semi text-slate-700 dark:text-slate-300">
+                    Gestionar etiquetas
+                  </Text>
+                  {!hasPremiumAccess && (
+                    <Lock size={12} color="#94A3B8" />
+                  )}
+                </View>
                 <Text className="text-[11px] font-sans text-slate-400 mt-0.5">
                   Crear, editar y eliminar tus etiquetas de color
                 </Text>
@@ -508,6 +489,12 @@ export default function SettingsScreen() {
       <ManageTagsModal
         visible={manageTagsVisible}
         onClose={() => setManageTagsVisible(false)}
+      />
+
+      <PremiumGateModal
+        visible={showPremiumGateModal}
+        onClose={hidePremiumModal}
+        feature={featureParam}
       />
     </View>
   );

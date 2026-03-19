@@ -16,7 +16,6 @@ import { useColorScheme } from "@/components/base/useColorScheme";
 import { AuthProvider, useAuth } from "@context/AuthContext";
 import {
   SubscriptionProvider,
-  useSubscription,
 } from "@context/SubscriptionContext";
 import { QueryProvider } from "@providers/QueryProvider";
 import {
@@ -133,12 +132,9 @@ function RootLayoutNav() {
 
   const isDark = colorScheme === "dark";
 
-  const { isPro, isInTrial } = useSubscription();
-
-  // Bloquear volver atrás desde paywall cuando el usuario no tiene acceso.
-  // Evita loop: usuario vuelve → redirect a paywall → vuelve → redirect...
-  const blockPaywallBack =
-    isAuthenticated && !isPro && !isInTrial;
+  // Freemium soft-lock: permitir volver atrás desde paywall.
+  // El acceso premium se controla por feature gate, no por redirect global.
+  const blockPaywallBack = false;
 
   useEffect(() => {
     if (!showLoadingOverlay) setEmergencyTapCount(0);

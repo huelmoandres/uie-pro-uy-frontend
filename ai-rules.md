@@ -117,7 +117,8 @@ Configurar y usar siempre alias en `tsconfig.json`:
 
 ## 14. 💳 Suscripciones (RevenueCat)
 * **Entitlement:** `pro_access` — desbloquea acceso completo a la app.
-* **Modelo:** No hay tier gratuito. La app se compra (suscripción con trial de 7 días) y da acceso a todo sin límites.
+* **Modelo Freemium Limitada:** Usuarios no-Pro pueden seguir **1 expediente gratis** con notificaciones activas. El resto de funcionalidades queda en soft-lock (candado + paywall contextual).
+* **Trial:** Durante el trial (7 días) hay acceso completo a todas las funcionalidades.
 * **Product ID:** Configurar en RevenueCat Dashboard el producto "Suscripción Mensual Pro" (App Store Connect).
 * **Paywall:** Pantalla `/paywall` con título "IUE.uy Pro", beneficios, botón "Suscribirse" y "Restaurar Compras" (obligatorio por Apple).
 * **Legal:** El Paywall debe incluir links a Política de Privacidad y Términos de Uso (requerido por Apple).

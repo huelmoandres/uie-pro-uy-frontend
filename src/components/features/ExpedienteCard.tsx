@@ -11,6 +11,7 @@ import {
   Star,
   Tag,
   Bell,
+  Lock,
 } from "lucide-react-native";
 import type { IExpediente } from "@app-types/expediente.types";
 import { formatRelativeDate, stripHtml } from "@utils/formatters";
@@ -31,6 +32,8 @@ interface Props {
   onAddReminder?: (item: IExpediente) => void;
   /** Mostrar tooltip contextual en el icono de estrella (favorito) */
   showPinTooltip?: boolean;
+  /** false = candado en recordatorios y etiquetas (freemium) */
+  hasPremiumAccess?: boolean;
 }
 
 /**
@@ -47,6 +50,7 @@ export const ExpedienteCard = React.memo(
     onTagsPress,
     onAddReminder,
     showPinTooltip = false,
+    hasPremiumAccess = true,
   }: Props) => {
     const { shouldShow: shouldShowPinTooltip, markSeen: markPinTooltipSeen } =
       useTooltipSeen(TOOLTIP_KEYS.EXPEDIENTE_PIN_STAR);
@@ -132,13 +136,27 @@ export const ExpedienteCard = React.memo(
           {!isSelectionMode && (onAddReminder || onTagsPress || onPin) && (
             <View className="flex-row items-center justify-end gap-1">
               {onAddReminder && (
-                <Pressable onPress={handleAddReminder} hitSlop={10} className="p-1">
+                <Pressable
+                  onPress={handleAddReminder}
+                  hitSlop={10}
+                  className="p-1 flex-row items-center gap-0.5"
+                >
                   <Bell size={15} color="#B89146" />
+                  {!hasPremiumAccess && (
+                    <Lock size={12} color="#94A3B8" />
+                  )}
                 </Pressable>
               )}
               {onTagsPress && (
-                <Pressable onPress={handleTagsPress} hitSlop={10} className="p-1">
+                <Pressable
+                  onPress={handleTagsPress}
+                  hitSlop={10}
+                  className="p-1 flex-row items-center gap-0.5"
+                >
                   <Tag size={15} color={tagColor} />
+                  {!hasPremiumAccess && (
+                    <Lock size={12} color="#94A3B8" />
+                  )}
                 </Pressable>
               )}
               {onPin && (

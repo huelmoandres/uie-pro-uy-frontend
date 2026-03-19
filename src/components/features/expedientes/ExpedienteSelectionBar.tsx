@@ -1,6 +1,10 @@
 import React from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
-import { Calendar as CalendarIcon, GitCompare } from "lucide-react-native";
+import {
+  Calendar as CalendarIcon,
+  GitCompare,
+  Lock,
+} from "lucide-react-native";
 import { COLORS } from "@/constants/Colors";
 
 interface PaginationMeta {
@@ -14,6 +18,7 @@ interface PaginationMeta {
 interface ExpedienteSelectionBarProps {
   selectedCount: number;
   canCompare: boolean;
+  hasPremiumAccess: boolean;
   onCompare: () => void;
   onBulkAgenda: () => void;
   onClearSelection: () => void;
@@ -27,6 +32,7 @@ interface ExpedienteSelectionBarProps {
 export function ExpedienteSelectionBar({
   selectedCount,
   canCompare,
+  hasPremiumAccess,
   onCompare,
   onBulkAgenda,
   onClearSelection,
@@ -56,17 +62,49 @@ export function ExpedienteSelectionBar({
               <Pressable
                 onPress={onCompare}
                 accessibilityLabel="Comparar expedientes"
-                className="h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 dark:border-white/15 dark:bg-white/5 active:scale-[0.95]"
+                className={`h-9 flex-row items-center gap-1.5 rounded-lg border px-2.5 active:scale-[0.95] ${
+                  hasPremiumAccess
+                    ? "border-slate-200 bg-slate-50 dark:border-white/15 dark:bg-white/5"
+                    : "border-amber-300/70 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10"
+                }`}
               >
-                <GitCompare size={16} color="#64748B" />
+                {hasPremiumAccess ? (
+                  <GitCompare size={16} color="#64748B" />
+                ) : (
+                  <Lock size={12} color="#B89146" />
+                )}
+                <Text
+                  className={`text-[11px] font-sans-semi ${
+                    hasPremiumAccess
+                      ? "text-slate-500 dark:text-slate-300"
+                      : "text-amber-700 dark:text-amber-400"
+                  }`}
+                >
+                  Comparar
+                </Text>
               </Pressable>
             )}
             <Pressable
               onPress={onBulkAgenda}
               accessibilityLabel="Agendar turno"
-              className="h-9 w-9 items-center justify-center rounded-lg bg-accent shadow-sm shadow-accent/20 active:scale-[0.95]"
+              className={`h-9 flex-row items-center gap-1.5 rounded-lg px-2.5 active:scale-[0.95] ${
+                hasPremiumAccess
+                  ? "bg-accent shadow-sm shadow-accent/20"
+                  : "bg-amber-100 dark:bg-amber-500/20"
+              }`}
             >
-              <CalendarIcon size={16} color="#FFFFFF" strokeWidth={2.5} />
+              {hasPremiumAccess ? (
+                <CalendarIcon size={16} color="#FFFFFF" strokeWidth={2.5} />
+              ) : (
+                <Lock size={12} color="#B89146" />
+              )}
+              <Text
+                className={`text-[11px] font-sans-semi ${
+                  hasPremiumAccess ? "text-white" : "text-amber-700 dark:text-amber-400"
+                }`}
+              >
+                Agendar
+              </Text>
             </Pressable>
           </View>
         </View>

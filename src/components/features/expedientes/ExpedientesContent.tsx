@@ -26,6 +26,7 @@ interface ExpedientesContentProps {
   onPin: (iue: string, isPinned: boolean) => void;
   onTagsPress: (iue: string | null) => void;
   onAddReminder: (item: IExpediente | null) => void;
+  hasPremiumAccess?: boolean;
 }
 
 export function ExpedientesContent({
@@ -44,6 +45,7 @@ export function ExpedientesContent({
   onPin,
   onTagsPress,
   onAddReminder,
+  hasPremiumAccess = true,
 }: ExpedientesContentProps) {
   const renderItem = useCallback(
     ({ item, index }: { item: IExpediente; index: number }) => (
@@ -58,9 +60,10 @@ export function ExpedientesContent({
           selectedIues.length === 0 ? onAddReminder : undefined
         }
         showPinTooltip={index === 0}
+        hasPremiumAccess={hasPremiumAccess}
       />
     ),
-    [selectedIues, onSelect, onPin, onTagsPress, onAddReminder],
+    [selectedIues, onSelect, onPin, onTagsPress, onAddReminder, hasPremiumAccess],
   );
 
   const ListFooterComponent = useCallback(() => {
