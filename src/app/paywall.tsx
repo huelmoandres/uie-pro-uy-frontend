@@ -1,6 +1,6 @@
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, Redirect, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@context/AuthContext";
 import { useSubscription } from "@context/SubscriptionContext";
 import { usePaywallActions } from "@hooks/usePaywallActions";
@@ -14,14 +14,24 @@ import {
 } from "@components/features/paywall";
 
 export default function PaywallScreen() {
-  const { feature } = useLocalSearchParams<{ feature?: string }>();
+  const { feature, entry } = useLocalSearchParams<{
+    feature?: string;
+    entry?: string;
+  }>();
   const { signOut } = useAuth();
   const { isPro, isInTrial } = useSubscription();
   const { handleSubscribe, handleRestore, isPurchasing, isRestoring } =
     usePaywallActions();
 
+  // Solo se permite entrar al paywall desde PremiumGate (entry=gate) o Perfil (entry=profile).
+  // Si se llegó por cualquier otro camino (estado de nav restaurado, deep link sin params, etc.)
+  // redirige silenciosamente a la pantalla principal para evitar mostrar el paywall de forma
+  // no intencional a usuarios que no tienen suscripción.
+  if (entry !== "gate" && entry !== "profile") {
+    return <Redirect href="/(tabs)" />;
+  }
+
   // Freemium soft-lock: permitir volver atrás siempre.
-  // El bloqueo de funciones ocurre en el gate de cada feature.
   const canGoBack = true;
 
   return (

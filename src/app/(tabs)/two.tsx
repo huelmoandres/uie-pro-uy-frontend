@@ -34,12 +34,20 @@ export default function ProfileScreen() {
       ? "Pro"
       : "ABOGADO/A";
 
+  const handlePaywallPress = () => {
+    router.push({
+      pathname: "/paywall",
+      params: { entry: "profile" },
+    } as any);
+  };
+
   const menuItems = [
     {
       icon: Crown,
       label: isPro || isInTrial ? "IUE Pro - Activo" : "IUE Pro - Suscribirse",
       color: "#B89146",
-      route: "/paywall",
+      route: null as null,
+      onPress: handlePaywallPress,
     },
     {
       icon: Settings,
@@ -124,7 +132,13 @@ export default function ProfileScreen() {
             {menuItems.map((item, index) => (
               <Pressable
                 key={index}
-                onPress={() => item.route && router.push(item.route as never)}
+                onPress={() => {
+                  if ("onPress" in item && item.onPress) {
+                    item.onPress();
+                  } else if (item.route) {
+                    router.push(item.route as never);
+                  }
+                }}
                 className={`flex-row items-center justify-between p-4 px-6 active:bg-slate-50 dark:active:bg-white/5 ${index !== menuItems.length - 1 ? "border-b border-slate-50 dark:border-white/5" : ""}`}
               >
                 <View className="flex-row items-center">

@@ -15,6 +15,10 @@ import { useColorScheme } from "@/components/base/useColorScheme";
 import { PremiumGateModal } from "@components/features";
 import { usePremiumGate } from "@hooks";
 
+export const unstable_settings = {
+  initialRouteName: "index",
+};
+
 /**
  * Premium Tab Layout — Expedientes, Agenda, Utilidades, Dashboard, Mi Perfil.
  */
@@ -38,7 +42,6 @@ export default function TabLayout() {
   return (
     <>
       <Tabs
-      initialRouteName="index"
       screenOptions={{
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: inactiveColor,

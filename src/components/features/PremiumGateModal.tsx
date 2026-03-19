@@ -21,7 +21,7 @@ interface PremiumGateModalProps {
 
 /**
  * Modal que se muestra cuando un usuario free intenta acceder a una feature premium.
- * El botón "Ver Planes" navega a /paywall?feature=X para texto dinámico en el Paywall
+ * El botón "Ver Planes" navega a /paywall?entry=gate&feature=X para texto dinámico en el Paywall
  * (mejora conversión ~15-20%).
  */
 export function PremiumGateModal({
@@ -34,7 +34,9 @@ export function PremiumGateModal({
   const handleGoToPaywall = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onClose();
-    router.push(`/paywall?feature=${encodeURIComponent(feature)}` as any);
+    router.push(
+      `/paywall?entry=gate&feature=${encodeURIComponent(feature)}` as any,
+    );
   };
 
   React.useEffect(() => {
