@@ -8,10 +8,12 @@ import type { ILoginRequest, IRegisterRequest } from "@app-types/auth.types";
 import { requestAndRegisterNotifications } from "@hooks/useNotifications";
 import Purchases from "react-native-purchases";
 import { getRevenueCatApiKey } from "@utils/subscription-context-helpers";
+import { useAnalytics } from "@hooks/useAnalytics";
 
 export const useLoginMutation = () => {
   const queryClient = useQueryClient();
   const { updateUserState } = useAuth();
+  const { identifyUser, trackEvent } = useAnalytics();
 
   return useMutation({
     mutationFn: async (data: ILoginRequest) => {
@@ -47,6 +49,8 @@ export const useLoginMutation = () => {
         console.warn("[Auth] RevenueCat logIn failed:", err);
       }
 
+      identifyUser(user.id, { email: user.email });
+      trackEvent("user_logged_in", { method: "email" });
       queryClient.setQueryData(AuthService.queryKeys.currentUser, user);
       return result;
     },
@@ -64,6 +68,7 @@ export const useLoginMutation = () => {
 export const useVerifyLoginOtpMutation = () => {
   const queryClient = useQueryClient();
   const { updateUserState } = useAuth();
+  const { identifyUser, trackEvent } = useAnalytics();
 
   return useMutation({
     mutationFn: async (data: { tempToken: string; otp: string }) => {
@@ -94,6 +99,8 @@ export const useVerifyLoginOtpMutation = () => {
         console.warn("[Auth] RevenueCat logIn failed:", err);
       }
 
+      identifyUser(user.id, { email: user.email });
+      trackEvent("user_logged_in", { method: "otp" });
       queryClient.setQueryData(AuthService.queryKeys.currentUser, user);
       return result;
     },
@@ -108,9 +115,14 @@ export const useVerifyLoginOtpMutation = () => {
 };
 
 export const useRegisterMutation = () => {
+  const { trackEvent } = useAnalytics();
+
   return useMutation({
     mutationFn: async (data: IRegisterRequest) => {
       return AuthService.register(data);
+    },
+    onSuccess: () => {
+      trackEvent("user_registered");
     },
   });
 };

@@ -76,6 +76,19 @@
       ],
       "expo-image",
       "expo-sharing",
+      "expo-mail-composer",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "La app necesita acceso al calendario para guardar fechas procesales."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Usá Face ID para acceder de forma segura a tus expedientes."
+        }
+      ],
       "@react-native-community/datetimepicker"
     ],
     "experiments": {

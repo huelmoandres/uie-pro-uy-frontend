@@ -9,8 +9,9 @@ import {
   usePinExpediente,
   usePremiumGate,
   useTodayMovementsExpedientesInfinite,
+  useAnalytics,
 } from "@hooks";
-import { FolderOpen, Search, SlidersHorizontal } from "lucide-react-native";
+import { Bell, Search, SlidersHorizontal } from "lucide-react-native";
 import { Skeleton } from "@components/ui";
 import {
   AgendaWebView,
@@ -58,6 +59,14 @@ export default function ExpedientesUpdatesScreen() {
   } = usePremiumGate();
   const params = useLocalSearchParams<{ iues?: string; scope?: string }>();
   const isTodayScope = params.scope === "todayMovements";
+  const { trackEvent } = useAnalytics();
+
+  useEffect(() => {
+    if (isTodayScope) {
+      trackEvent("today_movements_viewed");
+    }
+  }, [isTodayScope, trackEvent]);
+  
   const legacyIues = useMemo(() => {
     const raw = params.iues ?? "";
     return raw
@@ -214,20 +223,23 @@ export default function ExpedientesUpdatesScreen() {
     setSelectedIues([]);
   }, []);
 
-  // Sin IUEs en la URL: ir a la lista principal
+  // Sin scope ni IUEs: pantalla huérfana, redirigir a expedientes principal
   if (!isTodayScope && legacyIues.length === 0) {
     return (
       <View className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
-        <FolderOpen size={48} color="#94A3B8" />
-        <Text className="mt-4 font-sans-semi text-slate-500">
-          No hay expedientes para mostrar
+        <Bell size={48} color="#94A3B8" />
+        <Text className="mt-4 font-sans-semi text-slate-500 text-center px-8">
+          No hay novedades para mostrar
+        </Text>
+        <Text className="mt-2 text-[12px] font-sans text-slate-400 text-center px-12">
+          Esta sección muestra los expedientes que tuvieron movimientos hoy.
         </Text>
         <Pressable
           onPress={() => router.replace("/(tabs)" as any)}
-          className="mt-4 rounded-full bg-accent px-6 py-2.5"
+          className="mt-5 rounded-full bg-accent px-6 py-2.5 active:opacity-70"
         >
           <Text className="font-sans-semi text-sm text-white">
-            Ver todos los expedientes
+            Ir a mis expedientes
           </Text>
         </Pressable>
       </View>
@@ -237,7 +249,17 @@ export default function ExpedientesUpdatesScreen() {
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <View className="border-b border-slate-100 bg-white px-5 pb-4 pt-3 dark:bg-primary dark:border-white/5">
-        <View className="mt-1 flex-row gap-2.5">
+        {/* Subtitle: scope de búsqueda */}
+        <View className="mb-2.5 flex-row items-center gap-1.5">
+          <Bell size={11} color="#B89146" />
+          <Text className="text-[11px] font-sans-semi text-slate-500 dark:text-slate-400">
+            {isTodayScope
+              ? "Búsqueda y filtros sobre expedientes con movimientos hoy"
+              : "Búsqueda y filtros sobre los expedientes de esta notificación"}
+          </Text>
+        </View>
+
+        <View className="flex-row gap-2.5">
           <View className="flex-1 h-11 flex-row items-center rounded-xl border border-slate-100 bg-slate-50 px-3.5 dark:border-white/10 dark:bg-white/5">
             <Search size={16} color="#94A3B8" />
             <TextInput
@@ -272,17 +294,23 @@ export default function ExpedientesUpdatesScreen() {
         onLoadMore={handleLoadMore}
         hasNextPage={activeQuery.hasNextPage ?? false}
         isFetchingNextPage={activeQuery.isFetchingNextPage}
-        onAddPress={() =>
-          router.push({
-            pathname: "/(tabs)",
-            params: { openAddExpediente: "1" },
-          } as any)
-        }
         onSelect={toggleSelection}
         onPin={handlePin}
         onTagsPress={handleTagsPress}
         onAddReminder={handleAddReminder}
         hasPremiumAccess={hasPremiumAccess}
+        emptyTitle={
+          hasActiveFilters || debouncedSearch
+            ? "Sin resultados para esta búsqueda"
+            : "Sin novedades por ahora"
+        }
+        emptyDescription={
+          hasActiveFilters || debouncedSearch
+            ? "Intentá con otros filtros o borrá la búsqueda."
+            : isTodayScope
+              ? "Hoy no se registraron movimientos en tus expedientes."
+              : "No se encontraron novedades para los expedientes de esta notificación."
+        }
       />
 
       <View className="bg-white dark:bg-primary border-t border-slate-200/60 dark:border-white/10 z-10 px-5 pt-3 pb-4">

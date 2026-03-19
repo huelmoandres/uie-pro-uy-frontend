@@ -18,6 +18,7 @@ import {
   SubscriptionProvider,
 } from "@context/SubscriptionContext";
 import { QueryProvider } from "@providers/QueryProvider";
+import { PostHogProvider } from "@providers/PostHogProvider";
 import {
   useNotifications,
   requestAndRegisterNotifications,
@@ -81,19 +82,21 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
-      <AuthProvider>
-        <SubscriptionWrapper>
-          <OnboardingProvider>
-            <RootLayoutNav />
-            <LoadingOverlay
-              visible={isDownloading}
-              message="Descargando actualización..."
-            />
-          </OnboardingProvider>
-        </SubscriptionWrapper>
-      </AuthProvider>
-    </QueryProvider>
+    <PostHogProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <SubscriptionWrapper>
+            <OnboardingProvider>
+              <RootLayoutNav />
+              <LoadingOverlay
+                visible={isDownloading}
+                message="Descargando actualización..."
+              />
+            </OnboardingProvider>
+          </SubscriptionWrapper>
+        </AuthProvider>
+      </QueryProvider>
+    </PostHogProvider>
   );
 }
 

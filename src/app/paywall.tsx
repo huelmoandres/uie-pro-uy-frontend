@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { Stack, Redirect, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@context/AuthContext";
 import { useSubscription } from "@context/SubscriptionContext";
 import { usePaywallActions } from "@hooks/usePaywallActions";
+import { useAnalytics } from "@hooks/useAnalytics";
 import { HeaderBackButton } from "@components/shared/HeaderBackButton";
 import {
   PaywallHero,
@@ -22,12 +23,23 @@ export default function PaywallScreen() {
   const { isPro, isInTrial } = useSubscription();
   const { handleSubscribe, handleRestore, isPurchasing, isRestoring } =
     usePaywallActions();
+  const { trackEvent } = useAnalytics();
+
+  const isValidEntry = entry === "gate" || entry === "profile";
+
+  useEffect(() => {
+    if (!isValidEntry) return;
+    trackEvent("paywall_viewed", {
+      entry: entry ?? "unknown",
+      feature: feature ?? null,
+    });
+  }, [isValidEntry, entry, feature, trackEvent]);
 
   // Solo se permite entrar al paywall desde PremiumGate (entry=gate) o Perfil (entry=profile).
   // Si se llegó por cualquier otro camino (estado de nav restaurado, deep link sin params, etc.)
   // redirige silenciosamente a la pantalla principal para evitar mostrar el paywall de forma
   // no intencional a usuarios que no tienen suscripción.
-  if (entry !== "gate" && entry !== "profile") {
+  if (!isValidEntry) {
     return <Redirect href="/(tabs)" />;
   }
 

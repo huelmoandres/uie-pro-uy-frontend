@@ -6,6 +6,7 @@ import Toast from "react-native-toast-message";
 import { buildDecreePdf } from "@utils/pdf-template";
 import type { IDecree } from "@app-types/expediente.types";
 import type { IDecreePdfContext } from "@utils/pdf-template";
+import { useAnalytics } from "@hooks/useAnalytics";
 
 interface ExportState {
   isExporting: boolean;
@@ -14,6 +15,7 @@ interface ExportState {
 
 export function useExportDecreePdf(): ExportState {
   const [isExporting, setIsExporting] = useState(false);
+  const { trackEvent } = useAnalytics();
 
   const exportPdf = useCallback(
     async (decree: IDecree, context?: IDecreePdfContext) => {
@@ -63,6 +65,7 @@ export function useExportDecreePdf(): ExportState {
           UTI: "com.adobe.pdf",
         });
 
+        trackEvent("pdf_exported", { type: "decree" });
         void Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success,
         );
@@ -78,7 +81,7 @@ export function useExportDecreePdf(): ExportState {
         setIsExporting(false);
       }
     },
-    [isExporting],
+    [isExporting, trackEvent],
   );
 
   return { isExporting, export: exportPdf };

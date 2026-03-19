@@ -40,8 +40,7 @@ export function useRestoreColorScheme(): boolean {
       .finally(() => {
         setIsReady(true);
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setColorScheme]);
 
   return isReady;
 }
