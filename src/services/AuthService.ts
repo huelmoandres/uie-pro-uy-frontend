@@ -19,6 +19,7 @@ import type {
 
 export class AuthService {
   static readonly queryKeys = {
+    currentUser: ["currentUser"] as const,
     sessions: ["sessions"] as const,
   };
 

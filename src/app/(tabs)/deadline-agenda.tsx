@@ -22,8 +22,10 @@ import {
   CheckCircle,
   ChevronDown,
   Bell,
+  Lock,
 } from "lucide-react-native";
 import { useDeadlineAgenda } from "@hooks/useDeadlineAgenda";
+import { usePremiumGate } from "@hooks/usePremiumGate";
 import { useRemindersInfinite } from "@hooks/useReminders";
 import { useDeleteReminder } from "@hooks/useReminderMutations";
 import {
@@ -31,6 +33,7 @@ import {
   AgendaSkeleton,
   CreateReminderModal,
   ReminderCard,
+  PremiumGateModal,
 } from "@components/features";
 import { EducationalEmptyState } from "@components/shared/EducationalEmptyState";
 import {
@@ -146,6 +149,13 @@ function buildSections(items: IAgendaItem[]): AgendaSection[] {
 export default function DeadlineAgendaScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const {
+    hasAccess: hasPremiumAccess,
+    showPremiumModal,
+    showModal: showPremiumGateModal,
+    featureParam,
+    hidePremiumModal,
+  } = usePremiumGate();
   const { data, isLoading, isError, refetch, isRefetching } =
     useDeadlineAgenda();
   const {
@@ -160,6 +170,17 @@ export default function DeadlineAgendaScreen() {
   const [reminderModalItem, setReminderModalItem] =
     useState<IAgendaItem | null>(null);
   const [deleteReminderId, setDeleteReminderId] = useState<string | null>(null);
+
+  const handleAddReminderFromPlazo = useCallback(
+    (agendaItem: IAgendaItem) => {
+      if (!hasPremiumAccess) {
+        showPremiumModal("reminders");
+        return;
+      }
+      setReminderModalItem(agendaItem);
+    },
+    [hasPremiumAccess, showPremiumModal],
+  );
 
   const filtered = useMemo(
     () => applyFilter(data ?? [], activeFilter),
@@ -258,6 +279,9 @@ export default function DeadlineAgendaScreen() {
           >
             Recordatorios
           </Text>
+          {!hasPremiumAccess && (
+            <Lock size={12} color={isDark ? "#94A3B8" : "#64748B"} />
+          )}
           {scheduledReminders.length > 0 && (
             <View
               className="rounded-full px-2 py-0.5 min-w-[20px] items-center"
@@ -310,7 +334,25 @@ export default function DeadlineAgendaScreen() {
       {/* Contenido según tab activo */}
       {activeTab === "reminders" ? (
         <View className="px-4 pb-4">
-          {scheduledReminders.length > 0 ? (
+          {!hasPremiumAccess ? (
+            <View className="py-12 px-6 rounded-2xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/5 items-center">
+              <Lock size={36} color="#94A3B8" />
+              <Text className="mt-3 text-[14px] font-sans-semi text-slate-600 dark:text-slate-300 text-center">
+                Los recordatorios son una función IUE Pro
+              </Text>
+              <Text className="mt-1 text-[12px] font-sans text-slate-500 dark:text-slate-400 text-center">
+                Suscribite para programar alertas antes del vencimiento de plazos.
+              </Text>
+              <Pressable
+                onPress={() => showPremiumModal("reminders")}
+                className="mt-5 rounded-full bg-accent px-6 py-2.5 active:opacity-80"
+              >
+                <Text className="text-[12px] font-sans-bold text-white uppercase tracking-wider">
+                  Ver planes
+                </Text>
+              </Pressable>
+            </View>
+          ) : scheduledReminders.length > 0 ? (
             <View className="p-4 rounded-2xl bg-accent/5 border border-accent/20">
               <Text className="text-[11px] font-sans text-slate-500 dark:text-slate-400 mb-3">
                 Tocá la papelera para eliminar un recordatorio.
@@ -451,7 +493,8 @@ export default function DeadlineAgendaScreen() {
                   section={section}
                   expanded={expandedKeys.has(section.key)}
                   onToggle={() => toggleSection(section.key)}
-                  onAddReminder={setReminderModalItem}
+                  onAddReminder={handleAddReminderFromPlazo}
+                  hasPremiumAccess={hasPremiumAccess}
                 />
               ))}
             </View>
@@ -486,6 +529,12 @@ export default function DeadlineAgendaScreen() {
         agendaItem={reminderModalItem}
       />
 
+      <PremiumGateModal
+        visible={showPremiumGateModal}
+        onClose={hidePremiumModal}
+        feature={featureParam}
+      />
+
       <ConfirmationModal
         visible={deleteReminderId != null}
         title="Eliminar recordatorio"
@@ -512,6 +561,7 @@ interface CollapsibleSectionProps {
   expanded: boolean;
   onToggle: () => void;
   onAddReminder?: (item: IAgendaItem) => void;
+  hasPremiumAccess?: boolean;
 }
 
 function CollapsibleSection({
@@ -519,6 +569,7 @@ function CollapsibleSection({
   expanded,
   onToggle,
   onAddReminder,
+  hasPremiumAccess = true,
 }: CollapsibleSectionProps) {
   const rotation = useSharedValue(expanded ? 1 : 0);
 
@@ -564,6 +615,7 @@ function CollapsibleSection({
               key={item.id}
               item={item}
               onAddReminder={onAddReminder}
+              hasPremiumAccess={hasPremiumAccess}
             />
           ))}
         </View>

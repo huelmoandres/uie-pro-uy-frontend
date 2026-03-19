@@ -112,9 +112,10 @@ apiClient.interceptors.response.use(
         | { errorCode?: string }
         | undefined;
       if (
-        error.response?.status === 403 &&
-        (errorData?.errorCode === "PAY_001" ||
-          errorData?.errorCode === "EXP_007")
+        (error.response?.status === 403 &&
+          (errorData?.errorCode === "PAY_001" ||
+            errorData?.errorCode === "EXP_007")) ||
+        error.response?.status === 402
       ) {
         handlePaywallRedirect();
       }

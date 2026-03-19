@@ -28,3 +28,5 @@ export * from "./useSubscriptionExpiry";
 export * from "./useTributos";
 export * from "./usePremiumGate";
 export * from "./useAccessPolicy";
+export * from "./useProfileMutations";
+export * from "./useExpedienteMutations";

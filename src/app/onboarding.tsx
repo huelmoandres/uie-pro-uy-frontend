@@ -29,45 +29,49 @@ const SLIDES = [
   {
     id: "1",
     icon: Smartphone,
-    title: "Tu estudio, siempre en el bolsillo",
+    title: "Nunca más se te pasa un movimiento clave",
     description:
-      "Seguí tus expedientes y recibí alertas inmediatas cuando haya novedades.",
+      "IUE Pro Uy monitorea tus expedientes del Poder Judicial y te avisa cuando hay novedades, sin revisar manualmente todo el día.",
   },
   {
     id: "2",
     icon: Sparkles,
-    title: "IA y plazos automáticos",
+    title: "Priorizá mejor cada jornada de trabajo",
     description:
-      "Resumí cada decreto en segundos. La IA detecta plazos procesales y te avisa antes de que venzan.",
+      "Detectamos plazos, recordatorios y cambios para que sepas qué atender primero y trabajes con más foco.",
   },
   {
     id: "3",
     icon: Bell,
-    title: "Notificaciones y agenda",
+    title: "Cuando quieras escalar, tenés IUE Pro",
     description:
-      "Recordatorios personalizados, agendá turnos en el Poder Judicial y exportá todo a PDF.",
+      "Comparador, resúmenes con IA, recordatorios avanzados, etiquetas y herramientas profesionales en un solo lugar.",
   },
   {
     id: "4",
     icon: CalendarCheck,
-    title: "Control total",
+    title: "Empezá gratis hoy",
     description:
-      "Compará expedientes lado a lado, organizá con etiquetas y tené todo sincronizado.",
+      "Podés seguir 1 expediente gratis para siempre. Cuando necesites más capacidad, activás premium.",
   },
 ];
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlatList<(typeof SLIDES)[number]>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { markOnboardingSeen } = useOnboarding();
 
-  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const handleMomentumScrollEnd = (
+    e: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
     const offsetX = e.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / SCREEN_WIDTH);
-    if (index !== currentIndex && index >= 0 && index < SLIDES.length) {
-      setCurrentIndex(index);
-    }
+    if (index < 0 || index >= SLIDES.length) return;
+
+    // Evita "loop" por offsets fraccionales: solo actualizamos cuando el scroll
+    // ya llegó al slide (momentum end) con pagingEnabled.
+    setCurrentIndex((prev) => (prev === index ? prev : index));
   };
 
   const handleContinue = async () => {
@@ -97,6 +101,9 @@ export default function OnboardingScreen() {
       {/* Fondo: acentos sutiles */}
       <View className="absolute -top-24 -right-20 h-72 w-72 rounded-full bg-accent/10 dark:bg-accent/10" />
       <View className="absolute bottom-24 -left-16 h-52 w-52 rounded-full bg-accent/5 dark:bg-accent/5" />
+      <Text className="pt-3 pb-2 text-center text-[10px] font-sans-bold uppercase tracking-[2px] text-slate-400 dark:text-slate-500">
+        Hecho para práctica judicial en Uruguay
+      </Text>
 
       <FlatList
         ref={flatListRef}
@@ -104,8 +111,13 @@ export default function OnboardingScreen() {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
         scrollEventThrottle={16}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        getItemLayout={(_, index) => ({
+          length: SCREEN_WIDTH,
+          offset: SCREEN_WIDTH * index,
+          index,
+        })}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.flatListContent}
         renderItem={({ item }) => (
@@ -142,6 +154,14 @@ export default function OnboardingScreen() {
       {/* Legal text (last slide) */}
       {isLastSlide && (
         <View className="mb-2 px-7">
+          <View className="mb-3 rounded-2xl border border-accent/20 bg-accent/5 px-4 py-3 dark:bg-accent/10">
+            <Text className="text-[11px] font-sans-semi text-accent">
+              ✅ 1 expediente gratis para siempre
+            </Text>
+            <Text className="mt-1 text-[11px] font-sans text-slate-600 dark:text-slate-300">
+              ✅ Todas tus novedades en un solo lugar
+            </Text>
+          </View>
           <Text className="text-center text-[12px] font-sans leading-[18px] text-slate-500 dark:text-slate-400">
             Al continuar, aceptás nuestros{" "}
             <Text onPress={openTerms} className="font-sans-semi text-accent underline">
@@ -164,7 +184,7 @@ export default function OnboardingScreen() {
         >
           <FileText size={16} color="#FFFFFF" strokeWidth={2.5} />
           <Text className="text-[13px] font-sans-bold uppercase tracking-wider text-white">
-            Agregar mi primer expediente
+            Agregar mi primer expediente gratis
           </Text>
         </Pressable>
       </View>

@@ -7,10 +7,12 @@ import React, {
   useRef,
 } from "react";
 import Purchases, { CustomerInfo } from "react-native-purchases";
-import { parseProFromCustomerInfo } from "@utils/subscription";
+import { getProStatusDebug, parseProFromCustomerInfo } from "@utils/subscription";
 import { isSimulateCancelledTrialEnabled } from "@utils/debugSubscription";
 import {
   isBypassEmail,
+  isEmailOnBypassList,
+  isSubscriptionBypassDisabled,
   buildRevenueCatAttributes,
   getRevenueCatApiKey,
   resetToNoAccess,
@@ -62,6 +64,18 @@ export function SubscriptionProvider({
       const { isPro: pro, isInTrial: trial } = parseProFromCustomerInfo(info);
       const hasAccess = options?.forcePro ?? (pro || trial);
 
+      if (__DEV__) {
+        const dbg = getProStatusDebug(info);
+        console.log("[SubscriptionDebug] applyCustomerInfo", {
+          userId,
+          pro,
+          trial,
+          hasAccess,
+          forcePro: options?.forcePro ?? null,
+          ...dbg,
+        });
+      }
+
       if (hasAccess) {
         if (revokeTimeoutRef.current) {
           clearTimeout(revokeTimeoutRef.current);
@@ -78,12 +92,19 @@ export function SubscriptionProvider({
         }, REVOKE_DELAY_MS);
       }
     },
-    [],
+    [userId],
   );
 
   const refreshSubscription = useCallback(async () => {
     try {
       const info = await Purchases.getCustomerInfo();
+      if (__DEV__) {
+        console.log("[SubscriptionDebug] getCustomerInfo ok", {
+          userId,
+          entitlementKeys: Object.keys(info.entitlements.all ?? {}),
+          activeSubscriptions: info.activeSubscriptions ?? [],
+        });
+      }
       applyCustomerInfo(info);
     } catch (err) {
       console.warn("RevenueCat getCustomerInfo failed:", err);
@@ -92,10 +113,18 @@ export function SubscriptionProvider({
     } finally {
       setIsLoading(false);
     }
-  }, [applyCustomerInfo]);
+  }, [applyCustomerInfo, userId]);
 
   useEffect(() => {
     const apiKey = getRevenueCatApiKey();
+    if (__DEV__) {
+      console.log("[SubscriptionDebug] effect init", {
+        userId,
+        userEmail: userEmail ?? null,
+        apiKeyConfigured: Boolean(apiKey),
+        isAuthLoading,
+      });
+    }
     if (!apiKey) {
       __DEV__ &&
         console.warn(
@@ -137,7 +166,24 @@ export function SubscriptionProvider({
 
     setIsLoading(true);
 
+    if (
+      __DEV__ &&
+      isEmailOnBypassList(userEmail) &&
+      isSubscriptionBypassDisabled()
+    ) {
+      console.warn(
+        "[SubscriptionDebug] email en SUBSCRIPTION_BYPASS_EMAILS pero bypass desactivado (EXPO_PUBLIC_DISABLE_SUBSCRIPTION_BYPASS) — usando RevenueCat",
+        { userId, userEmail: userEmail ?? null },
+      );
+    }
+
     if (isBypassEmail(userEmail)) {
+      if (__DEV__) {
+        console.warn("[SubscriptionDebug] bypass email activo", {
+          userId,
+          userEmail: userEmail ?? null,
+        });
+      }
       setBypassAccess(setIsLoading, setIsPro, setIsInTrial);
       return;
     }

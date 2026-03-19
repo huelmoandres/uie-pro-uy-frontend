@@ -2,10 +2,15 @@ import React, { useMemo, useCallback } from "react";
 import { Pressable, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { useExpedientes, usePinExpediente } from "@hooks";
+import { useExpedientes, usePinExpediente, usePremiumGate } from "@hooks";
 import { RefreshCw, FolderOpen } from "lucide-react-native";
 import { Skeleton, PageContainer } from "@components/ui";
-import { ExpedienteCard, TagPickerModal, CreateReminderModal } from "@components/features";
+import {
+  ExpedienteCard,
+  TagPickerModal,
+  CreateReminderModal,
+  PremiumGateModal,
+} from "@components/features";
 import type { IExpediente } from "@app-types/expediente.types";
 
 export function ExpedienteSkeleton() {
@@ -32,6 +37,13 @@ export function ExpedienteSkeleton() {
  * Llegada desde push coalescido: el payload incluye iues y route /expedientes/updates.
  */
 export default function ExpedientesUpdatesScreen() {
+  const {
+    hasAccess: hasPremiumAccess,
+    showPremiumModal,
+    showModal: showPremiumGateModal,
+    featureParam,
+    hidePremiumModal,
+  } = usePremiumGate();
   const params = useLocalSearchParams<{ iues?: string }>();
   const iues = useMemo(() => {
     const raw = params.iues ?? "";
@@ -65,6 +77,30 @@ export default function ExpedientesUpdatesScreen() {
       pinMutation.mutate({ iue, isPinned });
     },
     [pinMutation],
+  );
+
+  const handleTagsPress = useCallback(
+    (iue: string | null) => {
+      if (!iue) return;
+      if (!hasPremiumAccess) {
+        showPremiumModal("tags");
+        return;
+      }
+      setTagPickerIue(iue);
+    },
+    [hasPremiumAccess, showPremiumModal],
+  );
+
+  const handleAddReminder = useCallback(
+    (item: IExpediente | null) => {
+      if (!item) return;
+      if (!hasPremiumAccess) {
+        showPremiumModal("reminders");
+        return;
+      }
+      setReminderModalItem(item);
+    },
+    [hasPremiumAccess, showPremiumModal],
   );
 
   // Sin IUEs en la URL: ir a la lista principal
@@ -137,8 +173,9 @@ export default function ExpedientesUpdatesScreen() {
                 isSelectionMode={false}
                 onSelect={() => {}}
                 onPin={handlePin}
-                onTagsPress={setTagPickerIue}
-                onAddReminder={setReminderModalItem}
+                onTagsPress={handleTagsPress}
+                onAddReminder={handleAddReminder}
+                hasPremiumAccess={hasPremiumAccess}
               />
             )}
             contentContainerStyle={{ paddingTop: 24, paddingBottom: 24 }}
@@ -162,6 +199,12 @@ export default function ExpedientesUpdatesScreen() {
         onClose={() => setReminderModalItem(null)}
         iue={reminderModalItem?.iue ?? null}
         caratula={reminderModalItem?.caratula ?? null}
+      />
+
+      <PremiumGateModal
+        visible={showPremiumGateModal}
+        onClose={hidePremiumModal}
+        feature={featureParam}
       />
     </View>
   );

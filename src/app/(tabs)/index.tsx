@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { View, Modal } from "react-native";
 import Toast from "react-native-toast-message";
 import {
@@ -68,18 +68,6 @@ export default function ExpedientesScreen() {
       ? `${getFreeQuotaUsage(totalItems).label} utilizado`
       : undefined;
 
-  useEffect(() => {
-    if (showFollowModal && !canCreateMoreExpedientes) {
-      setShowFollowModal(false);
-      showPremiumModal("add-expediente");
-    }
-  }, [
-    showFollowModal,
-    canCreateMoreExpedientes,
-    setShowFollowModal,
-    showPremiumModal,
-  ]);
-
   const handleOpenAddExpediente = () => {
     if (!canCreateMoreExpedientes) {
       showPremiumModal("add-expediente");
@@ -102,6 +90,24 @@ export default function ExpedientesScreen() {
       return;
     }
     handleBulkAgenda();
+  };
+
+  const handleGuardedTagsPress = (iue: string | null) => {
+    if (!iue) return;
+    if (!hasPremiumFeatureAccess) {
+      showPremiumModal("tags");
+      return;
+    }
+    setTagPickerIue(iue);
+  };
+
+  const handleGuardedAddReminder = (item: Parameters<typeof setReminderModalItem>[0]) => {
+    if (!item) return;
+    if (!hasPremiumFeatureAccess) {
+      showPremiumModal("reminders");
+      return;
+    }
+    setReminderModalItem(item);
   };
 
   return (
@@ -132,8 +138,9 @@ export default function ExpedientesScreen() {
         onAddPress={handleOpenAddExpediente}
         onSelect={toggleSelection}
         onPin={handlePin}
-        onTagsPress={setTagPickerIue}
-        onAddReminder={setReminderModalItem}
+        onTagsPress={handleGuardedTagsPress}
+        onAddReminder={handleGuardedAddReminder}
+        hasPremiumAccess={hasPremiumFeatureAccess}
       />
 
       <View className="bg-white dark:bg-primary border-t border-slate-200/60 dark:border-white/10 z-10 px-5 pt-3 pb-4">
@@ -162,6 +169,11 @@ export default function ExpedientesScreen() {
         currentFilters={queryParams}
         onClose={() => setShowFilterModal(false)}
         onApply={(filters) => setQueryParams({ ...filters })}
+        hasPremiumAccess={hasPremiumFeatureAccess}
+        onPremiumTagsRequired={() => {
+          setShowFilterModal(false);
+          showPremiumModal("tags");
+        }}
       />
 
       <Modal

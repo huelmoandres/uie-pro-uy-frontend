@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "@context/AuthContext";
 import { ReminderService } from "@services";
+import { useAccessPolicy } from "./useAccessPolicy";
 import type {
   IRemindersQuery,
   IRemindersListResponse,
@@ -15,12 +16,13 @@ const REMINDERS_PAGE_SIZE = 15;
 export function useReminders(params: IRemindersQuery = {}) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
+  const { hasPremiumAccess } = useAccessPolicy();
 
   return useQuery({
     queryKey: [...ReminderService.queryKeys.list(params), userId],
     queryFn: () => ReminderService.getAll(params),
     staleTime: 1000 * 60 * 2,
-    enabled: !!userId,
+    enabled: !!userId && hasPremiumAccess,
   });
 }
 
@@ -33,6 +35,7 @@ export function useRemindersInfinite(
 ) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
+  const { hasPremiumAccess } = useAccessPolicy();
 
   return useInfiniteQuery({
     queryKey: [...ReminderService.queryKeys.lists(), "infinite", params, userId],
@@ -51,6 +54,6 @@ export function useRemindersInfinite(
       return loaded < lastPage.total ? allPages.length + 1 : undefined;
     },
     staleTime: 1000 * 60 * 2,
-    enabled: !!userId,
+    enabled: !!userId && hasPremiumAccess,
   });
 }

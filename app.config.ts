@@ -18,6 +18,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   const revenueCatIos = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS ?? "";
   const revenueCatAndroid =
     process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID ?? "";
+  const disableSubscriptionBypass =
+    process.env.EXPO_PUBLIC_DISABLE_SUBSCRIPTION_BYPASS === "1" ||
+    process.env.EXPO_PUBLIC_DISABLE_SUBSCRIPTION_BYPASS === "true";
 
   return {
     ...base,
@@ -30,6 +33,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       freeExpedientesLimit,
       revenueCatIos,
       revenueCatAndroid,
+      disableSubscriptionBypass,
     },
     ios: {
       ...base.ios,

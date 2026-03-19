@@ -16,9 +16,29 @@ const REVENUECAT_API_KEY_ANDROID =
   process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID ??
   "";
 
-export function isBypassEmail(email: string | null | undefined): boolean {
+/**
+ * Cuando es true, los emails de SUBSCRIPTION_BYPASS_EMAILS no reciben acceso forzado.
+ * Solo para dev/QA local — no desactivar bypass en builds de reviewers si dependen de él.
+ */
+export function isSubscriptionBypassDisabled(): boolean {
+  const extra = Constants.expoConfig?.extra as
+    | { disableSubscriptionBypass?: boolean }
+    | undefined;
+  if (extra?.disableSubscriptionBypass === true) return true;
+  const raw = process.env.EXPO_PUBLIC_DISABLE_SUBSCRIPTION_BYPASS ?? "";
+  const s = String(raw).toLowerCase().trim();
+  return s === "1" || s === "true" || s === "yes";
+}
+
+/** Email está en la lista de bypass (sin mirar el flag de desactivación). */
+export function isEmailOnBypassList(email: string | null | undefined): boolean {
   const lower = email?.trim().toLowerCase();
   return !!lower && SUBSCRIPTION_BYPASS_EMAILS.includes(lower);
+}
+
+export function isBypassEmail(email: string | null | undefined): boolean {
+  if (isSubscriptionBypassDisabled()) return false;
+  return isEmailOnBypassList(email);
 }
 
 export function buildRevenueCatAttributes(

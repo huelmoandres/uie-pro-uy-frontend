@@ -24,7 +24,6 @@ export interface NavigationRedirectsState {
   inAuthGroup: boolean;
   inPaywall: boolean;
   inOnboarding: boolean;
-  mustSeePaywall: boolean;
   hasSeenOnboarding: boolean;
   /** true mientras AsyncStorage carga hasSeenOnboarding */
   isOnboardingLoading: boolean;
@@ -61,10 +60,6 @@ export function useNavigationRedirects(): NavigationRedirectsState {
     (pathname != null && (pathname === "/paywall" || pathname.includes("/paywall"))) ?? false;
   const inOnboarding =
     (pathname === "/onboarding" || pathname?.startsWith("/onboarding")) ?? false;
-  // Freemium soft-lock: no hay redirect global por suscripción.
-  // El paywall aparece por acción explícita (premium gate o error API).
-  const mustSeePaywall = false;
-
   // Un solo destino de redirección para evitar loops por Redirects competidores
   const redirectTarget: RedirectTarget = (() => {
     if (!isAuthenticated && !inAuthGroup) return "/(auth)/login";
@@ -73,12 +68,12 @@ export function useNavigationRedirects(): NavigationRedirectsState {
         return "/onboarding";
       return "/(tabs)";
     }
-    // No redirigir cuando el usuario con acceso está en paywall: puede haber entrado
-    // desde Perfil para ver estado de suscripción. Puede volver atrás o usar "Ir al inicio".
+    // Freemium soft-lock: no hay redirect global por suscripción.
+    // El paywall aparece por acción explícita (premium gate o error API).
+    // No redirigir cuando está en paywall: puede haber entrado desde Perfil.
     if (
       isAuthenticated &&
       !isSubscriptionLoading &&
-      !mustSeePaywall &&
       !inPaywall &&
       !inOnboarding &&
       !isOnboardingLoading &&
@@ -119,7 +114,6 @@ export function useNavigationRedirects(): NavigationRedirectsState {
     inAuthGroup,
     inPaywall,
     inOnboarding,
-    mustSeePaywall,
     hasSeenOnboarding: hasSeenOnboarding ?? false,
     isOnboardingLoading,
     showLoadingOverlay,

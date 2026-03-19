@@ -17,15 +17,13 @@ import {
   Platform,
  ScrollView } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
 import {
-  useAccessPolicy,
   useExpedienteDetail,
   useExpedienteNotes,
   useExportPdf,
   usePremiumGate,
+  useUnfollowExpediente,
 } from "@hooks";
-import { ExpedienteService } from "@services";
 import {
   ConfirmationModal,
   Skeleton,
@@ -210,7 +208,6 @@ function NotesEditor({
 }
 
 export default function ExpedienteDetailScreen() {
-  const queryClient = useQueryClient();
   const { id } = useLocalSearchParams();
   const [showUnfollowModal, setShowUnfollowModal] = useState(false);
   const [showAgenda, setShowAgenda] = useState(false);
@@ -222,7 +219,7 @@ export default function ExpedienteDetailScreen() {
     featureParam,
     hidePremiumModal,
   } = usePremiumGate();
-  const { hasPremiumAccess: hasPremiumFromPolicy } = useAccessPolicy();
+  const unfollowMutation = useUnfollowExpediente();
 
   const iue = (id as string).replace(":", "/");
 
@@ -238,28 +235,9 @@ export default function ExpedienteDetailScreen() {
   const { data, isLoading, isError, refetch, isRefetching } =
     useExpedienteDetail(iue);
 
-  const handleUnfollow = async () => {
+  const handleUnfollow = () => {
     setShowUnfollowModal(false);
-    try {
-      await ExpedienteService.unfollow(id as string);
-      void queryClient.invalidateQueries({
-        queryKey: ExpedienteService.queryKeys.lists(),
-      });
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Toast.show({
-        type: "success",
-        text1: "Éxito",
-        text2: "Dejaste de seguir este expediente.",
-      });
-      router.back();
-    } catch {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "No se pudo realizar la acción. Intentá de nuevo.",
-      });
-    }
+    unfollowMutation.mutate(id as string);
   };
 
   const availableYears = useMemo(() => {
@@ -358,7 +336,7 @@ export default function ExpedienteDetailScreen() {
   const item = data;
   const parties = item.parties;
   const prediction = item.prediction;
-  const canUsePremiumActions = hasPremiumAccess && hasPremiumFromPolicy;
+  const canUsePremiumActions = hasPremiumAccess;
 
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
@@ -489,9 +467,19 @@ export default function ExpedienteDetailScreen() {
                 ? "border-accent/30 bg-accent/10"
                 : "border-amber-300/60 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10"
             }`}
-            onPress={() => setShowReminderModal(true)}
+            onPress={() => {
+              if (!canUsePremiumActions) {
+                showPremiumModal("reminders");
+                return;
+              }
+              setShowReminderModal(true);
+            }}
           >
-            <Bell size={18} color="#B89146" />
+            {canUsePremiumActions ? (
+              <Bell size={18} color="#B89146" />
+            ) : (
+              <Lock size={16} color="#B89146" />
+            )}
             <Text className="font-sans-bold text-sm text-accent uppercase tracking-widest">
               Agregar recordatorio
             </Text>

@@ -13,6 +13,8 @@ export const PREMIUM_FEATURE_KEYS = {
   exportPdf: "export-pdf",
   resumenIa: "resumen-ia",
   addExpediente: "add-expediente",
+  reminders: "reminders",
+  tags: "tags",
 } as const;
 
 export type PremiumFeatureKey = keyof typeof PREMIUM_FEATURE_KEYS;
@@ -27,6 +29,8 @@ export const PREMIUM_FEATURE_LABELS: Record<PremiumFeatureKey, string> = {
   exportPdf: "Exportar a PDF",
   resumenIa: "Resumen con IA",
   addExpediente: "Agregar más expedientes",
+  reminders: "Recordatorios",
+  tags: "Etiquetas",
 };
 
 /** Mapa de param ?feature= a etiqueta (para modal y Paywall). */
@@ -40,6 +44,8 @@ export const FEATURE_PARAM_TO_LABEL: Record<string, string> = {
   "export-pdf": "Exportar a PDF",
   "resumen-ia": "Resumen con IA",
   "add-expediente": "Agregar más expedientes",
+  reminders: "Recordatorios",
+  tags: "Etiquetas",
 };
 
 /** Texto dinámico para PaywallHero cuando viene con ?feature= (mejora conversión). */

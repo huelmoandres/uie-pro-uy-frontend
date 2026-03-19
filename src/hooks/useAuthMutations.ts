@@ -47,7 +47,7 @@ export const useLoginMutation = () => {
         console.warn("[Auth] RevenueCat logIn failed:", err);
       }
 
-      queryClient.setQueryData(["currentUser"], user);
+      queryClient.setQueryData(AuthService.queryKeys.currentUser, user);
       return result;
     },
     onSuccess: async (data) => {
@@ -94,7 +94,7 @@ export const useVerifyLoginOtpMutation = () => {
         console.warn("[Auth] RevenueCat logIn failed:", err);
       }
 
-      queryClient.setQueryData(["currentUser"], user);
+      queryClient.setQueryData(AuthService.queryKeys.currentUser, user);
       return result;
     },
     onSuccess: async () => {

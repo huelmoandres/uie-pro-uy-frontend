@@ -12,27 +12,23 @@ export function useAccessPolicy() {
   const hasPremiumAccess = isPro || isInTrial;
   const freeExpedientesLimit = FREEMIUM_POLICY.freeExpedientesLimit;
 
-  const canAddExpediente = (followedCount: number): boolean =>
-    hasPremiumAccess || followedCount < freeExpedientesLimit;
-
-  const getFreeQuotaUsage = (followedCount: number) => {
-    const used = Math.min(followedCount, freeExpedientesLimit);
-    const remaining = Math.max(freeExpedientesLimit - followedCount, 0);
-    return {
-      used,
-      total: freeExpedientesLimit,
-      remaining,
-      isExhausted: remaining === 0,
-      label: `${used} de ${freeExpedientesLimit} cupo gratuito`,
-    };
-  };
-
   return useMemo(
     () => ({
       hasPremiumAccess,
       freeExpedientesLimit,
-      canAddExpediente,
-      getFreeQuotaUsage,
+      canAddExpediente: (followedCount: number): boolean =>
+        hasPremiumAccess || followedCount < freeExpedientesLimit,
+      getFreeQuotaUsage: (followedCount: number) => {
+        const used = Math.min(followedCount, freeExpedientesLimit);
+        const remaining = Math.max(freeExpedientesLimit - followedCount, 0);
+        return {
+          used,
+          total: freeExpedientesLimit,
+          remaining,
+          isExhausted: remaining === 0,
+          label: `${used} de ${freeExpedientesLimit} cupo gratuito`,
+        };
+      },
     }),
     [hasPremiumAccess, freeExpedientesLimit],
   );

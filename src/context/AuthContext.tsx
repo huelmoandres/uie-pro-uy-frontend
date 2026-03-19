@@ -57,6 +57,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (storedToken) {
         setToken(storedToken);
         const userData = await AuthService.getCurrentUser();
+        if (__DEV__) {
+          console.log("[SubscriptionDebug] auth/me", {
+            userId: userData.id,
+            userEmail: userData.email,
+          });
+        }
         setUser(userData);
       }
     } catch (error) {
