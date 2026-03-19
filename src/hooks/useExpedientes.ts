@@ -29,6 +29,7 @@ export function useExpedientes(params: IExpedientesQuery) {
  */
 export function useExpedientesInfinite(
   params: Omit<IExpedientesQuery, "page"> = {},
+  options?: { enabled?: boolean },
 ) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
@@ -54,6 +55,42 @@ export function useExpedientesInfinite(
       const { currentPage, totalPages } = lastPage.meta;
       return currentPage < totalPages ? currentPage + 1 : undefined;
     },
-    enabled: !!userId,
+    enabled: !!userId && (options?.enabled ?? true),
+  });
+}
+
+/**
+ * Hook para lista infinita de expedientes con movimientos de hoy.
+ * Soporta los mismos filtros/paginación de la lista principal.
+ */
+export function useTodayMovementsExpedientesInfinite(
+  params: Omit<IExpedientesQuery, "page"> = {},
+  options?: { enabled?: boolean },
+) {
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+
+  return useInfiniteQuery({
+    queryKey: [
+      ...ExpedienteService.queryKeys.todayMovementsLists(),
+      "infinite",
+      params,
+      userId,
+    ],
+    queryFn: async ({
+      pageParam = 1,
+    }): Promise<IPaginatedExpedientes> => {
+      return ExpedienteService.getTodayMovements({
+        ...params,
+        page: pageParam,
+        limit: params.limit ?? EXPEDIENTES_PAGE_SIZE,
+      });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { currentPage, totalPages } = lastPage.meta;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+    enabled: !!userId && (options?.enabled ?? true),
   });
 }

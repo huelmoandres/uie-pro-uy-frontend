@@ -28,6 +28,26 @@ export async function getExpedientes(
 }
 
 /**
+ * Fetches followed expedientes that had movements today
+ * (backend timezone: America/Montevideo), with pagination and filters.
+ */
+export async function getTodayMovementExpedientes(
+  params: IExpedientesQuery = {},
+): Promise<IPaginatedExpedientes> {
+  const queryParams = { ...params };
+  if (queryParams.tagIds && Array.isArray(queryParams.tagIds)) {
+    queryParams.tagIds = queryParams.tagIds.join(",") as any;
+  }
+  const { data } = await apiClient.get<IPaginatedExpedientes>(
+    "/expedientes/today-movements",
+    {
+      params: queryParams,
+    },
+  );
+  return data;
+}
+
+/**
  * Fetches a single expediente by its IUE, including all movements.
  */
 export async function getExpedienteById(iue: string): Promise<IExpediente> {

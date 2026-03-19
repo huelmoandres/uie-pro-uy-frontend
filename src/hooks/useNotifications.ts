@@ -207,12 +207,27 @@ function handleNotificationResponse(response: any) {
   if (type === "EXPEDIENTE_UPDATE") {
     const grouped = data.grouped as boolean | undefined;
     const route = data.route as string | undefined;
+    const scope =
+      typeof params?.scope === "string" ? (params.scope as string) : undefined;
     const iuesPayload = data.iues as string[] | string | undefined;
     const iues = Array.isArray(iuesPayload)
       ? iuesPayload
       : typeof iuesPayload === "string"
         ? iuesPayload.split(",").map((s) => s.trim()).filter(Boolean)
         : [];
+    if (
+      grouped &&
+      route === "/expedientes/updates" &&
+      scope === "todayMovements"
+    ) {
+      router.push({
+        pathname: "/expedientes/updates",
+        params: { scope: "todayMovements" },
+      } as any);
+      return;
+    }
+
+    // Retrocompatibilidad con payload anterior (iues)
     if (grouped && route === "/expedientes/updates" && iues.length > 0) {
       router.push({
         pathname: "/expedientes/updates",

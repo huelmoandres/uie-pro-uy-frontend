@@ -5,6 +5,7 @@ import {
   SlidersHorizontal,
   Plus,
   Star,
+  Bell,
 } from "lucide-react-native";
 import { InfoButton } from "@components/ui";
 import { INFO_HINTS } from "@/constants/InfoHints";
@@ -20,6 +21,7 @@ interface ExpedientesHeaderProps {
   hasActiveFilters: boolean;
   totalItems?: number;
   freeQuotaLabel?: string;
+  onTodayMovementsPress?: () => void;
 }
 
 export function ExpedientesHeader({
@@ -32,6 +34,7 @@ export function ExpedientesHeader({
   hasActiveFilters,
   totalItems,
   freeQuotaLabel,
+  onTodayMovementsPress,
 }: ExpedientesHeaderProps) {
   return (
     <View className="border-b border-slate-100 bg-white px-5 pb-4 pt-14 dark:bg-primary dark:border-white/5">
@@ -134,6 +137,18 @@ export function ExpedientesHeader({
           size={14}
         />
       </View>
+
+      {onTodayMovementsPress ? (
+        <Pressable
+          onPress={onTodayMovementsPress}
+          className="mt-3 self-start flex-row items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 dark:border-accent/40 dark:bg-accent/10 active:opacity-70"
+        >
+          <Bell size={12} color="#B89146" />
+          <Text className="text-[11px] font-sans-semi text-primary dark:text-accent">
+            Novedades de hoy
+          </Text>
+        </Pressable>
+      ) : null}
 
       {freeQuotaLabel ? (
         <View className="mt-3 self-start rounded-full border border-amber-300/70 bg-amber-50 px-3 py-1.5 dark:border-amber-500/40 dark:bg-amber-500/10">

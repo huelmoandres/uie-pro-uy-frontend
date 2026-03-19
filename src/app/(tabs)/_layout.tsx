@@ -38,10 +38,12 @@ export default function TabLayout() {
   return (
     <>
       <Tabs
+      initialRouteName="index"
       screenOptions={{
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: inactiveColor,
         headerShown: false,
+        lazy: true,
         tabBarStyle: {
           backgroundColor: Colors[colorScheme].background,
           borderTopWidth: 1,
