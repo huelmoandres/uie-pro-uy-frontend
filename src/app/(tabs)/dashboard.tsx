@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react-native";
 import { useDashboard } from "@hooks/useDashboard";
+import { useAnalytics } from "@hooks/useAnalytics";
 import { PageContainer, InfoButton } from "@components/ui";
 import { DashboardSkeleton } from "@components/features";
 import {
@@ -31,6 +32,11 @@ import { INFO_HINTS } from "@/constants/InfoHints";
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { data, isLoading, isError, refetch, isRefetching } = useDashboard();
+  const { trackEvent } = useAnalytics();
+
+  React.useEffect(() => {
+    trackEvent("dashboard_viewed");
+  }, [trackEvent]);
 
   return (
     <PageContainer withHeader={false}>

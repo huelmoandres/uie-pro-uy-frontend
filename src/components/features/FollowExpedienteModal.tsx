@@ -22,8 +22,9 @@ import {
 } from "@schemas/auth.schema";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
-import { extractApiErrorMessage } from "@utils/apiError";
+import { extractApiErrorMessage, extractApiErrorCode, DOMAIN_ERROR_CODES } from "@utils/apiError";
 import { ExpedienteService } from "@services";
+import { useAnalytics } from "@hooks/useAnalytics";
 
 interface FollowExpedienteModalProps {
   visible: boolean;
@@ -39,6 +40,7 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
   onClose,
 }) => {
   const queryClient = useQueryClient();
+  const { trackEvent } = useAnalytics();
   const inputRef = useRef<TextInput>(null);
 
   const {
@@ -80,6 +82,10 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
       handleClose();
     } catch (err: unknown) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const errorCode = extractApiErrorCode(err);
+      if (errorCode === DOMAIN_ERROR_CODES.EXP_007) {
+        trackEvent("free_limit_reached", { source: "follow_modal" });
+      }
       const msg = extractApiErrorMessage(
         err,
         "No se pudo agregar el expediente. Verificá el IUE ingresado.",

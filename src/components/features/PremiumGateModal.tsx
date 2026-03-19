@@ -11,6 +11,7 @@ import { BlurView } from "expo-blur";
 import { Lock, X } from "lucide-react-native";
 import { router } from "expo-router";
 import { FEATURE_PARAM_TO_LABEL } from "@constants/premiumFeatures";
+import { useAnalytics } from "@hooks/useAnalytics";
 
 interface PremiumGateModalProps {
   visible: boolean;
@@ -21,7 +22,7 @@ interface PremiumGateModalProps {
 
 /**
  * Modal que se muestra cuando un usuario free intenta acceder a una feature premium.
- * El botón "Ver Planes" navega a /paywall?feature=X para texto dinámico en el Paywall
+ * El botón "Ver Planes" navega a /paywall?entry=gate&feature=X para texto dinámico en el Paywall
  * (mejora conversión ~15-20%).
  */
 export function PremiumGateModal({
@@ -30,18 +31,22 @@ export function PremiumGateModal({
   feature,
 }: PremiumGateModalProps) {
   const featureName = FEATURE_PARAM_TO_LABEL[feature] ?? "esta función";
+  const { trackEvent } = useAnalytics();
 
   const handleGoToPaywall = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onClose();
-    router.push(`/paywall?feature=${encodeURIComponent(feature)}` as any);
+    router.push(
+      `/paywall?entry=gate&feature=${encodeURIComponent(feature)}` as any,
+    );
   };
 
   React.useEffect(() => {
     if (visible) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      trackEvent("premium_gate_shown", { feature });
     }
-  }, [visible]);
+  }, [visible, feature, trackEvent]);
 
   if (!visible) return null;
 

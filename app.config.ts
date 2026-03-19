@@ -21,6 +21,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   const disableSubscriptionBypass =
     process.env.EXPO_PUBLIC_DISABLE_SUBSCRIPTION_BYPASS === "1" ||
     process.env.EXPO_PUBLIC_DISABLE_SUBSCRIPTION_BYPASS === "true";
+  const postHogApiKey = process.env.EXPO_PUBLIC_POSTHOG_API_KEY ?? "";
+  const postHogHost =
+    process.env.EXPO_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
 
   return {
     ...base,
@@ -34,6 +37,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       revenueCatIos,
       revenueCatAndroid,
       disableSubscriptionBypass,
+      postHogApiKey,
+      postHogHost,
     },
     ios: {
       ...base.ios,

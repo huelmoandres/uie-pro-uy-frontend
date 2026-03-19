@@ -23,6 +23,7 @@ import {
   useExportPdf,
   usePremiumGate,
   useUnfollowExpediente,
+  useAnalytics,
 } from "@hooks";
 import {
   ConfirmationModal,
@@ -219,9 +220,14 @@ export default function ExpedienteDetailScreen() {
     featureParam,
     hidePremiumModal,
   } = usePremiumGate();
+  const { trackEvent } = useAnalytics();
   const unfollowMutation = useUnfollowExpediente();
 
   const iue = (id as string).replace(":", "/");
+
+  useEffect(() => {
+    trackEvent("expediente_detail_viewed");
+  }, [trackEvent]);
 
   const pdfExporter = useExportPdf();
 

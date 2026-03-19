@@ -3,17 +3,20 @@ import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
 import { ReminderService } from "@services";
 import type { ICreateReminderPayload } from "@app-types/reminder.types";
+import { useAnalytics } from "@hooks/useAnalytics";
 
 /**
  * Mutación para crear un recordatorio relativo a un plazo.
  */
 export function useCreateReminder() {
   const queryClient = useQueryClient();
+  const { trackEvent } = useAnalytics();
 
   return useMutation({
     mutationFn: (payload: ICreateReminderPayload) =>
       ReminderService.create(payload),
     onSuccess: () => {
+      trackEvent("reminder_created");
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({
         type: "success",

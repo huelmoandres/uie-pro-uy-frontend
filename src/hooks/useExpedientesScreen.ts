@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useExpedientesInfinite } from "./useExpedientes";
 import { useDebounce } from "./useDebounce";
 import { usePinExpediente } from "./usePinExpediente";
+import { useAnalytics } from "./useAnalytics";
 import type {
   IExpediente,
   IExpedientesQuery,
@@ -34,6 +35,8 @@ export function useExpedientesScreen() {
   const [tagPickerIue, setTagPickerIue] = useState<string | null>(null);
   const [reminderModalItem, setReminderModalItem] =
     useState<IExpediente | null>(null);
+  const { trackEvent } = useAnalytics();
+  const hasFiredSearchRef = useRef(false);
 
   const debouncedSearch = useDebounce(searchText, 500);
   const {
@@ -58,12 +61,20 @@ export function useExpedientesScreen() {
   }, [openAddExpediente]);
 
   useEffect(() => {
+    const trimmed = debouncedSearch.trim();
     setQueryParams((prev) => {
-      const newSearch = debouncedSearch.trim() || undefined;
+      const newSearch = trimmed || undefined;
       if (prev.search === newSearch) return prev;
       return { ...prev, search: newSearch };
     });
-  }, [debouncedSearch]);
+    // Trackear búsqueda solo si el texto tiene contenido (evita el reset a vacío).
+    if (trimmed) {
+      hasFiredSearchRef.current = true;
+      trackEvent("search_performed", { has_text: true });
+    } else if (hasFiredSearchRef.current) {
+      hasFiredSearchRef.current = false;
+    }
+  }, [debouncedSearch, trackEvent]);
 
   const handleTabChange = useCallback((tab: TabFilter) => {
     setActiveTab(tab);

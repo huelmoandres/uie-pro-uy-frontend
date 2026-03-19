@@ -53,7 +53,6 @@ const AGENDA_BASE_URL = "https://agenda.poderjudicial.gub.uy";
  */
 let NativeWebView: typeof import("react-native-webview").WebView | null = null;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports -- dynamic require para fallback en Expo Go
   NativeWebView = require("react-native-webview").WebView;
 } catch {
   NativeWebView = null;

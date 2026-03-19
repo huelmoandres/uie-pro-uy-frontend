@@ -1,4 +1,5 @@
 import React from "react";
+import { router } from "expo-router";
 import { View, Modal } from "react-native";
 import Toast from "react-native-toast-message";
 import {
@@ -110,6 +111,13 @@ export default function ExpedientesScreen() {
     setReminderModalItem(item);
   };
 
+  const handleOpenTodayMovements = () => {
+    router.push({
+      pathname: "/expedientes/updates",
+      params: { scope: "todayMovements" },
+    } as any);
+  };
+
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <ExpedientesHeader
@@ -122,6 +130,7 @@ export default function ExpedientesScreen() {
         hasActiveFilters={hasActiveFilters}
         totalItems={paginationMeta?.totalItems}
         freeQuotaLabel={freeQuotaLabel}
+        onTodayMovementsPress={handleOpenTodayMovements}
       />
 
       <ExpedientesContent

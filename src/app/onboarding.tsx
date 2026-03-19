@@ -22,6 +22,7 @@ import {
 } from "lucide-react-native";
 import { LEGAL_URLS } from "@/constants/legal";
 import { useOnboarding } from "@context/OnboardingContext";
+import { useAnalytics } from "@hooks/useAnalytics";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -61,6 +62,7 @@ export default function OnboardingScreen() {
   const flatListRef = useRef<FlatList<(typeof SLIDES)[number]>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { markOnboardingSeen } = useOnboarding();
+  const { trackEvent } = useAnalytics();
 
   const handleMomentumScrollEnd = (
     e: NativeSyntheticEvent<NativeScrollEvent>,
@@ -71,11 +73,19 @@ export default function OnboardingScreen() {
 
     // Evita "loop" por offsets fraccionales: solo actualizamos cuando el scroll
     // ya llegó al slide (momentum end) con pagingEnabled.
-    setCurrentIndex((prev) => (prev === index ? prev : index));
+    setCurrentIndex((prev) => {
+      if (prev === index) return prev;
+      trackEvent("onboarding_step_viewed", {
+        step: index,
+        total_steps: SLIDES.length,
+      });
+      return index;
+    });
   };
 
   const handleContinue = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    trackEvent("onboarding_completed", { total_steps: SLIDES.length });
     await markOnboardingSeen();
     router.replace({
       pathname: "/(tabs)",

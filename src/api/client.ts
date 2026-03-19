@@ -30,21 +30,6 @@ export const setGlobalSignOut = (callback: () => Promise<void>) => {
   globalSignOut = callback;
 };
 
-// ─── Paywall Redirection (Debounce) ──────────────────────────────────────────
-
-let isNavigatingToPaywall = false;
-
-const handlePaywallRedirect = () => {
-  if (!isNavigatingToPaywall) {
-    isNavigatingToPaywall = true;
-    router.replace("/paywall");
-    // Liberar el flag después de un segundo para futuras navegaciones
-    setTimeout(() => {
-      isNavigatingToPaywall = false;
-    }, 1000);
-  }
-};
-
 // ─── Axios Instance ───────────────────────────────────────────────────────────
 
 export const apiClient = axios.create({
@@ -108,17 +93,8 @@ apiClient.interceptors.response.use(
       isAuthEndpoint ||
       originalConfig?._retry
     ) {
-      const errorData = error.response?.data as
-        | { errorCode?: string }
-        | undefined;
-      if (
-        (error.response?.status === 403 &&
-          (errorData?.errorCode === "PAY_001" ||
-            errorData?.errorCode === "EXP_007")) ||
-        error.response?.status === 402
-      ) {
-        handlePaywallRedirect();
-      }
+      // Freemium soft-lock: no redirección global automática al paywall.
+      // El paywall se muestra por acción explícita (Perfil / PremiumGateModal).
       return Promise.reject(error);
     }
 

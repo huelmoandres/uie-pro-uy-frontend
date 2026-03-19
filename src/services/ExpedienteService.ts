@@ -1,5 +1,6 @@
 import {
   getExpedientes,
+  getTodayMovementExpedientes,
   getExpedienteById,
   followExpediente,
   unfollowExpediente,
@@ -23,6 +24,10 @@ export class ExpedienteService {
     lists: () => [...ExpedienteService.queryKeys.all, "list"] as const,
     list: (params: IExpedientesQuery) =>
       [...ExpedienteService.queryKeys.lists(), params] as const,
+    todayMovementsLists: () =>
+      [...ExpedienteService.queryKeys.all, "today-movements-list"] as const,
+    todayMovementsList: (params: IExpedientesQuery) =>
+      [...ExpedienteService.queryKeys.todayMovementsLists(), params] as const,
     details: () => [...ExpedienteService.queryKeys.all, "detail"] as const,
     detail: (id: string) =>
       [...ExpedienteService.queryKeys.details(), id] as const,
@@ -32,6 +37,12 @@ export class ExpedienteService {
     params: IExpedientesQuery,
   ): Promise<IPaginatedResponse<IExpediente>> {
     return await getExpedientes(params);
+  }
+
+  static async getTodayMovements(
+    params: IExpedientesQuery,
+  ): Promise<IPaginatedResponse<IExpediente>> {
+    return await getTodayMovementExpedientes(params);
   }
 
   static async getById(id: string): Promise<IExpediente> {
