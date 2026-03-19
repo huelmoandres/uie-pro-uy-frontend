@@ -18,7 +18,13 @@ import {
  ScrollView } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useExpedienteDetail, useExpedienteNotes, useExportPdf } from "@hooks";
+import {
+  useAccessPolicy,
+  useExpedienteDetail,
+  useExpedienteNotes,
+  useExportPdf,
+  usePremiumGate,
+} from "@hooks";
 import { ExpedienteService } from "@services";
 import {
   ConfirmationModal,
@@ -34,6 +40,7 @@ import {
   InternalGroupItem,
   ActivityStatusBadge,
   CreateReminderModal,
+  PremiumGateModal,
 } from "@components/features";
 import {
   Trash2,
@@ -48,6 +55,7 @@ import {
   Pencil,
   Download,
   Bell,
+  Lock,
 } from "lucide-react-native";
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
@@ -207,6 +215,14 @@ export default function ExpedienteDetailScreen() {
   const [showUnfollowModal, setShowUnfollowModal] = useState(false);
   const [showAgenda, setShowAgenda] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
+  const {
+    hasAccess: hasPremiumAccess,
+    showPremiumModal,
+    showModal: showPremiumGateModal,
+    featureParam,
+    hidePremiumModal,
+  } = usePremiumGate();
+  const { hasPremiumAccess: hasPremiumFromPolicy } = useAccessPolicy();
 
   const iue = (id as string).replace(":", "/");
 
@@ -342,6 +358,7 @@ export default function ExpedienteDetailScreen() {
   const item = data;
   const parties = item.parties;
   const prediction = item.prediction;
+  const canUsePremiumActions = hasPremiumAccess && hasPremiumFromPolicy;
 
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
@@ -467,7 +484,11 @@ export default function ExpedienteDetailScreen() {
         {/* Recordatorio + Agenda CTA */}
         <View className="mb-6 gap-3">
           <Pressable
-            className="flex-row items-center justify-center gap-3 rounded-[20px] border border-accent/30 bg-accent/10 p-4 active:opacity-70"
+            className={`flex-row items-center justify-center gap-3 rounded-[20px] border p-4 active:opacity-70 ${
+              canUsePremiumActions
+                ? "border-accent/30 bg-accent/10"
+                : "border-amber-300/60 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10"
+            }`}
             onPress={() => setShowReminderModal(true)}
           >
             <Bell size={18} color="#B89146" />
@@ -476,10 +497,24 @@ export default function ExpedienteDetailScreen() {
             </Text>
           </Pressable>
           <Pressable
-            className="flex-row items-center justify-center gap-3 rounded-[20px] border border-accent/30 bg-accent/10 p-4 active:opacity-70"
-            onPress={() => setShowAgenda(true)}
+            className={`flex-row items-center justify-center gap-3 rounded-[20px] border p-4 active:opacity-70 ${
+              canUsePremiumActions
+                ? "border-accent/30 bg-accent/10"
+                : "border-amber-300/60 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10"
+            }`}
+            onPress={() => {
+              if (!canUsePremiumActions) {
+                showPremiumModal("agenda-turno");
+                return;
+              }
+              setShowAgenda(true);
+            }}
           >
-            <Calendar size={18} color="#B89146" />
+            {canUsePremiumActions ? (
+              <Calendar size={18} color="#B89146" />
+            ) : (
+              <Lock size={16} color="#B89146" />
+            )}
             <Text className="font-sans-bold text-sm text-accent uppercase tracking-widest">
               Agendar Hora
             </Text>
@@ -675,13 +710,27 @@ export default function ExpedienteDetailScreen() {
 
           {/* Export PDF */}
           <Pressable
-            className="mb-3 flex-row items-center justify-between rounded-3xl bg-accent/5 p-5 border border-accent/15 active:bg-accent/10"
-            onPress={() => void pdfExporter.export(item)}
+            className={`mb-3 flex-row items-center justify-between rounded-3xl p-5 border ${
+              canUsePremiumActions
+                ? "bg-accent/5 border-accent/15 active:bg-accent/10"
+                : "bg-amber-50 border-amber-300/50 dark:bg-amber-500/10 dark:border-amber-500/30"
+            }`}
+            onPress={() => {
+              if (!canUsePremiumActions) {
+                showPremiumModal("export-pdf");
+                return;
+              }
+              void pdfExporter.export(item);
+            }}
             disabled={pdfExporter.isExporting}
           >
             <View className="flex-row items-center">
               <View className="h-10 w-10 items-center justify-center rounded-xl bg-accent/10 mr-4">
-                <Download size={18} color="#B89146" />
+                {canUsePremiumActions ? (
+                  <Download size={18} color="#B89146" />
+                ) : (
+                  <Lock size={16} color="#B89146" />
+                )}
               </View>
               <View>
                 <Text className="text-sm font-sans-bold text-accent">
@@ -762,6 +811,12 @@ export default function ExpedienteDetailScreen() {
         onClose={() => setShowReminderModal(false)}
         iue={item.iue}
         caratula={item.caratula ?? null}
+      />
+
+      <PremiumGateModal
+        visible={showPremiumGateModal}
+        onClose={hidePremiumModal}
+        feature={featureParam}
       />
     </View>
   );

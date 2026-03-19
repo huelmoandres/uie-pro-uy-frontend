@@ -108,9 +108,13 @@ apiClient.interceptors.response.use(
       isAuthEndpoint ||
       originalConfig?._retry
     ) {
+      const errorData = error.response?.data as
+        | { errorCode?: string }
+        | undefined;
       if (
         error.response?.status === 403 &&
-        (error.response?.data as any)?.code === "PAY_001"
+        (errorData?.errorCode === "PAY_001" ||
+          errorData?.errorCode === "EXP_007")
       ) {
         handlePaywallRedirect();
       }

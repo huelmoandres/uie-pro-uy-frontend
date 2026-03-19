@@ -1,6 +1,6 @@
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@context/AuthContext";
 import { useSubscription } from "@context/SubscriptionContext";
 import { usePaywallActions } from "@hooks/usePaywallActions";
@@ -14,14 +14,15 @@ import {
 } from "@components/features/paywall";
 
 export default function PaywallScreen() {
+  const { feature } = useLocalSearchParams<{ feature?: string }>();
   const { signOut } = useAuth();
   const { isPro, isInTrial } = useSubscription();
   const { handleSubscribe, handleRestore, isPurchasing, isRestoring } =
     usePaywallActions();
 
-  // Mostrar flecha atrás cuando el usuario tiene Pro o trial (accedió desde perfil).
-  // Ocultar cuando no tiene acceso (fue redirigido y no debe volver).
-  const canGoBack = isPro || isInTrial;
+  // Freemium soft-lock: permitir volver atrás siempre.
+  // El bloqueo de funciones ocurre en el gate de cada feature.
+  const canGoBack = true;
 
   return (
     <>
@@ -39,7 +40,7 @@ export default function PaywallScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <PaywallHero />
+        <PaywallHero featureParam={feature} />
         <PaywallBenefits />
         <PaywallLegal />
         <PaywallCta

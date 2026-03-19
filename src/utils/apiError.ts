@@ -5,6 +5,10 @@
 export const DOMAIN_ERROR_CODES = {
   /** Cuota de IA agotada → redirigir a Paywall */
   DEC_004: "DEC_004",
+  /** Suscripción inactiva */
+  PAY_001: "PAY_001",
+  /** Límite de expediente gratuito */
+  EXP_007: "EXP_007",
   /** Token inválido o expirado */
   AUTH_001: "AUTH_001",
 } as const;
@@ -47,6 +51,19 @@ export function isDecreeQuotaError(err: unknown): boolean {
  */
 export function isQuotaError(err: unknown): boolean {
   return isDecreeQuotaError(err);
+}
+
+/**
+ * Indica si el error requiere mostrar Paywall
+ * (suscripción inactiva o límite free alcanzado).
+ */
+export function isPaywallRequiredError(err: unknown): boolean {
+  if (!err || typeof err !== "object" || !("response" in err)) return false;
+  const r = (err as ApiErrorResponse).response;
+  const code = r?.data?.errorCode;
+  return (
+    code === DOMAIN_ERROR_CODES.PAY_001 || code === DOMAIN_ERROR_CODES.EXP_007
+  );
 }
 
 /**

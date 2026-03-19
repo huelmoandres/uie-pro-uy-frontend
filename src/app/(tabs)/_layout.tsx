@@ -1,5 +1,6 @@
 import React from "react";
 import { Tabs } from "expo-router";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Home,
@@ -7,9 +8,12 @@ import {
   CalendarClock,
   LayoutDashboard,
   Wrench,
+  Lock,
 } from "lucide-react-native";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/base/useColorScheme";
+import { PremiumGateModal } from "@components/features";
+import { usePremiumGate } from "@hooks";
 
 /**
  * Premium Tab Layout — Expedientes, Agenda, Utilidades, Dashboard, Mi Perfil.
@@ -17,14 +21,23 @@ import { useColorScheme } from "@/components/base/useColorScheme";
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
+  const premiumGate = usePremiumGate();
   const activeColor = Colors[colorScheme].tint;
   const inactiveColor = Colors[colorScheme].tabIconDefault;
+  const {
+    hasAccess: hasPremiumAccess,
+    showPremiumModal,
+    showModal: showPremiumGateModal,
+    featureParam,
+    hidePremiumModal,
+  } = premiumGate;
 
   const tabBarContentHeight = 48;
   const tabBarHeight = tabBarContentHeight + Math.max(insets.bottom, 10);
 
   return (
-    <Tabs
+    <>
+      <Tabs
       screenOptions={{
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: inactiveColor,
@@ -54,14 +67,29 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="deadline-agenda"
+        listeners={{
+          tabPress: (event) => {
+            if (!hasPremiumAccess) {
+              event.preventDefault();
+              showPremiumModal("agenda");
+            }
+          },
+        }}
         options={{
           title: "Agenda",
           tabBarIcon: ({ color, focused }) => (
-            <CalendarClock
-              size={22}
-              color={color}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <View className="relative">
+              <CalendarClock
+                size={22}
+                color={color}
+                strokeWidth={focused ? 2.5 : 2}
+              />
+              {!hasPremiumAccess && (
+                <View className="absolute -right-2 -top-1 rounded-full bg-amber-100 px-0.5 dark:bg-amber-500/20">
+                  <Lock size={12} color="#B89146" />
+                </View>
+              )}
+            </View>
           ),
         }}
       />
@@ -76,14 +104,29 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="dashboard"
+        listeners={{
+          tabPress: (event) => {
+            if (!hasPremiumAccess) {
+              event.preventDefault();
+              showPremiumModal("dashboard");
+            }
+          },
+        }}
         options={{
           title: "Dashboard",
           tabBarIcon: ({ color, focused }) => (
-            <LayoutDashboard
-              size={22}
-              color={color}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <View className="relative">
+              <LayoutDashboard
+                size={22}
+                color={color}
+                strokeWidth={focused ? 2.5 : 2}
+              />
+              {!hasPremiumAccess && (
+                <View className="absolute -right-2 -top-1 rounded-full bg-amber-100 px-0.5 dark:bg-amber-500/20">
+                  <Lock size={12} color="#B89146" />
+                </View>
+              )}
+            </View>
           ),
         }}
       />
@@ -96,6 +139,13 @@ export default function TabLayout() {
           ),
         }}
       />
-    </Tabs>
+      </Tabs>
+
+      <PremiumGateModal
+        visible={showPremiumGateModal}
+        onClose={hidePremiumModal}
+        feature={featureParam}
+      />
+    </>
   );
 }

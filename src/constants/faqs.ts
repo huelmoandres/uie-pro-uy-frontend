@@ -148,7 +148,27 @@ export const FAQS: FaqItem[] = [
   {
     question: "¿Cómo funciona la suscripción?",
     answer:
-      "IUE Pro requiere una suscripción activa (IUE.uy Pro) para acceder a todas las funcionalidades. Incluye 7 días de prueba gratuita sin permanencia. La suscripción se renueva automáticamente salvo que la canceles antes del final del período. Podés gestionar o cancelar desde Configuración de tu dispositivo (App Store o Google Play).",
+      "Podés seguir un expediente gratis para siempre, con notificaciones activas. Para agregar más expedientes y desbloquear funciones premium (agenda, comparar, sedes, tributos, dashboard, PDF, IA y agenda de turnos), necesitás IUE.uy Pro. Incluye 7 días de prueba gratuita con acceso completo. Luego podés continuar con el plan gratuito o suscribirte.",
+  },
+  {
+    question: "¿Cuántos expedientes puedo seguir gratis?",
+    answer:
+      "Podés seguir un (1) expediente de forma gratuita para siempre, con notificaciones activas.",
+  },
+  {
+    question: "¿Qué pasa si borro mi expediente gratis?",
+    answer:
+      "Si dejás de seguir tu único expediente gratuito, el cupo se considera consumido. Para seguir otro expediente necesitás suscribirte a IUE.uy Pro.",
+  },
+  {
+    question: "¿Qué funcionalidades son premium?",
+    answer:
+      "Agenda procesal, comparar expedientes, sedes judiciales, tributos judiciales, dashboard, exportar PDF, resumen con IA y agendar turnos en el Poder Judicial.",
+  },
+  {
+    question: "¿Qué incluye el período de prueba?",
+    answer:
+      "Durante el trial tenés acceso completo a todas las funcionalidades premium. Al finalizar, podés seguir usando tu cupo gratuito de un expediente o suscribirte para mantener todo desbloqueado.",
   },
   {
     question: "¿Cómo restauro mis compras?",

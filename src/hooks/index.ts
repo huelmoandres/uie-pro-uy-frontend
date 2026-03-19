@@ -26,3 +26,5 @@ export * from "./useReminderMutations";
 export * from "./useModalKeyboardDismiss";
 export * from "./useSubscriptionExpiry";
 export * from "./useTributos";
+export * from "./usePremiumGate";
+export * from "./useAccessPolicy";

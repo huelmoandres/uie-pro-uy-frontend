@@ -23,3 +23,4 @@ export * from "./CreateReminderModal";
 export * from "./ReminderCard";
 export * from "./FaqAccordion";
 export * from "./TributoCard";
+export * from "./PremiumGateModal";

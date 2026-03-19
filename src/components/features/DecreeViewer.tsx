@@ -30,10 +30,12 @@ import { useTooltipSeen } from "@hooks/useTooltipSeen";
 import { DeadlineBadge } from "./DeadlineBadge";
 import { useDecreeSummary } from "@hooks/useDecreeSummary";
 import { useExportDecreePdf } from "@hooks";
+import { useAccessPolicy, usePremiumGate } from "@hooks";
 import type { IDecreePdfContext } from "@utils/pdf-template";
 import { isDecreeQuotaError } from "@utils/apiError";
 import { router } from "expo-router";
 import { COLORS } from "@/constants/Colors";
+import { PremiumGateModal } from "./PremiumGateModal";
 
 interface Props {
   decree: IDecree;
@@ -61,6 +63,13 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
     error: summaryRawError,
   } = useDecreeSummary();
   const { isExporting, export: exportPdf } = useExportDecreePdf();
+  const { hasPremiumAccess } = useAccessPolicy();
+  const {
+    showPremiumModal,
+    showModal: showPremiumGateModal,
+    featureParam,
+    hidePremiumModal,
+  } = usePremiumGate();
 
   const isQuotaExceeded = isDecreeQuotaError(summaryRawError);
 
@@ -71,6 +80,10 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
   const canSummarize = !decree.isReserved && !!decree.textoDecreto?.trim();
 
   function handleSummarize() {
+    if (!hasPremiumAccess) {
+      showPremiumModal("resumen-ia");
+      return;
+    }
     markAiTooltipSeen();
     summarize(decree.id, {
       onSuccess: (data) => setSummary(data),
@@ -138,7 +151,13 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
               </View>
               <View className="flex-row items-center gap-2">
                 <Pressable
-                  onPress={() => exportPdf(decree, decreeContext)}
+                  onPress={() => {
+                    if (!hasPremiumAccess) {
+                      showPremiumModal("export-pdf");
+                      return;
+                    }
+                    exportPdf(decree, decreeContext);
+                  }}
                   disabled={isExporting}
                   className="flex-row items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 active:opacity-70 disabled:opacity-50"
                 >
@@ -226,7 +245,9 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
                     !summary &&
                     (isQuotaExceeded ? (
                       <Pressable
-                        onPress={() => router.push("/paywall")}
+                        onPress={() =>
+                          router.push("/paywall?feature=resumen-ia" as any)
+                        }
                         className="flex-row items-start gap-2.5 rounded-xl border border-amber-300/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-3 active:opacity-80"
                       >
                         <CreditCard
@@ -268,6 +289,12 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
           </View>
         </View>
       </Modal>
+
+      <PremiumGateModal
+        visible={showPremiumGateModal}
+        onClose={hidePremiumModal}
+        feature={featureParam}
+      />
     </>
   );
 });

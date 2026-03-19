@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Modal } from "react-native";
 import Toast from "react-native-toast-message";
 import {
@@ -10,11 +10,14 @@ import {
   AgendaWebView,
   TagPickerModal,
   CreateReminderModal,
+  PremiumGateModal,
 } from "@components/features";
-import { useExpedientesScreen } from "@hooks";
+import { useAccessPolicy, useExpedientesScreen, usePremiumGate } from "@hooks";
 
 export default function ExpedientesScreen() {
   const screen = useExpedientesScreen();
+  const premiumGate = usePremiumGate();
+  const { canAddExpediente, hasPremiumAccess, getFreeQuotaUsage } = useAccessPolicy();
 
   const {
     searchText,
@@ -51,6 +54,55 @@ export default function ExpedientesScreen() {
     handleBulkAgenda,
     handleCompare,
   } = screen;
+  const {
+    hasAccess: hasPremiumFeatureAccess,
+    showPremiumModal,
+    showModal: showPremiumGateModal,
+    featureParam,
+    hidePremiumModal,
+  } = premiumGate;
+  const totalItems = paginationMeta?.totalItems ?? 0;
+  const canCreateMoreExpedientes = canAddExpediente(totalItems);
+  const freeQuotaLabel =
+    !hasPremiumAccess && totalItems > 0
+      ? `${getFreeQuotaUsage(totalItems).label} utilizado`
+      : undefined;
+
+  useEffect(() => {
+    if (showFollowModal && !canCreateMoreExpedientes) {
+      setShowFollowModal(false);
+      showPremiumModal("add-expediente");
+    }
+  }, [
+    showFollowModal,
+    canCreateMoreExpedientes,
+    setShowFollowModal,
+    showPremiumModal,
+  ]);
+
+  const handleOpenAddExpediente = () => {
+    if (!canCreateMoreExpedientes) {
+      showPremiumModal("add-expediente");
+      return;
+    }
+    setShowFollowModal(true);
+  };
+
+  const handleGuardedCompare = () => {
+    if (!hasPremiumFeatureAccess) {
+      showPremiumModal("compare");
+      return;
+    }
+    handleCompare();
+  };
+
+  const handleGuardedBulkAgenda = () => {
+    if (!hasPremiumFeatureAccess) {
+      showPremiumModal("agenda-turno");
+      return;
+    }
+    handleBulkAgenda();
+  };
 
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
@@ -59,10 +111,11 @@ export default function ExpedientesScreen() {
         onSearchChange={setSearchText}
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        onAddPress={() => setShowFollowModal(true)}
+        onAddPress={handleOpenAddExpediente}
         onFilterPress={() => setShowFilterModal(true)}
         hasActiveFilters={hasActiveFilters}
         totalItems={paginationMeta?.totalItems}
+        freeQuotaLabel={freeQuotaLabel}
       />
 
       <ExpedientesContent
@@ -76,7 +129,7 @@ export default function ExpedientesScreen() {
         onLoadMore={handleLoadMore}
         hasNextPage={hasNextPage ?? false}
         isFetchingNextPage={isFetchingNextPage}
-        onAddPress={() => setShowFollowModal(true)}
+        onAddPress={handleOpenAddExpediente}
         onSelect={toggleSelection}
         onPin={handlePin}
         onTagsPress={setTagPickerIue}
@@ -87,8 +140,9 @@ export default function ExpedientesScreen() {
         <ExpedienteSelectionBar
           selectedCount={selectedIues.length}
           canCompare={canCompare}
-          onCompare={handleCompare}
-          onBulkAgenda={handleBulkAgenda}
+          hasPremiumAccess={hasPremiumFeatureAccess}
+          onCompare={handleGuardedCompare}
+          onBulkAgenda={handleGuardedBulkAgenda}
           onClearSelection={clearSelection}
           paginationMeta={paginationMeta}
           onLoadMore={handleLoadMore}
@@ -150,6 +204,12 @@ export default function ExpedientesScreen() {
         onClose={() => setReminderModalItem(null)}
         iue={reminderModalItem?.iue ?? null}
         caratula={reminderModalItem?.caratula ?? null}
+      />
+
+      <PremiumGateModal
+        visible={showPremiumGateModal}
+        onClose={hidePremiumModal}
+        feature={featureParam}
       />
     </View>
   );
