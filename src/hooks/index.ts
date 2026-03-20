@@ -31,3 +31,4 @@ export * from "./useAccessPolicy";
 export * from "./useProfileMutations";
 export * from "./useExpedienteMutations";
 export * from "./useAnalytics";
+export * from "./useBiometric";

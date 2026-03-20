@@ -34,6 +34,8 @@ import { LoadingOverlay } from "@components/shared/LoadingOverlay";
 import { AppLoadingScreen } from "@components/shared/AppLoadingScreen";
 import { NetworkBanner } from "@components/shared/NetworkBanner";
 import { NotificationPermissionModal } from "@components/shared/NotificationPermissionModal";
+import { BiometricLockScreen } from "@components/auth/BiometricLockScreen";
+import { useBiometric } from "@hooks/useBiometric";
 
 import {
   Inter_400Regular,
@@ -122,6 +124,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, signOut } = useAuth();
   const [, setEmergencyTapCount] = useState(0);
+  const { isLocked, biometricType, authenticate, unlock } = useBiometric(isAuthenticated);
 
   useNotifications(isAuthenticated);
 
@@ -224,6 +227,17 @@ function RootLayoutNav() {
             await requestAndRegisterNotifications();
           }}
         />
+      )}
+
+      {/* Biometric lock screen — shown when app returns from background */}
+      {isAuthenticated && isLocked && (
+        <Pressable style={StyleSheet.absoluteFill} accessible={false}>
+          <BiometricLockScreen
+            biometricType={biometricType}
+            onAuthenticate={authenticate}
+            onUnlock={unlock}
+          />
+        </Pressable>
       )}
     </ThemeProvider>
   );
