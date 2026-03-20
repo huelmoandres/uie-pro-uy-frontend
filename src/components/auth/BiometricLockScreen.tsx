@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 import { Fingerprint, ScanFace, LogOut } from "lucide-react-native";
 import { useAuth } from "@context/AuthContext";
@@ -17,13 +17,11 @@ export function BiometricLockScreen({
   const { signOut } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [failCount, setFailCount] = useState(0);
+  const isAuthenticatingRef = useRef(false);
 
-  useEffect(() => {
-    void triggerAuth();
-  }, []);
-
-  const triggerAuth = async () => {
-    if (isAuthenticating) return;
+  const triggerAuth = useCallback(async () => {
+    if (isAuthenticatingRef.current) return;
+    isAuthenticatingRef.current = true;
     setIsAuthenticating(true);
     try {
       const ok = await onAuthenticate();
@@ -33,9 +31,14 @@ export function BiometricLockScreen({
         setFailCount((c) => c + 1);
       }
     } finally {
+      isAuthenticatingRef.current = false;
       setIsAuthenticating(false);
     }
-  };
+  }, [onAuthenticate, onUnlock]);
+
+  useEffect(() => {
+    void triggerAuth();
+  }, [triggerAuth]);
 
   const handleSignOut = async () => {
     await signOut();

@@ -29,7 +29,6 @@ export const SUBSCRIPTION_TRIAL_DAYS = 7;
  * Editá esta lista y hacé `eas update` — no requiere rebuild.
  */
 export const SUBSCRIPTION_BYPASS_EMAILS: string[] = [
-  "huelmoandres@gmail.com",
   "alatallada@ferreirayasociados.com.uy",
   "user@iueprouy.com",
 ]

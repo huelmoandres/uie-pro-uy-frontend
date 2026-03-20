@@ -23,6 +23,8 @@ export const SECURE_STORE_KEYS = {
   ACCESS_TOKEN: "judicial_access_token",
   REFRESH_TOKEN: "judicial_refresh_token",
   BIOMETRIC_ENABLED: "judicial_biometric_enabled",
+  /** Último push token registrado exitosamente en el backend. Evita llamadas redundantes. */
+  PUSH_TOKEN: "judicial_push_token",
 } as const;
 
 let globalSignOut: (() => Promise<void>) | null = null;
@@ -68,6 +70,7 @@ async function performSignOut() {
   queryClient.clear();
   await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
   await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+  await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.PUSH_TOKEN);
   if (globalSignOut) {
     await globalSignOut();
   } else {

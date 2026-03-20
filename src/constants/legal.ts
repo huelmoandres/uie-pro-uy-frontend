@@ -14,8 +14,16 @@ export const LEGAL_URLS = {
   APPLE_EULA: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
 } as const;
 
-/** URLs de la web para Soporte y Contacto (por si se abren en navegador) */
+/** URLs de la web para Soporte, Contacto y descarga de la app */
 export const WEB_URLS = {
+  HOME: WEB_BASE,
   SOPORTE: `${WEB_BASE}/soporte`,
   CONTACTO: `${WEB_BASE}/contacto`,
+} as const;
+
+/** Links de descarga en las tiendas de aplicaciones. Dejar vacío si aún no está publicado. */
+export const STORE_URLS = {
+  APP_STORE: "https://apps.apple.com/uy/app/iue-pro-uy/id6759987612",
+  /** Completar cuando Google apruebe la app en Play Store. */
+  PLAY_STORE: "",
 } as const;

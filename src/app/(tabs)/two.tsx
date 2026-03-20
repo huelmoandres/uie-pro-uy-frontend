@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, Text, View, ScrollView } from "react-native";
 import { router } from "expo-router";
+import { formatDateShort } from "@utils/formatters";
 import { useAuth } from "@context/AuthContext";
 import { useSubscription } from "@context/SubscriptionContext";
 import { useSubscriptionExpiry } from "@hooks/useSubscriptionExpiry";
@@ -15,6 +16,7 @@ import {
   HelpCircle,
   Crown,
   Smartphone,
+  Users,
 } from "lucide-react-native";
 import { INFO_HINTS } from "@/constants/InfoHints";
 
@@ -25,7 +27,7 @@ import { INFO_HINTS } from "@/constants/InfoHints";
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { isPro, isInTrial } = useSubscription();
-  const { isExpiringSoon, daysRemaining } = useSubscriptionExpiry();
+  const { isExpiringSoon, daysRemaining, expirationDate } = useSubscriptionExpiry();
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
   const badgeLabel = isInTrial
@@ -66,6 +68,12 @@ export default function ProfileScreen() {
       label: "Dispositivos vinculados",
       color: "#64748B",
       route: "/linked-devices",
+    },
+    {
+      icon: Users,
+      label: "Referidos",
+      color: "#7c3aed",
+      route: "/referrals",
     },
     { icon: Shield, label: "Privacidad", color: "#64748B", route: "/privacy" },
     {
@@ -108,14 +116,25 @@ export default function ProfileScreen() {
                   {badgeLabel}
                 </Text>
               </View>
+              {/* Fecha de expiración para cualquier tipo de acceso Pro */}
+              {isPro && expirationDate && !isExpiringSoon && (
+                <View className="mt-3 px-4 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                  <Text className="text-xs font-sans text-emerald-700 dark:text-emerald-400 text-center">
+                    {isInTrial ? "Prueba activa" : "Activo"} hasta el{" "}
+                    {formatDateShort(expirationDate)}
+                  </Text>
+                </View>
+              )}
               {isExpiringSoon && daysRemaining !== null && (
                 <View className="mt-3 px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30">
                   <Text className="text-xs font-sans-semi text-amber-700 dark:text-amber-400 text-center">
                     {daysRemaining === 0
-                      ? "Tu prueba vence hoy"
+                      ? isInTrial ? "Tu prueba vence hoy" : "Tu acceso Pro vence hoy"
                       : daysRemaining === 1
-                        ? "Tu prueba vence mañana"
-                        : `Tu prueba está por vencer en ${daysRemaining} días`}
+                        ? isInTrial ? "Tu prueba vence mañana" : "Tu acceso Pro vence mañana"
+                        : isInTrial
+                          ? `Tu prueba vence en ${daysRemaining} días`
+                          : `Tu acceso Pro vence en ${daysRemaining} días`}
                   </Text>
                 </View>
               )}
@@ -168,7 +187,7 @@ export default function ProfileScreen() {
 
         <View className="mt-12 items-center">
           <Text className="text-[10px] font-sans text-slate-400 uppercase tracking-widest">
-            UIE Pro Uy v1.0.1
+            UIE Pro Uy v1.2.0
           </Text>
         </View>
       </ScrollView>

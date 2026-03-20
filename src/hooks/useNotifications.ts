@@ -96,7 +96,17 @@ export async function requestAndRegisterNotifications(): Promise<RegisterNotific
   }
   try {
     const token = await Notifications.getExpoPushTokenAsync({ projectId });
+
+    // Evitar llamadas redundantes: solo registrar si el token cambió desde el último envío.
+    const cachedToken = await SecureStore.getItemAsync(
+      SECURE_STORE_KEYS.PUSH_TOKEN,
+    );
+    if (cachedToken === token.data) {
+      return { ok: true };
+    }
+
     await apiClient.post("/users/me/push-token", { token: token.data });
+    await SecureStore.setItemAsync(SECURE_STORE_KEYS.PUSH_TOKEN, token.data);
     return { ok: true };
   } catch (error) {
     console.error("[Notifications] Failed to register token:", error);

@@ -3,8 +3,8 @@ import { Pressable, Text, View } from "react-native";
 import { router, Stack } from "expo-router";
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
-import { useForm } from "react-hook-form";
-import { Scale } from "lucide-react-native";
+import { useForm, useWatch } from "react-hook-form";
+import { Scale, Gift } from "lucide-react-native";
 import { useRegisterMutation } from "@hooks/useAuthMutations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterFormData } from "@schemas/auth.schema";
@@ -34,9 +34,16 @@ export default function RegisterScreen() {
     resolver: zodResolver(registerSchema),
   });
 
+  const referralCodeValue = useWatch({ control, name: "referralCode" });
+  const referralCodeReady = (referralCodeValue ?? "").length === 6;
+
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      const { confirmPassword, ...registerData } = data;
+      const { confirmPassword, referralCode, ...rest } = data;
+      const registerData = {
+        ...rest,
+        ...(referralCode ? { referralCode } : {}),
+      };
       const result = await registerMutation(registerData);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({
@@ -114,6 +121,29 @@ export default function RegisterScreen() {
             disabled={isLoading}
             error={errors.confirmPassword?.message}
           />
+
+          <FormField
+            control={control}
+            name="referralCode"
+            label="Código de invitación (opcional)"
+            placeholder="Ej: AB3X9Z"
+            autoCapitalize="characters"
+            maxLength={6}
+            disabled={isLoading}
+            error={errors.referralCode?.message}
+          />
+          {referralCodeReady ? (
+            <View className="flex-row items-center gap-1.5 -mt-2 ml-1 mb-4">
+              <Gift size={13} color="#059669" />
+              <Text className="text-xs font-sans-bold text-emerald-600 dark:text-emerald-400">
+                ¡Código listo! Arrancás con días de Pro gratis al crear tu cuenta.
+              </Text>
+            </View>
+          ) : (
+            <Text className="text-xs font-sans text-slate-400 dark:text-slate-500 -mt-2 ml-1 mb-4">
+              Si te compartieron un código, ingresalo y arrancás con días de Pro gratis.
+            </Text>
+          )}
 
           <AuthButton
             label="Crear Cuenta"

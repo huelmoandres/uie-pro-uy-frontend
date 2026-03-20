@@ -117,6 +117,8 @@ export default function PrivacyScreen() {
               "Token de notificaciones push de tu dispositivo para enviarte alertas.",
               "Preferencias de notificaciones que configurás en la app.",
               "Indicador de consumo del cupo gratuito de expedientes (para aplicar la regla freemium).",
+              "Preferencia de recepción de emails de marketing (configurable en cualquier momento usando el link de cancelación incluido en cada email de campaña).",
+              "Código de referido único generado automáticamente para cada cuenta, y el ID del usuario o partner que te invitó (si ingresaste un código al registrarte). Esto permite acreditar el beneficio correspondiente cuando se confirma una suscripción.",
               "Datos de uso de la app (pantallas visitadas, funcionalidades utilizadas, flujos de suscripción) procesados por nuestro proveedor de analíticas. Ningún texto judicial ni datos personales se incluyen en estos eventos.",
             ]}
           />
@@ -161,8 +163,11 @@ export default function PrivacyScreen() {
           <PolicySection
             number="5"
             icon={Bell}
-            title="Notificaciones push"
-            description="Si otorgás permiso de notificaciones, tu token de dispositivo se almacena en nuestros servidores para poder enviarte alertas. Podés revocar este permiso en cualquier momento desde la configuración de tu dispositivo o desde Mi Perfil → Notificaciones en la app. Al desactivar las notificaciones se elimina tu token de nuestros registros."
+            title="Notificaciones push y emails de marketing"
+            bullets={[
+              "PUSH: Si otorgás permiso de notificaciones, tu token de dispositivo se almacena en nuestros servidores para poder enviarte alertas. Podés revocar este permiso en cualquier momento desde la configuración de tu dispositivo o desde Mi Perfil → Notificaciones. Al desactivar las notificaciones se elimina tu token de nuestros registros.",
+              "EMAILS DE MARKETING: Podemos enviarte emails ocasionales sobre el uso de la app, recordatorios para agregar expedientes, sugerencias para invitar colegas y encuestas de satisfacción. Cada email incluye un link para cancelar la suscripción con un clic. Al cancelar, no volvés a recibir ningún email de campaña. Nunca enviamos spam — cada campaña se envía una única vez por cuenta.",
+            ]}
           />
           <Divider />
 
@@ -184,7 +189,8 @@ export default function PrivacyScreen() {
               "RevenueCat — gestión de suscripciones (App Store / Google Play).",
               "Apple Push Notification Service (APNs) / Firebase Cloud Messaging (FCM) — envío de notificaciones push.",
               "OpenAI y Google Gemini — procesamiento de texto para resúmenes IA (solo bajo demanda).",
-              "Brevo SMTP — envío de correos transaccionales (ej. mensajes de soporte, recuperación de contraseña).",
+              "Resend — envío de correos transaccionales urgentes (recuperación de contraseña, verificación OTP, notificaciones críticas).",
+              "SMTP propio — envío de correos en segundo plano (notificaciones de referidos, campañas de marketing con tu consentimiento).",
               "Poder Judicial del Uruguay (SOAP) — fuente oficial de datos de expedientes.",
               "PostHog — plataforma de analíticas de producto alojada en servidores de la Unión Europea (eu.i.posthog.com), cumpliendo estándares GDPR.",
             ]}
@@ -229,6 +235,7 @@ export default function PrivacyScreen() {
               "Rectificar información incorrecta (nombre, correo, teléfono, cédula).",
               "Eliminar tu cuenta en cualquier momento desde Configuración → Eliminar cuenta.",
               "Revocar los permisos de notificaciones push.",
+              "Cancelar la suscripción a emails de marketing usando el link de cancelación incluido en cualquier email de campaña.",
               "Exportar tus expedientes en formato PDF.",
             ]}
           />

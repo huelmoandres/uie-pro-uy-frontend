@@ -98,6 +98,13 @@ export const registerSchema = z
     confirmPassword: z
       .string()
       .min(1, "Confirmar la contraseña es obligatorio"),
+    referralCode: z
+      .string()
+      .length(6, "El código debe tener 6 caracteres.")
+      .regex(/^[A-Z0-9]+$/, "Solo letras y números.")
+      .transform((v) => v.toUpperCase())
+      .optional()
+      .or(z.literal("")),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",

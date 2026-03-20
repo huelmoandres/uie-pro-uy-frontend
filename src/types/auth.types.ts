@@ -15,6 +15,14 @@ export interface IUser {
   phone: string | null;
   cedula: string | null;
   createdAt: string;
+  referralCode: string | null;
+  referredById: string | null;
+  /** Tipo de referido que se aplicó al registrarse. null si no usó código. */
+  referralType: 'USER' | 'PARTNER' | null;
+  /** true si el backend confirma acceso Pro activo (suscripción o entitlement promocional). */
+  isPro: boolean;
+  /** Fecha de expiración del acceso Pro según el backend. null si no tiene o es perpetuo. */
+  proExpiresAt: string | null;
 }
 
 export interface ILoginRequest {
@@ -36,6 +44,7 @@ export interface IRegisterRequest {
   name?: string;
   phone?: string;
   cedula?: string;
+  referralCode?: string;
 }
 
 export interface IUpdateUserRequest {
