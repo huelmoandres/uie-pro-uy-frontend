@@ -21,12 +21,16 @@ interface ExpedientesContentProps {
   onLoadMore?: () => void;
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
-  onAddPress: () => void;
+  onAddPress?: () => void;
   onSelect: (iue: string) => void;
   onPin: (iue: string, isPinned: boolean) => void;
   onTagsPress: (iue: string | null) => void;
   onAddReminder: (item: IExpediente | null) => void;
   hasPremiumAccess?: boolean;
+  /** Texto del estado vacío (sobreescribe el default) */
+  emptyTitle?: string;
+  /** Descripción del estado vacío (sobreescribe el default) */
+  emptyDescription?: string;
 }
 
 export function ExpedientesContent({
@@ -46,6 +50,8 @@ export function ExpedientesContent({
   onTagsPress,
   onAddReminder,
   hasPremiumAccess = true,
+  emptyTitle,
+  emptyDescription,
 }: ExpedientesContentProps) {
   const renderItem = useCallback(
     ({ item, index }: { item: IExpediente; index: number }) => (
@@ -131,14 +137,21 @@ export function ExpedientesContent({
     return (
       <PageContainer withHeader={true}>
         <EducationalEmptyState
-          title="Todavía no seguís ningún expediente"
-          description="Ingresá un IUE y nosotros nos encargamos de avisarte cuando haya novedades."
+          title={emptyTitle ?? "Todavía no seguís ningún expediente"}
+          description={
+            emptyDescription ??
+            "Ingresá un IUE y nosotros nos encargamos de avisarte cuando haya novedades."
+          }
           icon={FolderOpen}
           iconColor={COLORS.slate[400]}
-          primaryCta={{
-            label: "Buscar expediente por IUE",
-            onPress: onAddPress,
-          }}
+          primaryCta={
+            onAddPress
+              ? {
+                  label: "Buscar expediente por IUE",
+                  onPress: onAddPress,
+                }
+              : undefined
+          }
         />
       </PageContainer>
     );

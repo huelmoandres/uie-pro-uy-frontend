@@ -11,6 +11,7 @@ import { SECURE_STORE_KEYS, setGlobalSignOut } from "@api/client";
 import { logout as apiLogout } from "@api/auth.api";
 import { queryClient } from "@providers/QueryProvider";
 import { getDeviceId } from "@utils/deviceId";
+import { usePostHog } from "posthog-react-native";
 import type { IUser } from "@app-types/auth.types";
 
 interface AuthContextData {
@@ -28,8 +29,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<IUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const posthog = usePostHog();
 
   const signOut = useCallback(async () => {
+    posthog?.reset();
     queryClient.clear();
     try {
       const deviceId = await getDeviceId().catch(() => undefined);
@@ -42,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(null);
       setUser(null);
     }
-  }, []);
+  }, [posthog]);
 
   useEffect(() => {
     void restoreSession();

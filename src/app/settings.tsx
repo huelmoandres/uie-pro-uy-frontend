@@ -7,9 +7,11 @@ import {
   ActivityIndicator,
   ScrollView,
   KeyboardAvoidingView,
+  Switch,
 } from "react-native";
 import { Stack, router } from "expo-router";
 import { useAppColorScheme } from "@hooks/useAppColorScheme";
+import { useBiometric } from "@hooks/useBiometric";
 import {
   Monitor,
   Moon,
@@ -26,6 +28,8 @@ import {
   Trash2,
   RotateCcw,
   Bug,
+  ScanFace,
+  Fingerprint,
 } from "lucide-react-native";
 import { useAuth } from "@context/AuthContext";
 import { useOnboarding } from "@context/OnboardingContext";
@@ -56,8 +60,16 @@ export default function SettingsScreen() {
     featureParam,
     hidePremiumModal,
   } = usePremiumGate();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { resetOnboarding } = useOnboarding();
+  const {
+    isBiometricAvailable,
+    isBiometricEnabled,
+    biometricType,
+    enableBiometric,
+    disableBiometric,
+  } = useBiometric(isAuthenticated);
+  const [biometricLoading, setBiometricLoading] = useState(false);
   const { colorScheme, setColorScheme } = useAppColorScheme();
   const [isEditing, setIsEditing] = useState(false);
   const [manageTagsVisible, setManageTagsVisible] = useState(false);
@@ -347,6 +359,55 @@ export default function SettingsScreen() {
               <ChevronRight size={16} color="#CBD5E1" />
             </Pressable>
           </View>
+
+          {isBiometricAvailable && (
+            <>
+              <Text className="ml-2 mb-2 mt-4 text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
+                Seguridad
+              </Text>
+              <View className="overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm dark:bg-slate-900/50 dark:border-white/5 mb-8">
+                <View className="flex-row items-center p-4">
+                  <View className="mr-3 h-8 w-8 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-500/10">
+                    {biometricType === "faceid" || biometricType === "iris" ? (
+                      <ScanFace size={16} color="#3B82F6" />
+                    ) : (
+                      <Fingerprint size={16} color="#3B82F6" />
+                    )}
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-[15px] font-sans-semi text-slate-700 dark:text-slate-300">
+                      {biometricType === "faceid"
+                        ? "Face ID"
+                        : biometricType === "iris"
+                          ? "Iris"
+                          : "Huella dactilar"}
+                    </Text>
+                    <Text className="text-[11px] font-sans text-slate-400 mt-0.5">
+                      Desbloquear la app al volver de background
+                    </Text>
+                  </View>
+                  {biometricLoading ? (
+                    <ActivityIndicator size="small" color="#B89146" />
+                  ) : (
+                    <Switch
+                      value={isBiometricEnabled}
+                      onValueChange={async (value) => {
+                        setBiometricLoading(true);
+                        if (value) {
+                          await enableBiometric();
+                        } else {
+                          await disableBiometric();
+                        }
+                        setBiometricLoading(false);
+                      }}
+                      trackColor={{ false: "#E2E8F0", true: "#B89146" }}
+                      thumbColor="white"
+                    />
+                  )}
+                </View>
+              </View>
+            </>
+          )}
 
           <Text className="ml-2 mb-2 text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
             Apariencia

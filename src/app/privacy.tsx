@@ -13,6 +13,7 @@ import {
   UserCheck,
   StickyNote,
   Mail,
+  BarChart2,
 } from "lucide-react-native";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -116,6 +117,7 @@ export default function PrivacyScreen() {
               "Token de notificaciones push de tu dispositivo para enviarte alertas.",
               "Preferencias de notificaciones que configurás en la app.",
               "Indicador de consumo del cupo gratuito de expedientes (para aplicar la regla freemium).",
+              "Datos de uso de la app (pantallas visitadas, funcionalidades utilizadas, flujos de suscripción) procesados por nuestro proveedor de analíticas. Ningún texto judicial ni datos personales se incluyen en estos eventos.",
             ]}
           />
           <Divider />
@@ -184,12 +186,27 @@ export default function PrivacyScreen() {
               "OpenAI y Google Gemini — procesamiento de texto para resúmenes IA (solo bajo demanda).",
               "Brevo SMTP — envío de correos transaccionales (ej. mensajes de soporte, recuperación de contraseña).",
               "Poder Judicial del Uruguay (SOAP) — fuente oficial de datos de expedientes.",
+              "PostHog — plataforma de analíticas de producto alojada en servidores de la Unión Europea (eu.i.posthog.com), cumpliendo estándares GDPR.",
             ]}
           />
           <Divider />
 
           <PolicySection
             number="8"
+            icon={BarChart2}
+            title="Análisis de uso y Session Replay"
+            description="Usamos PostHog para entender cómo se usa la app y mejorar la experiencia. Los datos se almacenan en la Unión Europea (GDPR). Lo que se registra y lo que no:"
+            bullets={[
+              "SE REGISTRA: pantallas visitadas, funcionalidades utilizadas (ej: 'se exportó un PDF', 'se abrió el comparador'), flujos de suscripción y errores de la app.",
+              "NO SE REGISTRA: texto de decretos, IUEs de expedientes, notas personales, nombre de partes del proceso ni ningún dato judicial.",
+              "SESSION REPLAY: la app graba grabaciones de pantalla para detectar problemas de usabilidad. Todos los campos de texto aparecen enmascarados (****) en las grabaciones — nunca se captura lo que escribís.",
+              "Podés solicitar la eliminación de tus datos de analíticas escribiéndonos a través de Soporte.",
+            ]}
+          />
+          <Divider />
+
+          <PolicySection
+            number="9"
             icon={Trash2}
             title="Retención y eliminación de datos"
             bullets={[
@@ -203,7 +220,7 @@ export default function PrivacyScreen() {
           <Divider />
 
           <PolicySection
-            number="9"
+            number="10"
             icon={UserCheck}
             title="Tus derechos"
             description="En cualquier momento tenés derecho a:"
@@ -218,7 +235,7 @@ export default function PrivacyScreen() {
           <Divider />
 
           <PolicySection
-            number="10"
+            number="11"
             icon={Mail}
             title="Contacto"
             description="Para cualquier consulta sobre esta política, ejercer tus derechos o reportar un problema de privacidad, podés contactarnos a través de la sección Soporte dentro de la app o directamente a nuestro correo de soporte. Respondemos en un plazo máximo de 5 días hábiles."
@@ -226,7 +243,7 @@ export default function PrivacyScreen() {
         </View>
 
         <Text className="mt-6 text-center text-[11px] font-sans text-slate-400">
-          Última actualización: Marzo 2026
+          Última actualización: Marzo 2026 · v2
         </Text>
       </ScrollView>
     </View>

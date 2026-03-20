@@ -22,6 +22,7 @@ if (__DEV__) {
 export const SECURE_STORE_KEYS = {
   ACCESS_TOKEN: "judicial_access_token",
   REFRESH_TOKEN: "judicial_refresh_token",
+  BIOMETRIC_ENABLED: "judicial_biometric_enabled",
 } as const;
 
 let globalSignOut: (() => Promise<void>) | null = null;

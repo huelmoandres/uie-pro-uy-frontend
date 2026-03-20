@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { GitCompare } from "lucide-react-native";
-import { useExpedienteCompare, useDeadlineAgenda } from "@hooks";
+import { useExpedienteCompare, useDeadlineAgenda, useAnalytics } from "@hooks";
 import { CompareExpedientePanel } from "@components/features";
 import { EducationalEmptyState } from "@components/shared/EducationalEmptyState";
 import { PageContainer } from "@components/ui";
@@ -31,6 +31,7 @@ function filterPlazosByIues(
 export default function CompareExpedientesScreen() {
   const { iues: iuesParam } = useLocalSearchParams<{ iues?: string }>();
   const { width } = useWindowDimensions();
+  const { trackEvent } = useAnalytics();
 
   const iues = useMemo(() => {
     const raw = iuesParam ?? "";
@@ -40,6 +41,10 @@ export default function CompareExpedientesScreen() {
       .filter(Boolean)
       .slice(0, MAX_IUES);
   }, [iuesParam]);
+
+  React.useEffect(() => {
+    trackEvent("compare_expedientes_opened", { count: iues.length });
+  }, [iues.length, trackEvent]);
 
   const { expedientes, isLoading, isError } = useExpedienteCompare(iues);
   const { data: agendaItems } = useDeadlineAgenda();

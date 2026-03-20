@@ -6,11 +6,13 @@ import Purchases from "react-native-purchases";
 import { useSubscription } from "@context/SubscriptionContext";
 import { parseProFromCustomerInfo } from "@utils/subscription";
 import { queryClient } from "@providers/QueryProvider";
+import { useAnalytics } from "@hooks/useAnalytics";
 
 const NAV_DELAY_MS = 300;
 
 export function usePaywallActions() {
   const { applyCustomerInfo } = useSubscription();
+  const { trackEvent } = useAnalytics();
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
 
@@ -25,7 +27,12 @@ export function usePaywallActions() {
       const { customerInfo: purchasedInfo } =
         await Purchases.purchasePackage(pkg);
       applyCustomerInfo(purchasedInfo, { forcePro: true });
-      
+
+      trackEvent("subscription_started", {
+        package_identifier: pkg.identifier,
+        product_identifier: pkg.product.identifier,
+      });
+
       // Invalidar todas las queries para que salten del error PAY_001 al éxito
       void queryClient.invalidateQueries();
 
@@ -55,7 +62,7 @@ export function usePaywallActions() {
     } finally {
       setIsPurchasing(false);
     }
-  }, [applyCustomerInfo]);
+  }, [applyCustomerInfo, trackEvent]);
 
   const handleRestore = useCallback(async () => {
     setIsRestoring(true);

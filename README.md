@@ -49,6 +49,31 @@ npm run start:production
 
 Cada script carga el `.env` correspondiente antes de arrancar Expo.
 
+### Seleccionar dispositivo / simulador
+
+Una vez iniciado Expo con uno de los scripts anteriores:
+
+- Presioná `i` para abrir en el simulador de iOS por defecto.
+- Presioná `a` para abrir en el emulador de Android por defecto.
+- Presioná `shift + i` para ver el **selector interactivo** de simuladores iOS disponibles.
+
+También podés listar y arrancar un simulador específico desde la terminal:
+
+```bash
+# Ver todos los simuladores disponibles
+xcrun simctl list devices
+
+# Arrancar un simulador específico
+xcrun simctl boot "iPhone 12 Pro Max (Screenshots)"
+open -a Simulator
+```
+
+O usar el flag `--device` para elegir dispositivo al compilar localmente:
+
+```bash
+npx expo run:ios --device
+```
+
 ---
 
 ## EAS Build y Update
@@ -84,15 +109,29 @@ eas build -e development -p all
 ### Update (OTA)
 
 ```bash
-# Producción
-eas update --environment production --message "Descripción del cambio"
-
-# Con auto (usa rama y commit actuales)
-eas update --environment production --auto
+# Producción (siempre especificar --branch production para no depender de la rama git actual)
+eas update --branch production --environment production --message "Descripción del cambio"
 
 # Staging / development
-eas update --environment development --message "Fix en staging"
+eas update --branch development --environment development --message "Fix en staging"
 ```
+
+> **Importante:** no uses `--auto` en producción. El flag `--auto` toma el nombre de la rama git actual como branch de EAS, lo que puede publicar a `staging` si no estás en `main`.
+
+### Submit (App Store / Play Store)
+
+```bash
+# Subir el último build a App Store Connect (iOS)
+eas submit -e production -p ios --latest
+
+# Subir el último build a Google Play (Android)
+eas submit -e production -p android --latest
+
+# Subir un build específico por ID
+eas submit -e production -p ios --id <build-id>
+```
+
+> El `--latest` toma el build más reciente del perfil `production`. Requiere tener configuradas las credenciales de App Store Connect (API Key) en EAS.
 
 ---
 

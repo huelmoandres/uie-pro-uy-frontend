@@ -2,7 +2,7 @@
   "expo": {
     "name": "IUE Pro Uy",
     "slug": "iue-pro-uy",
-    "version": "1.0.1",
+    "version": "1.2.0",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -76,6 +76,19 @@
       ],
       "expo-image",
       "expo-sharing",
+      "expo-mail-composer",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "La app necesita acceso al calendario para guardar fechas procesales."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Usá Face ID para acceder de forma segura a tus expedientes."
+        }
+      ],
       "@react-native-community/datetimepicker"
     ],
     "experiments": {

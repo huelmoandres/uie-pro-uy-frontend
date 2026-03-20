@@ -18,6 +18,7 @@ import {
   SubscriptionProvider,
 } from "@context/SubscriptionContext";
 import { QueryProvider } from "@providers/QueryProvider";
+import { PostHogProvider } from "@providers/PostHogProvider";
 import {
   useNotifications,
   requestAndRegisterNotifications,
@@ -33,6 +34,8 @@ import { LoadingOverlay } from "@components/shared/LoadingOverlay";
 import { AppLoadingScreen } from "@components/shared/AppLoadingScreen";
 import { NetworkBanner } from "@components/shared/NetworkBanner";
 import { NotificationPermissionModal } from "@components/shared/NotificationPermissionModal";
+import { BiometricLockScreen } from "@components/auth/BiometricLockScreen";
+import { useBiometric } from "@hooks/useBiometric";
 
 import {
   Inter_400Regular,
@@ -81,19 +84,21 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
-      <AuthProvider>
-        <SubscriptionWrapper>
-          <OnboardingProvider>
-            <RootLayoutNav />
-            <LoadingOverlay
-              visible={isDownloading}
-              message="Descargando actualización..."
-            />
-          </OnboardingProvider>
-        </SubscriptionWrapper>
-      </AuthProvider>
-    </QueryProvider>
+    <PostHogProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <SubscriptionWrapper>
+            <OnboardingProvider>
+              <RootLayoutNav />
+              <LoadingOverlay
+                visible={isDownloading}
+                message="Descargando actualización..."
+              />
+            </OnboardingProvider>
+          </SubscriptionWrapper>
+        </AuthProvider>
+      </QueryProvider>
+    </PostHogProvider>
   );
 }
 
@@ -119,6 +124,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, signOut } = useAuth();
   const [, setEmergencyTapCount] = useState(0);
+  const { isLocked, biometricType, authenticate, unlock } = useBiometric(isAuthenticated);
 
   useNotifications(isAuthenticated);
 
@@ -221,6 +227,17 @@ function RootLayoutNav() {
             await requestAndRegisterNotifications();
           }}
         />
+      )}
+
+      {/* Biometric lock screen — shown when app returns from background */}
+      {isAuthenticated && isLocked && (
+        <Pressable style={StyleSheet.absoluteFill} accessible={false}>
+          <BiometricLockScreen
+            biometricType={biometricType}
+            onAuthenticate={authenticate}
+            onUnlock={unlock}
+          />
+        </Pressable>
       )}
     </ThemeProvider>
   );

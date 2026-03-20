@@ -156,9 +156,9 @@ export const FAQS: FaqItem[] = [
       "Podés seguir un (1) expediente de forma gratuita para siempre, con notificaciones activas.",
   },
   {
-    question: "¿Qué pasa si borro mi expediente gratis?",
+    question: "¿Qué pasa si dejo de seguir mi expediente gratis?",
     answer:
-      "Si dejás de seguir tu único expediente gratuito, el cupo se considera consumido. Para seguir otro expediente necesitás suscribirte a IUE.uy Pro.",
+      "Si dejás de seguir tu único expediente gratuito y te quedás sin ninguno activo, el cupo se libera automáticamente. Eso significa que podés empezar a seguir un expediente diferente sin necesidad de suscribirte. Si agregás un segundo expediente mientras ya tenés uno activo, ahí sí necesitás IUE.uy Pro.",
   },
   {
     question: "¿Qué funcionalidades son premium?",
@@ -185,6 +185,18 @@ export const FAQS: FaqItem[] = [
     question: "¿Por qué me pide cédula y teléfono al agendar?",
     answer:
       "Los datos de cédula y teléfono se usan para autocompletar el formulario de agendamiento del Poder Judicial. Si no los tenés cargados, podés agendar igual pero tendrás que ingresarlos manualmente en cada reserva. Completalos en Mi Perfil → Configuración para automatizar el proceso.",
+  },
+  // ── Novedades de Hoy ─────────────────────────────────────────────────
+  {
+    question: "¿Qué son las Novedades de hoy?",
+    answer:
+      'Es una vista que muestra todos tus expedientes que tuvieron movimientos hoy (según hora Uruguay). Podés acceder tocando el botón "Novedades de hoy" en la pantalla de Mis Expedientes, o directamente desde la notificación push del mediodía. Incluye buscador y filtros para localizar rápidamente lo que te interesa.',
+  },
+  // ── Privacidad y datos ────────────────────────────────────────────────
+  {
+    question: "¿La app registra o trackea mi actividad?",
+    answer:
+      "Sí, usamos PostHog (servidor en la Unión Europea) para analizar cómo se utiliza la app y mejorar la experiencia. Se registran eventos como: pantallas visitadas, funcionalidades usadas y flujos de suscripción. NO se registra el contenido de tus expedientes, decretos, notas personales ni ningún dato judicial. También activamos Session Replay para detectar problemas de usabilidad: todos los campos de texto aparecen enmascarados (****) y nunca se captura lo que escribís. Podés pedir la eliminación de tus datos de analíticas contactando a Soporte.",
   },
   // ── Etiquetas ─────────────────────────────────────────────────────────
   {

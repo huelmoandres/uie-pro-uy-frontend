@@ -13,8 +13,8 @@ export interface EducationalEmptyStateProps {
   iconColor?: string;
   /** Tamaño del icono (default: 48) */
   iconSize?: number;
-  /** CTA principal - botón prominente */
-  primaryCta: {
+  /** CTA principal - botón prominente (opcional) */
+  primaryCta?: {
     label: string;
     onPress: () => void;
   };
@@ -51,14 +51,16 @@ export function EducationalEmptyState({
       </View>
 
       <View className="mt-8 w-full max-w-[280px] gap-3">
-        <Pressable
-          onPress={primaryCta.onPress}
-          className="items-center justify-center rounded-2xl bg-accent py-4 shadow-lg shadow-accent/30 active:scale-[0.98] active:bg-accent-dark"
-        >
-          <Text className="text-sm font-sans-bold uppercase tracking-[2px] text-white">
-            {primaryCta.label}
-          </Text>
-        </Pressable>
+        {primaryCta && (
+          <Pressable
+            onPress={primaryCta.onPress}
+            className="items-center justify-center rounded-2xl bg-accent py-4 shadow-lg shadow-accent/30 active:scale-[0.98] active:bg-accent-dark"
+          >
+            <Text className="text-sm font-sans-bold uppercase tracking-[2px] text-white">
+              {primaryCta.label}
+            </Text>
+          </Pressable>
+        )}
         {secondaryCta && (
           <Pressable
             onPress={secondaryCta.onPress}

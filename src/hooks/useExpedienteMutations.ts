@@ -3,13 +3,16 @@ import { ExpedienteService } from "@services";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
+import { useAnalytics } from "@hooks/useAnalytics";
 
 export const useUnfollowExpediente = () => {
   const queryClient = useQueryClient();
+  const { trackEvent } = useAnalytics();
 
   return useMutation({
     mutationFn: (iue: string) => ExpedienteService.unfollow(iue),
     onSuccess: () => {
+      trackEvent("expediente_unfollowed");
       void queryClient.invalidateQueries({
         queryKey: ExpedienteService.queryKeys.lists(),
       });

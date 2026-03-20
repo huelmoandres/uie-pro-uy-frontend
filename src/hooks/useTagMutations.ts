@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useAuth } from "@context/AuthContext";
 import { TagService , ExpedienteService } from "@services";
+import { useAnalytics } from "@hooks/useAnalytics";
 import type {
   ITag,
   ICreateTagPayload,
@@ -29,11 +30,13 @@ export function useTagMutations() {
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const listKey = tagsListKey(userId);
+  const { trackEvent } = useAnalytics();
 
   const createTag = useMutation<ITag, Error, ICreateTagPayload>({
     mutationFn: (payload) => TagService.create(payload),
     onSuccess: (newTag) => {
       if (!userId) return;
+      trackEvent("tag_created");
       queryClient.setQueryData<ITag[]>(
         listKey,
         (old = []) =>

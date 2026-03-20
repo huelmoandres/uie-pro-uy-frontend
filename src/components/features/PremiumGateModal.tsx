@@ -11,6 +11,7 @@ import { BlurView } from "expo-blur";
 import { Lock, X } from "lucide-react-native";
 import { router } from "expo-router";
 import { FEATURE_PARAM_TO_LABEL } from "@constants/premiumFeatures";
+import { useAnalytics } from "@hooks/useAnalytics";
 
 interface PremiumGateModalProps {
   visible: boolean;
@@ -30,6 +31,7 @@ export function PremiumGateModal({
   feature,
 }: PremiumGateModalProps) {
   const featureName = FEATURE_PARAM_TO_LABEL[feature] ?? "esta función";
+  const { trackEvent } = useAnalytics();
 
   const handleGoToPaywall = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -42,8 +44,9 @@ export function PremiumGateModal({
   React.useEffect(() => {
     if (visible) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      trackEvent("premium_gate_shown", { feature });
     }
-  }, [visible]);
+  }, [visible, feature, trackEvent]);
 
   if (!visible) return null;
 
