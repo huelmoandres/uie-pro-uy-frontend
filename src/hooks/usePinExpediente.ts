@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 import { ExpedienteService } from "@services";
 import type { IPaginatedExpedientes } from "@app-types/expediente.types";
 import type { InfiniteData } from "@tanstack/react-query";
@@ -66,6 +67,12 @@ export function usePinExpediente() {
           queryClient.setQueryData(key, value),
         );
       }
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Toast.show({
+        type: "error",
+        text1: "No se pudo guardar",
+        text2: "No se pudo marcar como favorito. Intentá de nuevo.",
+      });
     },
   });
 }

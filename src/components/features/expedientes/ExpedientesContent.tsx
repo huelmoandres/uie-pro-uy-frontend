@@ -6,6 +6,7 @@ import { PageContainer } from "@components/ui";
 import { ExpedienteCard } from "@components/features/ExpedienteCard";
 import { ExpedienteSkeleton } from "@components/features/ExpedienteSkeleton";
 import { EducationalEmptyState } from "@components/shared/EducationalEmptyState";
+import { usePendingReminderIues } from "@hooks/usePendingReminderIues";
 import type { IExpediente } from "@app-types/expediente.types";
 import type { TabFilter } from "@hooks/useExpedientesScreen";
 import { COLORS } from "@/constants/Colors";
@@ -53,6 +54,8 @@ export function ExpedientesContent({
   emptyTitle,
   emptyDescription,
 }: ExpedientesContentProps) {
+  const pendingReminderIues = usePendingReminderIues();
+
   const renderItem = useCallback(
     ({ item, index }: { item: IExpediente; index: number }) => (
       <ExpedienteCard
@@ -67,9 +70,10 @@ export function ExpedientesContent({
         }
         showPinTooltip={index === 0}
         hasPremiumAccess={hasPremiumAccess}
+        hasPendingReminder={pendingReminderIues.has(item.iue)}
       />
     ),
-    [selectedIues, onSelect, onPin, onTagsPress, onAddReminder, hasPremiumAccess],
+    [selectedIues, onSelect, onPin, onTagsPress, onAddReminder, hasPremiumAccess, pendingReminderIues],
   );
 
   const ListFooterComponent = useCallback(() => {

@@ -62,11 +62,8 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
   useModalKeyboardDismiss(visible);
 
   const onSubmit = async ({ iue }: FollowExpedienteFormData) => {
-    // Convert user-facing slash format to colon for the API (avoids URL encoding issues)
-    const apiIue = iue.replace("/", ":");
-
     try {
-      await ExpedienteService.follow(apiIue);
+      await ExpedienteService.follow(iue);
 
       await queryClient.invalidateQueries({
         queryKey: ExpedienteService.queryKeys.lists(),

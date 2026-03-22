@@ -26,3 +26,10 @@ export const DEFAULT_REMINDER_HOUR = 9;
 
 /** Minuto preferido para recordatorios relativos. */
 export const DEFAULT_REMINDER_MINUTE = 0;
+
+/**
+ * Maximum character count for the reminder body.
+ * iOS typically truncates push notification bodies after ~110 chars.
+ * 150 chars is a safe limit that remains readable on all platforms.
+ */
+export const REMINDER_BODY_MAX_LENGTH = 150;

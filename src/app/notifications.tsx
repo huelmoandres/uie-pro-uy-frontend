@@ -18,12 +18,19 @@ import {
   useUpdateNotificationPreferences,
 } from "@hooks/useNotificationPreferences";
 import { useQueryClient } from "@tanstack/react-query";
-import { requestAndRegisterNotifications } from "@hooks/useNotifications";
-import type { INotificationPreferences } from "@app-types/notification-preferences.types";
+import {
+  requestAndRegisterNotifications,
+  clearCachedPushToken,
+} from "@hooks/useNotifications";
+import type {
+  INotificationPreferences,
+  PushNotificationMode,
+} from "@app-types/notification-preferences.types";
 import { InfoBanner } from "@components/shared/InfoBanner";
 import {
   NOTIFICATION_TYPES,
   DIGEST_DAYS,
+  PUSH_MODE_OPTIONS,
 } from "@constants/notifications.constants";
 import Toast from "react-native-toast-message";
 
@@ -109,6 +116,11 @@ export default function NotificationsScreen() {
   const handleDigestDayChange = (day: number) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updatePrefs({ digestDay: day });
+  };
+
+  const handleModeChange = (mode: PushNotificationMode) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    updatePrefs({ pushNotificationMode: mode });
   };
 
   const masterEnabled = prefs?.pushEnabled ?? true;
@@ -200,6 +212,60 @@ export default function NotificationsScreen() {
           })}
         </SectionCard>
 
+        <SectionTitle>Modo de alertas</SectionTitle>
+        <SectionCard disabled={!masterEnabled}>
+          <View className="p-4 gap-3">
+            <Text className="text-[12px] font-sans text-slate-500 dark:text-slate-400 leading-relaxed">
+              Elegí cómo recibís las notificaciones cuando hay novedades en varios expedientes al mismo tiempo.
+            </Text>
+            {PUSH_MODE_OPTIONS.map((option, index) => {
+              const currentMode =
+                prefs?.pushNotificationMode ?? "INDIVIDUAL";
+              const isSelected = currentMode === option.value;
+              const isLast = index === PUSH_MODE_OPTIONS.length - 1;
+
+              return (
+                <Pressable
+                  key={option.value}
+                  onPress={() => handleModeChange(option.value)}
+                  disabled={!masterEnabled || isLoading}
+                  className={`flex-row items-start gap-3 p-3 rounded-xl border ${
+                    isSelected
+                      ? "bg-accent/10 border-accent/30"
+                      : "bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/10"
+                  } ${!isLast ? "mb-1" : ""}`}
+                >
+                  <View
+                    className={`mt-0.5 h-5 w-5 rounded-full border-2 items-center justify-center ${
+                      isSelected
+                        ? "border-accent bg-accent"
+                        : "border-slate-300 dark:border-slate-600 bg-transparent"
+                    }`}
+                  >
+                    {isSelected && (
+                      <View className="h-2 w-2 rounded-full bg-white" />
+                    )}
+                  </View>
+                  <View className="flex-1">
+                    <Text
+                      className={`font-sans-semi text-[14px] ${
+                        isSelected
+                          ? "text-amber-800 dark:text-amber-300"
+                          : "text-slate-700 dark:text-slate-300"
+                      }`}
+                    >
+                      {option.label}
+                    </Text>
+                    <Text className="text-[11px] font-sans text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">
+                      {option.description}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        </SectionCard>
+
         <SectionTitle>Resumen por email</SectionTitle>
         <SectionCard>
           <View className="flex-row items-center justify-between p-4">
@@ -284,6 +350,9 @@ export default function NotificationsScreen() {
           <View className="mt-6 mx-4 gap-3">
             <Pressable
               onPress={async () => {
+                // Clear the cache so requestAndRegisterNotifications always
+                // calls the API, even if the token hasn't changed locally.
+                await clearCachedPushToken();
                 const result = await requestAndRegisterNotifications();
                 if (result.ok) {
                   await queryClient.invalidateQueries({

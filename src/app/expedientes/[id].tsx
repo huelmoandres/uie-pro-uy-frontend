@@ -36,7 +36,6 @@ import { INFO_HINTS } from "@/constants/InfoHints";
 import {
   MovementItem,
   AgendaWebView,
-  InternalGroupItem,
   ActivityStatusBadge,
   CreateReminderModal,
   PremiumGateModal,
@@ -59,11 +58,7 @@ import {
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
 import { stripHtml, getYearInAppTimezone } from "@utils/formatters";
-import {
-  isInternalGroup,
-  flattenTimeline,
-  type TimelineEntry,
-} from "@app-types/expediente.types";
+import { flattenTimeline } from "@app-types/expediente.types";
 
 // ── Notes editor ──────────────────────────────────────────────────────────────
 function NotesEditor({
@@ -253,11 +248,8 @@ export default function ExpedienteDetailScreen() {
     return Array.from(years).sort((a, b) => b - a);
   }, [data]);
 
-  const filteredMovements = useMemo((): TimelineEntry[] => {
+  const filteredMovements = useMemo(() => {
     if (!data) return [];
-    const isFiltered = decreeFilter !== "all" || yearFilter !== null;
-    if (!isFiltered) return data.movements;
-
     return flattenTimeline(data.movements).filter((m) => {
       const matchesDecree =
         decreeFilter === "all"
@@ -278,14 +270,7 @@ export default function ExpedienteDetailScreen() {
     [filteredMovements, page],
   );
 
-  const individualCount = useMemo(
-    () =>
-      filteredMovements.reduce(
-        (acc, e) => acc + (isInternalGroup(e) ? e.count : 1),
-        0,
-      ),
-    [filteredMovements],
-  );
+  const individualCount = filteredMovements.length;
 
   const handleFilterChange = useCallback(
     (decree: typeof decreeFilter, year: number | null) => {
@@ -381,50 +366,45 @@ export default function ExpedienteDetailScreen() {
           />
         }
       >
-        {/* Main Info Card */}
-        <View className="mb-6 overflow-hidden rounded-[32px] bg-white p-6 border border-slate-100 shadow-premium dark:bg-primary/50 dark:border-white/5 dark:shadow-premium-dark">
-          <View className="mb-5 flex-row items-center">
-            <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-slate-50 dark:bg-primary shadow-sm border border-slate-100 dark:border-white/5">
-              <Scale size={28} color="#B89146" />
+        {/* Main Info Card — compact */}
+        <View className="mb-4 rounded-3xl bg-white p-4 border border-slate-100 shadow-sm dark:bg-primary/50 dark:border-white/5">
+          {/* Header: icon + IUE + badge */}
+          <View className="flex-row items-center gap-3 mb-2.5">
+            <View className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 dark:bg-primary border border-slate-100 dark:border-white/5">
+              <Scale size={20} color="#B89146" />
             </View>
-            <View className="ml-4 flex-1">
-              <Text className="text-[10px] font-sans-bold uppercase tracking-[1px] text-accent">
+            <View className="flex-1">
+              <Text className="text-[9px] font-sans-bold uppercase tracking-[1.5px] text-accent">
                 Expediente {item.anio}
               </Text>
-              <Text className="text-lg font-sans-bold text-slate-900 dark:text-white leading-tight">
+              <Text className="text-[15px] font-sans-bold text-slate-900 dark:text-white leading-tight">
                 {item.iue}
               </Text>
             </View>
+            {prediction && (
+              <ActivityStatusBadge status={prediction.status} />
+            )}
           </View>
 
-          <Text className="mb-4 font-sans-semi text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">
-            {stripHtml(item.caratula) ||
-              "Sin carátula registrada en el sistema."}
+          {/* Carátula */}
+          <Text
+            className="mb-3 font-sans text-[13px] leading-snug text-slate-600 dark:text-slate-300"
+            numberOfLines={4}
+          >
+            {stripHtml(item.caratula) || "Sin carátula registrada en el sistema."}
           </Text>
 
-          {/* Estado (Activo, Inactivo, etc.) */}
-          {prediction && (
-            <View className="flex-row flex-wrap gap-2 mb-4">
-              <ActivityStatusBadge status={prediction.status} />
-            </View>
-          )}
-
-          {/* Parties (plaintiff vs defendant) */}
+          {/* Parties — inline compacto */}
           {parties && (parties.plaintiff || parties.defendant) && (
-            <View className="mb-4 rounded-2xl bg-slate-50/80 dark:bg-white/5 p-3">
-              <View className="flex-row items-center mb-2 gap-1.5">
-                <Users size={12} color="#94A3B8" />
-                <Text className="text-[10px] font-sans-bold uppercase tracking-wide text-slate-400">
-                  Partes
-                </Text>
-              </View>
+            <View className="mb-2.5 gap-1">
               {parties.plaintiff && (
-                <View className="flex-row gap-2 mb-1">
-                  <Text className="text-[11px] font-sans-bold text-slate-400 w-16">
+                <View className="flex-row items-center gap-1.5">
+                  <Users size={10} color="#94A3B8" />
+                  <Text className="text-[10px] font-sans-bold text-slate-400">
                     Actor:
                   </Text>
                   <Text
-                    className="text-[11px] font-sans-semi text-slate-600 dark:text-slate-300 flex-1"
+                    className="text-[10px] font-sans-semi text-slate-500 dark:text-slate-400 flex-1"
                     numberOfLines={1}
                   >
                     {parties.plaintiff}
@@ -432,12 +412,13 @@ export default function ExpedienteDetailScreen() {
                 </View>
               )}
               {parties.defendant && (
-                <View className="flex-row gap-2">
-                  <Text className="text-[11px] font-sans-bold text-slate-400 w-16">
+                <View className="flex-row items-center gap-1.5">
+                  <Users size={10} color="#94A3B8" />
+                  <Text className="text-[10px] font-sans-bold text-slate-400">
                     Demandado:
                   </Text>
                   <Text
-                    className="text-[11px] font-sans-semi text-slate-600 dark:text-slate-300 flex-1"
+                    className="text-[10px] font-sans-semi text-slate-500 dark:text-slate-400 flex-1"
                     numberOfLines={1}
                   >
                     {parties.defendant}
@@ -447,112 +428,26 @@ export default function ExpedienteDetailScreen() {
             </View>
           )}
 
-          <View className="mb-3 flex-row items-center bg-slate-50/50 dark:bg-white/5 p-3 rounded-2xl">
-            <MapPin size={14} color="#B89146" />
-            <Text className="ml-3 font-sans-semi text-[13px] text-slate-600 dark:text-slate-400 flex-1">
-              {item.sede}
-            </Text>
-          </View>
-
-          <View className="flex-row items-center bg-slate-50/50 dark:bg-white/5 p-3 rounded-2xl">
-            <Calendar size={14} color="#B89146" />
-            <Text className="ml-3 font-sans text-[13px] text-slate-500">
-              Activo desde{" "}
-              <Text className="font-sans-bold text-slate-700 dark:text-slate-300">
-                {item.anio}
-              </Text>
-            </Text>
-          </View>
-        </View>
-
-        {/* Recordatorio + Agenda CTA */}
-        <View className="mb-6 gap-3">
-          <Pressable
-            className={`flex-row items-center justify-center gap-3 rounded-[20px] border p-4 active:opacity-70 ${
-              canUsePremiumActions
-                ? "border-accent/30 bg-accent/10"
-                : "border-amber-300/60 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10"
-            }`}
-            onPress={() => {
-              if (!canUsePremiumActions) {
-                showPremiumModal("reminders");
-                return;
-              }
-              setShowReminderModal(true);
-            }}
-          >
-            {canUsePremiumActions ? (
-              <Bell size={18} color="#B89146" />
-            ) : (
-              <Lock size={16} color="#B89146" />
-            )}
-            <Text className="font-sans-bold text-sm text-accent uppercase tracking-widest">
-              Agregar recordatorio
-            </Text>
-          </Pressable>
-          <Pressable
-            className={`flex-row items-center justify-center gap-3 rounded-[20px] border p-4 active:opacity-70 ${
-              canUsePremiumActions
-                ? "border-accent/30 bg-accent/10"
-                : "border-amber-300/60 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10"
-            }`}
-            onPress={() => {
-              if (!canUsePremiumActions) {
-                showPremiumModal("agenda-turno");
-                return;
-              }
-              setShowAgenda(true);
-            }}
-          >
-            {canUsePremiumActions ? (
-              <Calendar size={18} color="#B89146" />
-            ) : (
-              <Lock size={16} color="#B89146" />
-            )}
-            <Text className="font-sans-bold text-sm text-accent uppercase tracking-widest">
-              Agendar Hora
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* Stats row */}
-        <View className="mb-8 flex-row gap-4">
-          <View className="flex-1 rounded-[24px] bg-white p-5 border border-slate-100 shadow-premium dark:bg-white/5 dark:border-white/5">
-            <View className="flex-row items-center mb-2">
-              <History size={14} color="#B89146" />
-              <Text className="ml-2 text-[10px] font-sans-bold uppercase tracking-[1px] text-slate-400">
-                Movimientos
+          {/* Sede + año en una sola fila */}
+          <View className="flex-row items-center gap-4 pt-2 border-t border-slate-50 dark:border-white/5">
+            <View className="flex-row items-center gap-1.5 flex-1">
+              <MapPin size={11} color="#94A3B8" />
+              <Text
+                className="text-[11px] font-sans text-slate-400 flex-1"
+                numberOfLines={1}
+              >
+                {item.sede}
               </Text>
             </View>
-            <Text className="text-2xl font-sans-bold text-slate-900 dark:text-white">
-              {item.totalMovimientos}
-            </Text>
-            {item.stats?.averageDaysBetweenMovements != null && (
-              <Text className="text-[10px] font-sans text-slate-400 mt-1">
-                ~{Math.round(item.stats.averageDaysBetweenMovements)}d entre
-                mov.
-              </Text>
-            )}
-          </View>
-          <View className="flex-1 rounded-[24px] bg-white p-5 border border-slate-100 shadow-premium dark:bg-white/5 dark:border-white/5">
-            <View className="flex-row items-center mb-2">
-              <View className="h-2 w-2 rounded-full bg-success mr-2" />
-              <Text className="text-[10px] font-sans-bold uppercase tracking-[1px] text-slate-400">
-                Estado
+            <View className="flex-row items-center gap-1.5">
+              <Calendar size={11} color="#94A3B8" />
+              <Text className="text-[11px] font-sans text-slate-400">
+                Desde{" "}
+                <Text className="font-sans-semi text-slate-600 dark:text-slate-300">
+                  {item.anio}
+                </Text>
               </Text>
             </View>
-            {prediction ? (
-              <ActivityStatusBadge status={prediction.status} />
-            ) : (
-              <Text className="text-2xl font-sans-bold text-success">
-                Activo
-              </Text>
-            )}
-            {prediction?.daysSinceLastActivity != null && (
-              <Text className="text-[10px] font-sans text-slate-400 mt-1">
-                Último mov. hace {prediction.daysSinceLastActivity}d
-              </Text>
-            )}
           </View>
         </View>
 
@@ -651,18 +546,6 @@ export default function ExpedienteDetailScreen() {
               {paginatedMovements.map((entry, index) => {
                 const isFirst = index === 0;
                 const isLast = index === paginatedMovements.length - 1;
-
-                if (isInternalGroup(entry)) {
-                  return (
-                    <InternalGroupItem
-                      key={`group-${index}`}
-                      group={entry}
-                      isFirst={isFirst}
-                      isLast={isLast}
-                    />
-                  );
-                }
-
                 const decreeContext = {
                   expedienteIue: item.iue,
                   caratula: item.caratula,
@@ -691,6 +574,97 @@ export default function ExpedienteDetailScreen() {
               )}
             </View>
           )}
+        </View>
+
+        {/* Stats row */}
+        <View className="mb-6 flex-row gap-4">
+          <View className="flex-1 rounded-[24px] bg-white p-5 border border-slate-100 shadow-premium dark:bg-white/5 dark:border-white/5">
+            <View className="flex-row items-center mb-2">
+              <History size={14} color="#B89146" />
+              <Text className="ml-2 text-[10px] font-sans-bold uppercase tracking-[1px] text-slate-400">
+                Movimientos
+              </Text>
+            </View>
+            <Text className="text-2xl font-sans-bold text-slate-900 dark:text-white">
+              {item.totalMovimientos}
+            </Text>
+            {item.stats?.averageDaysBetweenMovements != null && (
+              <Text className="text-[10px] font-sans text-slate-400 mt-1">
+                ~{Math.round(item.stats.averageDaysBetweenMovements)}d entre
+                mov.
+              </Text>
+            )}
+          </View>
+          <View className="flex-1 rounded-[24px] bg-white p-5 border border-slate-100 shadow-premium dark:bg-white/5 dark:border-white/5">
+            <View className="flex-row items-center mb-2">
+              <View className="h-2 w-2 rounded-full bg-success mr-2" />
+              <Text className="text-[10px] font-sans-bold uppercase tracking-[1px] text-slate-400">
+                Estado
+              </Text>
+            </View>
+            {prediction ? (
+              <ActivityStatusBadge status={prediction.status} />
+            ) : (
+              <Text className="text-2xl font-sans-bold text-success">
+                Activo
+              </Text>
+            )}
+            {prediction?.daysSinceLastActivity != null && (
+              <Text className="text-[10px] font-sans text-slate-400 mt-1">
+                Último mov. hace {prediction.daysSinceLastActivity}d
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* Acciones rápidas — fila horizontal compacta */}
+        <View className="mb-6 flex-row gap-2">
+          <Pressable
+            className={`flex-1 flex-row items-center justify-center gap-2 rounded-2xl border py-3 px-3 active:opacity-70 ${
+              canUsePremiumActions
+                ? "border-accent/30 bg-accent/10"
+                : "border-amber-300/60 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10"
+            }`}
+            onPress={() => {
+              if (!canUsePremiumActions) {
+                showPremiumModal("reminders");
+                return;
+              }
+              setShowReminderModal(true);
+            }}
+          >
+            {canUsePremiumActions ? (
+              <Bell size={14} color="#B89146" />
+            ) : (
+              <Lock size={13} color="#B89146" />
+            )}
+            <Text className="font-sans-semi text-[12px] text-accent">
+              Recordatorio
+            </Text>
+          </Pressable>
+          <Pressable
+            className={`flex-1 flex-row items-center justify-center gap-2 rounded-2xl border py-3 px-3 active:opacity-70 ${
+              canUsePremiumActions
+                ? "border-accent/30 bg-accent/10"
+                : "border-amber-300/60 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10"
+            }`}
+            onPress={() => {
+              if (!canUsePremiumActions) {
+                showPremiumModal("agenda-turno");
+                return;
+              }
+              setShowAgenda(true);
+            }}
+          >
+            {canUsePremiumActions ? (
+              <Calendar size={14} color="#B89146" />
+            ) : (
+              <Lock size={13} color="#B89146" />
+            )}
+            <Text className="font-sans-semi text-[12px] text-accent">
+              Agendar Hora
+            </Text>
+          </Pressable>
         </View>
 
         {/* ── Notas personales ──────────────────────────────── */}

@@ -44,6 +44,14 @@ export type RegisterNotificationsResult =
   | { ok: false; reason: string };
 
 /**
+ * Clears the cached push token from SecureStore so the next call to
+ * requestAndRegisterNotifications forces a fresh API registration.
+ */
+export async function clearCachedPushToken(): Promise<void> {
+  await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.PUSH_TOKEN);
+}
+
+/**
  * Requests push notification permissions and registers the device token.
  * Called from NotificationPermissionModal after the user taps "Activar".
  */

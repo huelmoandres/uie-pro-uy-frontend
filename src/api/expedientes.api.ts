@@ -8,6 +8,16 @@ import { apiClient } from "./client";
 // ─── Expedientes API ──────────────────────────────────────────────────────────
 
 /**
+ * Normalizes an IUE for use in URL path segments.
+ * Fastify does not correctly decode %2F (encoded slash) in path parameters,
+ * so slashes are converted to colons before encoding. The backend's
+ * IueFormatter.format() converts colons back to slashes.
+ */
+function iueToPathParam(iue: string): string {
+  return encodeURIComponent(iue.replace("/", ":"));
+}
+
+/**
  * Fetches a paginated and filtered list of followed expedientes.
  */
 export async function getExpedientes(
@@ -52,7 +62,7 @@ export async function getTodayMovementExpedientes(
  */
 export async function getExpedienteById(iue: string): Promise<IExpediente> {
   const { data } = await apiClient.get<IExpediente>(
-    `/expedientes/${encodeURIComponent(iue)}`,
+    `/expedientes/${iueToPathParam(iue)}`,
   );
   return data;
 }
@@ -61,14 +71,14 @@ export async function getExpedienteById(iue: string): Promise<IExpediente> {
  * Adds an expediente to the user's follow list by IUE.
  */
 export async function followExpediente(iue: string): Promise<void> {
-  await apiClient.post(`/expedientes/${encodeURIComponent(iue)}/follow`);
+  await apiClient.post(`/expedientes/${iueToPathParam(iue)}/follow`);
 }
 
 /**
  * Removes an expediente from the user's follow list.
  */
 export async function unfollowExpediente(iue: string): Promise<void> {
-  await apiClient.delete(`/expedientes/${encodeURIComponent(iue)}/follow`);
+  await apiClient.delete(`/expedientes/${iueToPathParam(iue)}/follow`);
 }
 
 /**
@@ -85,7 +95,7 @@ export async function pinExpediente(
   iue: string,
   isPinned: boolean,
 ): Promise<void> {
-  await apiClient.patch(`/expedientes/${encodeURIComponent(iue)}/follow`, {
+  await apiClient.patch(`/expedientes/${iueToPathParam(iue)}/follow`, {
     isPinned,
   });
 }
@@ -97,7 +107,7 @@ export async function updateExpedienteNotes(
   iue: string,
   notes: string | null,
 ): Promise<void> {
-  await apiClient.patch(`/expedientes/${encodeURIComponent(iue)}/follow`, {
+  await apiClient.patch(`/expedientes/${iueToPathParam(iue)}/follow`, {
     notes,
   });
 }
@@ -112,6 +122,6 @@ export async function getExpedienteFollowData(
   const { data } = await apiClient.get<{
     isPinned: boolean;
     notes: string | null;
-  } | null>(`/expedientes/${encodeURIComponent(iue)}/follow`);
+  } | null>(`/expedientes/${iueToPathParam(iue)}/follow`);
   return data;
 }

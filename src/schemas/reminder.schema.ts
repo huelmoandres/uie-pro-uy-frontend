@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { REMINDER_BODY_MAX_LENGTH } from "@constants/reminders";
 
 export const createReminderSchema = z.object({
   processDeadlineId: z.string().uuid("ID de plazo inválido"),
@@ -11,7 +12,7 @@ export const createReminderSchema = z.object({
   preferredHour: z.number().int().min(0).max(23).optional(),
   preferredMinute: z.number().int().min(0).max(59).optional(),
   title: z.string().max(200).optional(),
-  body: z.string().max(500).optional(),
+  body: z.string().max(REMINDER_BODY_MAX_LENGTH, `Máximo ${REMINDER_BODY_MAX_LENGTH} caracteres`).optional(),
 });
 
 export type CreateReminderFormData = z.infer<typeof createReminderSchema>;

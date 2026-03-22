@@ -12,14 +12,17 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { BlurView } from "expo-blur";
-import { Bell, X, CalendarClock, ChevronLeft } from "lucide-react-native";
+import { Bell, X, CalendarClock, ChevronLeft, AlertTriangle } from "lucide-react-native";
 import DateTimePicker, {
   DateTimePickerAndroid,
 } from "@react-native-community/datetimepicker";
+import { router } from "expo-router";
 import { useCreateReminder } from "@hooks/useReminderMutations";
+import { useNotificationPreferences } from "@hooks/useNotificationPreferences";
 import {
   REMINDER_OFFSET_OPTIONS,
   REMINDER_FIXED_DATE_PRESETS,
+  REMINDER_BODY_MAX_LENGTH,
   DEFAULT_REMINDER_OFFSET,
   DEFAULT_REMINDER_HOUR,
 } from "@constants/reminders";
@@ -66,6 +69,8 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
   const colorScheme = useColorScheme();
   const themeVariant = colorScheme === "dark" ? "dark" : "light";
   const createReminder = useCreateReminder();
+  const { data: notifPrefs } = useNotificationPreferences();
+  const hasDeviceToken = notifPrefs?.hasDeviceToken ?? true;
   const scrollRef = useRef<ScrollView>(null);
 
   const scrollToInput = useCallback((y: number) => {
@@ -231,6 +236,19 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
             </Text>
           </Pressable>
 
+          {!hasDeviceToken && (
+            <Pressable
+              onPress={() => { onClose(); router.push("/notifications" as any); }}
+              className="flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-4 py-3 mb-4"
+            >
+              <AlertTriangle size={16} color="#D97706" />
+              <Text className="flex-1 text-[12px] font-sans-semi text-amber-700 dark:text-amber-400 leading-relaxed">
+                No tenés el dispositivo registrado para push.{" "}
+                <Text className="underline">Ir a Notificaciones</Text> para configurarlo.
+              </Text>
+            </Pressable>
+          )}
+
           <Pressable
             onPress={handleCreateSimple}
             disabled={createReminder.isPending}
@@ -366,15 +384,32 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
           </Text>
           <TextInput
             value={body}
-            onChangeText={setBody}
+            onChangeText={(t) => setBody(t.slice(0, REMINDER_BODY_MAX_LENGTH))}
             onFocus={scrollToEnd}
             placeholder="Ej: Revisar documentación antes de la audiencia"
             placeholderTextColor="#94A3B8"
             multiline
             numberOfLines={3}
-            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 font-sans text-[14px] text-slate-700 dark:text-slate-200 mb-6 min-h-[80px]"
+            maxLength={REMINDER_BODY_MAX_LENGTH}
+            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 font-sans text-[14px] text-slate-700 dark:text-slate-200 mb-1 min-h-[80px]"
             style={{ textAlignVertical: "top" }}
           />
+          <Text className={`text-right text-[11px] font-sans mb-5 ${body.length >= REMINDER_BODY_MAX_LENGTH ? "text-red-400" : "text-slate-400"}`}>
+            {body.length}/{REMINDER_BODY_MAX_LENGTH}
+          </Text>
+
+          {!hasDeviceToken && (
+            <Pressable
+              onPress={() => { onClose(); router.push("/notifications" as any); }}
+              className="flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-4 py-3 mb-4"
+            >
+              <AlertTriangle size={16} color="#D97706" />
+              <Text className="flex-1 text-[12px] font-sans-semi text-amber-700 dark:text-amber-400 leading-relaxed">
+                No tenés el dispositivo registrado para push.{" "}
+                <Text className="underline">Ir a Notificaciones</Text> para configurarlo.
+              </Text>
+            </Pressable>
+          )}
 
           <Pressable
             onPress={handleCreateFull}

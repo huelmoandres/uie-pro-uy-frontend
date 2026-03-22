@@ -12,6 +12,7 @@ import {
   Tag,
   Bell,
   Lock,
+  BellDot,
 } from "lucide-react-native";
 import type { IExpediente } from "@app-types/expediente.types";
 import { formatRelativeDate, stripHtml } from "@utils/formatters";
@@ -34,6 +35,8 @@ interface Props {
   showPinTooltip?: boolean;
   /** false = candado en recordatorios y etiquetas (freemium) */
   hasPremiumAccess?: boolean;
+  /** true = hay un recordatorio programado para este expediente */
+  hasPendingReminder?: boolean;
 }
 
 /**
@@ -51,6 +54,7 @@ export const ExpedienteCard = React.memo(
     onAddReminder,
     showPinTooltip = false,
     hasPremiumAccess = true,
+    hasPendingReminder = false,
   }: Props) => {
     const { shouldShow: shouldShowPinTooltip, markSeen: markPinTooltipSeen } =
       useTooltipSeen(TOOLTIP_KEYS.EXPEDIENTE_PIN_STAR);
@@ -235,11 +239,21 @@ export const ExpedienteCard = React.memo(
             </Text>
           </View>
 
-          <View className="flex-row items-center gap-2 rounded-lg bg-slate-50 px-3 py-1.5 dark:bg-slate-800/30 shrink-0">
-            <Calendar size={12} color="#94A3B8" />
-            <Text className="text-[11px] font-sans-bold text-slate-500 dark:text-slate-400">
-              {item.anio}
-            </Text>
+          <View className="flex-row items-center gap-2 shrink-0">
+            {hasPendingReminder && (
+              <View className="flex-row items-center gap-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/30 px-2.5 py-1.5">
+                <BellDot size={11} color="#D97706" />
+                <Text className="text-[10px] font-sans-semi text-amber-600 dark:text-amber-400">
+                  Recordatorio
+                </Text>
+              </View>
+            )}
+            <View className="flex-row items-center gap-2 rounded-lg bg-slate-50 px-3 py-1.5 dark:bg-slate-800/30">
+              <Calendar size={12} color="#94A3B8" />
+              <Text className="text-[11px] font-sans-bold text-slate-500 dark:text-slate-400">
+                {item.anio}
+              </Text>
+            </View>
           </View>
         </View>
       </Pressable>
