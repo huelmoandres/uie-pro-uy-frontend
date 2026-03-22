@@ -5,6 +5,7 @@ import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
 import { useForm } from "react-hook-form";
 import { Scale } from "lucide-react-native";
+import { APP_NAME } from "@/constants/app.constants";
 import { useLoginMutation } from "@hooks/useAuthMutations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginFormData } from "@schemas/auth.schema";
@@ -82,7 +83,7 @@ export default function LoginScreen() {
 
       <AuthScreenHeader
         icon={Scale}
-        title="UIE Pro Uy"
+        title={APP_NAME}
         subtitle="Gestión Judicial de Alta Gama"
         showBackButton={false}
       />

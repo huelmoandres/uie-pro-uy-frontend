@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Pressable, Text, View, ScrollView } from "react-native";
 import { router } from "expo-router";
+import {
+  APP_NAME_SHORT,
+  APP_NAME_VERSION,
+} from "@/constants/app.constants";
 import { formatDateShort } from "@utils/formatters";
 import { useAuth } from "@context/AuthContext";
 import { useSubscription } from "@context/SubscriptionContext";
@@ -46,7 +50,7 @@ export default function ProfileScreen() {
   const menuItems = [
     {
       icon: Crown,
-      label: isPro || isInTrial ? "IUE Pro - Activo" : "IUE Pro - Suscribirse",
+      label: isPro || isInTrial ? `${APP_NAME_SHORT} - Activo` : `${APP_NAME_SHORT} - Suscribirse`,
       color: "#B89146",
       route: null as null,
       onPress: handlePaywallPress,
@@ -187,7 +191,7 @@ export default function ProfileScreen() {
 
         <View className="mt-12 items-center">
           <Text className="text-[10px] font-sans text-slate-400 uppercase tracking-widest">
-            UIE Pro Uy v1.2.0
+            {APP_NAME_VERSION}
           </Text>
         </View>
       </ScrollView>

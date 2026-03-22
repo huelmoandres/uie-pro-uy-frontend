@@ -86,10 +86,19 @@ export async function refreshAccessToken(
 }
 
 /**
- * Cierra sesión en el servidor. Si deviceId se provee, invalida también la sesión.
+ * Cierra sesión en el servidor.
+ * Si deviceId se provee, invalida la sesión y el refresh token de ese dispositivo.
+ * Si pushToken se provee, elimina el token del dispositivo de la BD para que no
+ * reciba notificaciones luego del logout (ej: cambio de cuenta en el mismo celular).
  */
-export async function logout(deviceId?: string): Promise<void> {
-  await apiClient.post("/auth/logout", deviceId ? { deviceId } : {});
+export async function logout(
+  deviceId?: string,
+  pushToken?: string,
+): Promise<void> {
+  const body: Record<string, string> = {};
+  if (deviceId) body.deviceId = deviceId;
+  if (pushToken) body.pushToken = pushToken;
+  await apiClient.post("/auth/logout", body);
 }
 
 /**

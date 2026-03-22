@@ -5,7 +5,10 @@ import * as SecureStore from "expo-secure-store";
 import { SECURE_STORE_KEYS } from "@api/client";
 import { isLoginRequiresOtp } from "@api/auth.api";
 import type { ILoginRequest, IRegisterRequest } from "@app-types/auth.types";
-import { requestAndRegisterNotifications } from "@hooks/useNotifications";
+import {
+  requestAndRegisterNotifications,
+  clearCachedPushToken,
+} from "@hooks/useNotifications";
 import Purchases from "react-native-purchases";
 import { getRevenueCatApiKey } from "@utils/subscription-context-helpers";
 import { useAnalytics } from "@hooks/useAnalytics";
@@ -57,6 +60,10 @@ export const useLoginMutation = () => {
     onSuccess: async (data) => {
       if (isLoginRequiresOtp(data)) return;
       try {
+        // Limpiar caché local para forzar POST al backend aunque el token de Expo
+        // no haya cambiado. Garantiza que el token quede asociado al usuario actual
+        // (ej: cambio de cuenta en el mismo dispositivo).
+        await clearCachedPushToken();
         await requestAndRegisterNotifications();
       } catch (e) {
         console.warn("[Auth] Failed to register push token after login:", e);
@@ -106,6 +113,7 @@ export const useVerifyLoginOtpMutation = () => {
     },
     onSuccess: async () => {
       try {
+        await clearCachedPushToken();
         await requestAndRegisterNotifications();
       } catch (e) {
         console.warn("[Auth] Failed to register push token after login:", e);

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 import { Fingerprint, ScanFace, LogOut } from "lucide-react-native";
 import { useAuth } from "@context/AuthContext";
+import { APP_NAME } from "@/constants/app.constants";
 
 interface BiometricLockScreenProps {
   biometricType: "faceid" | "fingerprint" | "iris" | null;
@@ -67,7 +68,7 @@ export function BiometricLockScreen({
 
         <View className="items-center gap-2">
           <Text className="text-2xl font-sans-bold text-white">
-            IUE Pro Uy
+            {APP_NAME}
           </Text>
           <Text className="text-sm font-sans text-white/60 text-center">
             Verificá tu identidad para continuar

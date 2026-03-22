@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, AppStateStatus } from "react-native";
 import { SECURE_STORE_KEYS } from "@api/client";
+import { APP_NAME } from "@/constants/app.constants";
 
 const LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutos en background
 
@@ -83,7 +84,7 @@ export function useBiometric(isAuthenticated: boolean): UseBiometricReturn {
 
   const authenticate = useCallback(async (): Promise<boolean> => {
     const result = await LocalAuthentication.authenticateAsync({
-      promptMessage: "Desbloqueá IUE Pro",
+      promptMessage: `Desbloqueá ${APP_NAME}`,
       fallbackLabel: "Usar contraseña",
       cancelLabel: "Cancelar",
       disableDeviceFallback: false,

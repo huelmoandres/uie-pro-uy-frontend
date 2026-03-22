@@ -12,6 +12,7 @@ import { Lock, X } from "lucide-react-native";
 import { router } from "expo-router";
 import { FEATURE_PARAM_TO_LABEL } from "@constants/premiumFeatures";
 import { useAnalytics } from "@hooks/useAnalytics";
+import { APP_NAME_SHORT } from "@/constants/app.constants";
 
 interface PremiumGateModalProps {
   visible: boolean;
@@ -75,7 +76,7 @@ export function PremiumGateModal({
             </Text>
 
             <Text className="mt-3 text-center text-[14px] leading-5 text-slate-500 dark:text-slate-400 px-1">
-              Para usar {featureName} necesitás IUE Pro. ¿Querés ver los planes?
+              Para usar {featureName} necesitás {APP_NAME_SHORT}. ¿Querés ver los planes?
             </Text>
           </View>
 

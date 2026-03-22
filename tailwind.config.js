@@ -7,11 +7,11 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                // Premium Pro Palette
+                // Premium Pro Palette — Dark: Warm Charcoal
                 primary: {
-                    DEFAULT: '#0B1120', // Deep Navy
-                    light: '#1E293B',
-                    dark: '#020617',
+                    DEFAULT: '#13100D', // Warm Charcoal (replaces Deep Navy)
+                    light: '#211C17',   // Warm surface
+                    dark: '#0A0806',    // Deepest charcoal
                 },
                 accent: {
                     DEFAULT: '#B89146', // Refined Metallic Gold
@@ -22,14 +22,14 @@ module.exports = {
                 // Backgrounds & Surfaces
                 background: {
                     light: '#F8FAFC',
-                    dark: '#0B1120',
+                    dark: '#13100D',    // Warm Charcoal
                 },
                 surface: {
                     light: '#FFFFFF',
-                    dark: '#1E293B',
+                    dark: '#211C17',    // Warm surface
                     border: {
                         light: '#E2E8F0',
-                        dark: 'rgba(255, 255, 255, 0.05)',
+                        dark: 'rgba(255, 255, 255, 0.06)',
                     }
                 },
                 // Semantic
@@ -38,7 +38,7 @@ module.exports = {
                 danger: '#EF4444',
                 info: '#3B82F6',
 
-                // Specific Navy Palette
+                // Warm Charcoal scale (replaces navy in dark mode)
                 navy: {
                     50: '#F8FAFC',
                     100: '#F1F5F9',
@@ -47,10 +47,10 @@ module.exports = {
                     400: '#94A3B8',
                     500: '#64748B',
                     600: '#475569',
-                    700: '#334155',
-                    800: '#1E293B',
-                    900: '#0B1120',
-                    950: '#020617',
+                    700: '#2C2420',    // Warm dark surface
+                    800: '#211C17',    // Warm surface
+                    900: '#13100D',    // Warm Charcoal
+                    950: '#0A0806',    // Deepest
                 },
             },
             fontFamily: {
@@ -60,7 +60,7 @@ module.exports = {
             },
             boxShadow: {
                 'premium': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                'premium-dark': '0 4px 20px -2px rgba(0, 0, 0, 0.3)',
+                'premium-dark': '0 4px 24px -2px rgba(0, 0, 0, 0.5)',
             }
         },
     },

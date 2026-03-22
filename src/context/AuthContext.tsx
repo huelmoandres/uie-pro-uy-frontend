@@ -9,6 +9,7 @@ import * as SecureStore from "expo-secure-store";
 import { AuthService } from "@services";
 import { SECURE_STORE_KEYS, setGlobalSignOut } from "@api/client";
 import { logout as apiLogout } from "@api/auth.api";
+import { clearCachedPushToken } from "@hooks/useNotifications";
 import { queryClient } from "@providers/QueryProvider";
 import { getDeviceId } from "@utils/deviceId";
 import { usePostHog } from "posthog-react-native";
@@ -35,13 +36,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     posthog?.reset();
     queryClient.clear();
     try {
-      const deviceId = await getDeviceId().catch(() => undefined);
-      await apiLogout(deviceId);
+      const [deviceId, pushToken] = await Promise.all([
+        getDeviceId().catch(() => undefined),
+        SecureStore.getItemAsync(SECURE_STORE_KEYS.PUSH_TOKEN).catch(
+          () => undefined,
+        ),
+      ]);
+      // Enviar pushToken al backend para que lo elimine de la BD.
+      // Así el dispositivo no recibirá notificaciones del usuario saliente.
+      await apiLogout(deviceId, pushToken ?? undefined);
     } catch {
       // Ignorar errores de red; lo importante es limpiar el estado local.
     } finally {
       await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
       await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
+      // Limpiar caché del push token para forzar re-registro en el próximo login.
+      await clearCachedPushToken();
       setToken(null);
       setUser(null);
     }

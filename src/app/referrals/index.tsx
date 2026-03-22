@@ -17,6 +17,7 @@ import { useController, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Toast from "react-native-toast-message";
 import { useReferralCode, useApplyReferralCode } from "@hooks/useReferrals";
+import { APP_NAME } from "@/constants/app.constants";
 import { useAuth } from "@context/AuthContext";
 import { useSubscription } from "@context/SubscriptionContext";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
@@ -158,7 +159,7 @@ export default function ReferralsScreen() {
                 <View className="flex-1">
                   <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">Compartís tu código</Text>
                   <Text className="text-xs font-sans text-slate-500 dark:text-slate-400 mt-0.5 leading-5">
-                    Enviá tu código a colegas abogados. Ellos lo ingresan al registrarse en IUE Pro Uy.
+                    Enviá tu código a colegas abogados. Ellos lo ingresan al registrarse en {APP_NAME}.
                   </Text>
                 </View>
               </View>

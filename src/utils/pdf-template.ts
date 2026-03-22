@@ -3,6 +3,7 @@
  * Pure function — no side effects, fully testable.
  * Fechas en hora Uruguay (America/Montevideo).
  */
+import { APP_NAME, APP_NAME_SHORT } from "@/constants/app.constants";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import { stripHtml, formatDate } from "./formatters";
@@ -606,7 +607,7 @@ export function buildDecreePdf(
 
 <div class="header">
   <div>
-    <div class="brand-line">IUE Pro &nbsp;·&nbsp; Decreto Judicial</div>
+    <div class="brand-line">${APP_NAME_SHORT} &nbsp;·&nbsp; Decreto Judicial</div>
     <div class="doc-title">Decreto ${esc(nroDecree)}</div>
   </div>
   <div class="header-right">
@@ -626,7 +627,7 @@ ${deadlineBlock}
 </div>
 
 <div class="footer">
-  <div class="footer-brand">IUE PRO</div>
+  <div class="footer-brand">${APP_NAME}</div>
   <div class="footer-meta">
     Generado el ${esc(generatedAt)}<br/>
     Documento de uso interno — no constituye copia oficial

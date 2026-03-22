@@ -5,6 +5,7 @@ import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
 import { useForm, useWatch } from "react-hook-form";
 import { Scale, Gift } from "lucide-react-native";
+import { APP_NAME } from "@/constants/app.constants";
 import { useRegisterMutation } from "@hooks/useAuthMutations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterFormData } from "@schemas/auth.schema";
@@ -72,7 +73,7 @@ export default function RegisterScreen() {
       <AuthScreenHeader
         icon={Scale}
         title="Crear Cuenta"
-        subtitle="Sumate a UIE Pro Uy"
+        subtitle={`Sumate a ${APP_NAME}`}
         showBackButton={true}
       />
 
