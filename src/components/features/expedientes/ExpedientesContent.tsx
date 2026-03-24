@@ -65,15 +65,21 @@ export function ExpedientesContent({
         onSelect={onSelect}
         onPin={onPin}
         onTagsPress={selectedIues.length === 0 ? onTagsPress : undefined}
-        onAddReminder={
-          selectedIues.length === 0 ? onAddReminder : undefined
-        }
+        onAddReminder={selectedIues.length === 0 ? onAddReminder : undefined}
         showPinTooltip={index === 0}
         hasPremiumAccess={hasPremiumAccess}
         hasPendingReminder={pendingReminderIues.has(item.iue)}
       />
     ),
-    [selectedIues, onSelect, onPin, onTagsPress, onAddReminder, hasPremiumAccess, pendingReminderIues],
+    [
+      selectedIues,
+      onSelect,
+      onPin,
+      onTagsPress,
+      onAddReminder,
+      hasPremiumAccess,
+      pendingReminderIues,
+    ],
   );
 
   const ListFooterComponent = useCallback(() => {
@@ -131,7 +137,8 @@ export function ExpedientesContent({
               No tenés favoritos
             </Text>
             <Text className="mt-2 text-[12px] font-sans text-slate-400 text-center px-8">
-              Presioná la estrella ★ en un expediente para marcarlo como favorito
+              Presioná la estrella ★ en un expediente para marcarlo como
+              favorito
             </Text>
           </View>
         </PageContainer>

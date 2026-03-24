@@ -51,7 +51,9 @@ export const LoadMoreButton: React.FC<LoadMoreButtonProps> = React.memo(
         {loading ? (
           <ActivityIndicator size="small" color="#B89146" />
         ) : (
-          <Text className="text-[13px] font-sans-semi text-accent">{label}</Text>
+          <Text className="text-[13px] font-sans-semi text-accent">
+            {label}
+          </Text>
         )}
       </Pressable>
     );

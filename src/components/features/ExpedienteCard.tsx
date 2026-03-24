@@ -146,9 +146,7 @@ export const ExpedienteCard = React.memo(
                   className="p-1 flex-row items-center gap-0.5"
                 >
                   <Bell size={15} color="#B89146" />
-                  {!hasPremiumAccess && (
-                    <Lock size={12} color="#94A3B8" />
-                  )}
+                  {!hasPremiumAccess && <Lock size={12} color="#94A3B8" />}
                 </Pressable>
               )}
               {onTagsPress && (
@@ -158,13 +156,11 @@ export const ExpedienteCard = React.memo(
                   className="p-1 flex-row items-center gap-0.5"
                 >
                   <Tag size={15} color={tagColor} />
-                  {!hasPremiumAccess && (
-                    <Lock size={12} color="#94A3B8" />
-                  )}
+                  {!hasPremiumAccess && <Lock size={12} color="#94A3B8" />}
                 </Pressable>
               )}
-              {onPin && (
-                showPinTooltip && shouldShowPinTooltip ? (
+              {onPin &&
+                (showPinTooltip && shouldShowPinTooltip ? (
                   <ContextualTooltip
                     message="Fijá este expediente para tenerlo siempre a mano"
                     visible={showPinTooltip && shouldShowPinTooltip}
@@ -179,8 +175,7 @@ export const ExpedienteCard = React.memo(
                   <Pressable onPress={handlePin} hitSlop={10} className="p-1">
                     <Star size={15} color={starColor} fill={starFill} />
                   </Pressable>
-                )
-              )}
+                ))}
             </View>
           )}
         </View>

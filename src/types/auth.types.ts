@@ -18,7 +18,7 @@ export interface IUser {
   referralCode: string | null;
   referredById: string | null;
   /** Tipo de referido que se aplicó al registrarse. null si no usó código. */
-  referralType: 'USER' | 'PARTNER' | null;
+  referralType: "USER" | "PARTNER" | null;
   /** true si el backend confirma acceso Pro activo (suscripción o entitlement promocional). */
   isPro: boolean;
   /** Fecha de expiración del acceso Pro según el backend. null si no tiene o es perpetuo. */

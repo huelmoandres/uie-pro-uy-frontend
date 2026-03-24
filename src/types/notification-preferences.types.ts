@@ -3,7 +3,7 @@
  * Para agregar un nuevo tipo en el futuro, añadir el campo aquí
  * y en NOTIFICATION_TYPES de notifications.tsx.
  */
-export type PushNotificationMode = 'INDIVIDUAL' | 'GROUPED';
+export type PushNotificationMode = "INDIVIDUAL" | "GROUPED";
 
 export interface INotificationPreferences {
   pushEnabled: boolean;

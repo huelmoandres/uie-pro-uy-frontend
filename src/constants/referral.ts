@@ -7,7 +7,6 @@ import { APP_NAME } from "./app.constants";
  * cambios de copy sin tocar los componentes.
  */
 
-
 /**
  * Genera el mensaje para compartir el código de referido.
  * Solo incluye los links de tiendas que tengan URL configurada.

@@ -46,7 +46,8 @@ export function useApplyReferralCode() {
       let message = "No se pudo aplicar el código. Intentá de nuevo.";
       if (code === "REF_001") message = "Código de referido no encontrado.";
       if (code === "REF_002") message = "No podés usar tu propio código.";
-      if (code === "REF_003") message = "Ya tenés un código de invitación aplicado.";
+      if (code === "REF_003")
+        message = "Ya tenés un código de invitación aplicado.";
       Toast.show({ type: "error", text1: "Error", text2: message });
     },
   });

@@ -20,17 +20,32 @@ export function AgendaSkeleton() {
         <View className="rounded-[16px] border border-slate-100 dark:border-white/5 bg-white dark:bg-white/5 p-3">
           <Skeleton width="50%" height={12} borderRadius={4} />
           <Skeleton width="90%" height={14} borderRadius={4} className="mt-2" />
-          <Skeleton width={36} height={20} borderRadius={8} className="mt-2 self-end" />
+          <Skeleton
+            width={36}
+            height={20}
+            borderRadius={8}
+            className="mt-2 self-end"
+          />
         </View>
         <View className="rounded-[16px] border border-slate-100 dark:border-white/5 bg-white dark:bg-white/5 p-3">
           <Skeleton width="50%" height={12} borderRadius={4} />
           <Skeleton width="90%" height={14} borderRadius={4} className="mt-2" />
-          <Skeleton width={36} height={20} borderRadius={8} className="mt-2 self-end" />
+          <Skeleton
+            width={36}
+            height={20}
+            borderRadius={8}
+            className="mt-2 self-end"
+          />
         </View>
         <View className="rounded-[16px] border border-slate-100 dark:border-white/5 bg-white dark:bg-white/5 p-3">
           <Skeleton width="50%" height={12} borderRadius={4} />
           <Skeleton width="90%" height={14} borderRadius={4} className="mt-2" />
-          <Skeleton width={36} height={20} borderRadius={8} className="mt-2 self-end" />
+          <Skeleton
+            width={36}
+            height={20}
+            borderRadius={8}
+            className="mt-2 self-end"
+          />
         </View>
       </View>
     </View>

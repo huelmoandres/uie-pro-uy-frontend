@@ -16,7 +16,8 @@ export const FAQS: FaqItem[] = [
       "La app muestra los datos que ya tenés sincronizados aunque no tengas internet: tus expedientes, movimientos guardados, notas, recordatorios y plazos de la Agenda. Las acciones que requieren conexión son: sincronizar nuevos movimientos, usar el resumen con IA, agendar horas y verificar tu suscripción. La app te avisará si intentás hacer algo que necesita internet.",
   },
   {
-    question: "¿Por qué la información puede diferir del portal del Poder Judicial?",
+    question:
+      "¿Por qué la información puede diferir del portal del Poder Judicial?",
     answer:
       "La app consulta los mismos sistemas públicos del Poder Judicial (SOAP), pero puede haber diferencias por el momento de la última sincronización. La fuente oficial siempre es el portal del Poder Judicial (pj.gub.uy). IUE Pro es una herramienta de seguimiento y asistencia, no un reemplazo de la consulta oficial. Siempre verificá la información en el portal antes de tomar decisiones procesales.",
   },
@@ -71,7 +72,7 @@ export const FAQS: FaqItem[] = [
   {
     question: "¿Cómo busco una sede específica?",
     answer:
-      'Usá el buscador para escribir nombre o dirección. También podés aplicar filtros tocando el ícono de filtros: elegí departamento, ciudad y/o materia. Los resultados se actualizan automáticamente.',
+      "Usá el buscador para escribir nombre o dirección. También podés aplicar filtros tocando el ícono de filtros: elegí departamento, ciudad y/o materia. Los resultados se actualizan automáticamente.",
   },
   // ── Recordatorios ────────────────────────────────────────────────────
   {
@@ -82,12 +83,12 @@ export const FAQS: FaqItem[] = [
   {
     question: "¿Puedo poner recordatorios a cualquier expediente?",
     answer:
-      "Sí. Podés agregar recordatorios a cualquier expediente que sigas, no solo a los que tienen plazos en la Agenda. Tocá la campana en la tarjeta del expediente o \"Agregar recordatorio\" en el detalle. Elegí fecha, hora, título y descripción personalizados.",
+      'Sí. Podés agregar recordatorios a cualquier expediente que sigas, no solo a los que tienen plazos en la Agenda. Tocá la campana en la tarjeta del expediente o "Agregar recordatorio" en el detalle. Elegí fecha, hora, título y descripción personalizados.',
   },
   {
     question: "¿Dónde veo mis recordatorios programados?",
     answer:
-      "En la sección superior de la Agenda Procesal aparece \"Recordatorios programados\" con los recordatorios activos. Podés eliminarlos tocando el ícono de papelera. Los recordatorios enviados o cancelados no se muestran ahí.",
+      'En la sección superior de la Agenda Procesal aparece "Recordatorios programados" con los recordatorios activos. Podés eliminarlos tocando el ícono de papelera. Los recordatorios enviados o cancelados no se muestran ahí.',
   },
   // ── Agenda Procesal ──────────────────────────────────────────────────
   {
@@ -158,7 +159,7 @@ export const FAQS: FaqItem[] = [
   {
     question: "No me llegó el código OTP, ¿qué hago?",
     answer:
-      "Primero revisá la carpeta de spam o correo no deseado. Si tampoco está ahí, esperá unos minutos y pedí un nuevo código tocando \"Reenviar código\". Asegurate de que el email ingresado sea el correcto. Si el problema persiste, contactanos desde Soporte.",
+      'Primero revisá la carpeta de spam o correo no deseado. Si tampoco está ahí, esperá unos minutos y pedí un nuevo código tocando "Reenviar código". Asegurate de que el email ingresado sea el correcto. Si el problema persiste, contactanos desde Soporte.',
   },
   {
     question: "¿Cómo elimino mi cuenta?",
@@ -228,23 +229,23 @@ export const FAQS: FaqItem[] = [
   {
     question: "¿Cómo creo y gestiono etiquetas?",
     answer:
-      'Andá a Mi Perfil → Configuración → Gestionar etiquetas. Podés crear etiquetas con nombre y color, editarlas o eliminarlas. Para asignar una etiqueta a un expediente, tocá el ícono de etiqueta en la tarjeta del expediente o en su detalle.',
+      "Andá a Mi Perfil → Configuración → Gestionar etiquetas. Podés crear etiquetas con nombre y color, editarlas o eliminarlas. Para asignar una etiqueta a un expediente, tocá el ícono de etiqueta en la tarjeta del expediente o en su detalle.",
   },
   // ── Referidos ─────────────────────────────────────────────────────────
   {
     question: "¿Cómo funciona el programa de referidos?",
     answer:
-      'Es un sistema Win-Win. Encontrás tu código en Mi Perfil → Referidos y lo compartís con colegas. Cuando alguien se registra con tu código recibe 7 días de Pro gratis. Si además se suscribe, vos ganás 1 mes extra (30 días) de acceso Pro acreditado automáticamente.',
+      "Es un sistema Win-Win. Encontrás tu código en Mi Perfil → Referidos y lo compartís con colegas. Cuando alguien se registra con tu código recibe 7 días de Pro gratis. Si además se suscribe, vos ganás 1 mes extra (30 días) de acceso Pro acreditado automáticamente.",
   },
   {
     question: "¿Qué gana el colega que recibe mi código?",
     answer:
-      '7 días de acceso Pro completamente gratis al registrarse, sin necesidad de suscribirse primero. Recibirá un email de bienvenida confirmando el beneficio.',
+      "7 días de acceso Pro completamente gratis al registrarse, sin necesidad de suscribirse primero. Recibirá un email de bienvenida confirmando el beneficio.",
   },
   {
     question: "¿Cuándo se acredita el mes para mí?",
     answer:
-      'El mes se acredita en el momento en que el colega que invitaste confirma su primera suscripción Pro. Recibirás un email de confirmación avisándote que el beneficio fue acreditado.',
+      "El mes se acredita en el momento en que el colega que invitaste confirma su primera suscripción Pro. Recibirás un email de confirmación avisándote que el beneficio fue acreditado.",
   },
   {
     question: "¿Cómo funciona el mes ganado si tengo suscripción activa?",
@@ -259,6 +260,6 @@ export const FAQS: FaqItem[] = [
   {
     question: "¿Puedo aplicar un código de invitación después de registrarme?",
     answer:
-      'Sí, podés aplicarlo en cualquier momento desde Mi Perfil → Referidos, mientras no hayas ingresado uno antes. Solo se puede aplicar un código por cuenta. Los días gratis se acreditan al ingresar el código.',
+      "Sí, podés aplicarlo en cualquier momento desde Mi Perfil → Referidos, mientras no hayas ingresado uno antes. Solo se puede aplicar un código por cuenta. Los días gratis se acreditan al ingresar el código.",
   },
 ];

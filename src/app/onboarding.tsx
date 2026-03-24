@@ -155,7 +155,9 @@ export default function OnboardingScreen() {
           <View
             key={i}
             className={`h-2 rounded-full ${
-              i === currentIndex ? "w-6 bg-accent" : "w-2 bg-slate-300 dark:bg-white/20"
+              i === currentIndex
+                ? "w-6 bg-accent"
+                : "w-2 bg-slate-300 dark:bg-white/20"
             }`}
           />
         ))}
@@ -174,11 +176,17 @@ export default function OnboardingScreen() {
           </View>
           <Text className="text-center text-[12px] font-sans leading-[18px] text-slate-500 dark:text-slate-400">
             Al continuar, aceptás nuestros{" "}
-            <Text onPress={openTerms} className="font-sans-semi text-accent underline">
+            <Text
+              onPress={openTerms}
+              className="font-sans-semi text-accent underline"
+            >
               Términos Legales (EULA)
             </Text>{" "}
             y{" "}
-            <Text onPress={openPrivacy} className="font-sans-semi text-accent underline">
+            <Text
+              onPress={openPrivacy}
+              className="font-sans-semi text-accent underline"
+            >
               Política de Privacidad
             </Text>
             .

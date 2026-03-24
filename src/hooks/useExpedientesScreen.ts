@@ -29,9 +29,8 @@ export function useExpedientesScreen() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedIues, setSelectedIues] = useState<string[]>([]);
   const [showBulkAgenda, setShowBulkAgenda] = useState(false);
-  const [queryParams, setQueryParams] = useState<
-    Omit<IExpedientesQuery, "page">
-  >(BASE_QUERY);
+  const [queryParams, setQueryParams] =
+    useState<Omit<IExpedientesQuery, "page">>(BASE_QUERY);
   const [tagPickerIue, setTagPickerIue] = useState<string | null>(null);
   const [reminderModalItem, setReminderModalItem] =
     useState<IExpediente | null>(null);
@@ -162,7 +161,9 @@ export function useExpedientesScreen() {
   }, [data?.pages, expedientes.length]);
 
   const hasActiveFilters =
-    !!queryParams.sede || !!queryParams.anio || (queryParams.tagIds?.length ?? 0) > 0;
+    !!queryParams.sede ||
+    !!queryParams.anio ||
+    (queryParams.tagIds?.length ?? 0) > 0;
 
   return {
     // State

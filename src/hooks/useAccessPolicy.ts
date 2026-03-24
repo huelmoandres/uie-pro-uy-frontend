@@ -33,4 +33,3 @@ export function useAccessPolicy() {
     [hasPremiumAccess, freeExpedientesLimit],
   );
 }
-

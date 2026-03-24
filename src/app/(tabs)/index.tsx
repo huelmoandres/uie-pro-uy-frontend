@@ -1,5 +1,5 @@
 import React from "react";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { View, Modal } from "react-native";
 import Toast from "react-native-toast-message";
 import {
@@ -18,7 +18,8 @@ import { useAccessPolicy, useExpedientesScreen, usePremiumGate } from "@hooks";
 export default function ExpedientesScreen() {
   const screen = useExpedientesScreen();
   const premiumGate = usePremiumGate();
-  const { canAddExpediente, hasPremiumAccess, getFreeQuotaUsage } = useAccessPolicy();
+  const { canAddExpediente, hasPremiumAccess, getFreeQuotaUsage } =
+    useAccessPolicy();
 
   const {
     searchText,
@@ -102,7 +103,9 @@ export default function ExpedientesScreen() {
     setTagPickerIue(iue);
   };
 
-  const handleGuardedAddReminder = (item: Parameters<typeof setReminderModalItem>[0]) => {
+  const handleGuardedAddReminder = (
+    item: Parameters<typeof setReminderModalItem>[0],
+  ) => {
     if (!item) return;
     if (!hasPremiumFeatureAccess) {
       showPremiumModal("reminders");
@@ -115,7 +118,7 @@ export default function ExpedientesScreen() {
     router.push({
       pathname: "/expedientes/updates",
       params: { scope: "todayMovements" },
-    } as any);
+    } as Href);
   };
 
   return (

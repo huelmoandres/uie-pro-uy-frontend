@@ -17,4 +17,3 @@ function parseFreeExpedientesLimit(): number {
 export const FREEMIUM_POLICY = {
   freeExpedientesLimit: parseFreeExpedientesLimit(),
 } as const;
-

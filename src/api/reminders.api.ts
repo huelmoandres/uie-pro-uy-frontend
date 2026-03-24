@@ -29,9 +29,18 @@ export async function createReminder(
 
 export async function updateReminder(
   id: string,
-  payload: Partial<{ remindAt: string; offsetDays: number; title: string; body: string; data: Record<string, unknown> }>,
+  payload: Partial<{
+    remindAt: string;
+    offsetDays: number;
+    title: string;
+    body: string;
+    data: Record<string, unknown>;
+  }>,
 ): Promise<IReminder> {
-  const { data } = await apiClient.patch<IReminder>(`/reminders/${id}`, payload);
+  const { data } = await apiClient.patch<IReminder>(
+    `/reminders/${id}`,
+    payload,
+  );
   return data;
 }
 

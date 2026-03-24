@@ -19,7 +19,9 @@ export function useExpedienteCompare(iues: string[]) {
     })),
   });
 
-  const expedientes: (IExpediente | null)[] = results.map((r) => r.data ?? null);
+  const expedientes: (IExpediente | null)[] = results.map(
+    (r) => r.data ?? null,
+  );
   const isLoading = results.some((r) => r.isLoading);
   const isError = results.some((r) => r.isError);
   const refetch = () => results.forEach((r) => r.refetch());

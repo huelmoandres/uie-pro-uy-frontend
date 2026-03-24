@@ -19,7 +19,11 @@ export class AiService {
     messages: { role: MessageRole; content: string }[],
     onToken: (token: string) => void,
     onDone: (conversationId: string) => void,
-    onError: (message: string, status?: number, rateLimitMeta?: RateLimitMeta) => void,
+    onError: (
+      message: string,
+      status?: number,
+      rateLimitMeta?: RateLimitMeta,
+    ) => void,
     signal?: AbortSignal,
     conversationId?: string,
   ): Promise<void> {

@@ -23,7 +23,9 @@ export function useCreateReminder() {
         text1: "Recordatorio creado",
         text2: "Recibirás una notificación push en la fecha programada.",
       });
-      void queryClient.invalidateQueries({ queryKey: ReminderService.queryKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: ReminderService.queryKeys.all,
+      });
       void queryClient.invalidateQueries({ queryKey: ["deadline-agenda"] });
     },
     onError: (err: Error) => {
@@ -48,7 +50,9 @@ export function useDeleteReminder() {
     onSuccess: () => {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({ type: "success", text1: "Recordatorio eliminado" });
-      void queryClient.invalidateQueries({ queryKey: ReminderService.queryKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: ReminderService.queryKeys.all,
+      });
       void queryClient.invalidateQueries({ queryKey: ["deadline-agenda"] });
     },
     onError: (err: Error) => {

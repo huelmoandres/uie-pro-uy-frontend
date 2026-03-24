@@ -18,7 +18,14 @@ export function setErrorContext(ctx: ErrorContext) {
 }
 
 export function initErrorTracking() {
-  const ErrorUtils = (global as { ErrorUtils?: { getGlobalHandler: () => (e: unknown, f?: boolean) => void; setGlobalHandler: (h: (e: unknown, f?: boolean) => void) => void } }).ErrorUtils;
+  const ErrorUtils = (
+    global as {
+      ErrorUtils?: {
+        getGlobalHandler: () => (e: unknown, f?: boolean) => void;
+        setGlobalHandler: (h: (e: unknown, f?: boolean) => void) => void;
+      };
+    }
+  ).ErrorUtils;
   if (!ErrorUtils) return;
 
   const originalHandler = ErrorUtils.getGlobalHandler();

@@ -10,7 +10,11 @@ interface ChatModeTabsProps {
   disabled: boolean;
 }
 
-export function ChatModeTabs({ selected, onSelect, disabled }: ChatModeTabsProps) {
+export function ChatModeTabs({
+  selected,
+  onSelect,
+  disabled,
+}: ChatModeTabsProps) {
   return (
     <ScrollView
       horizontal

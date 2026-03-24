@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  RefreshControl,
-} from "react-native";
+import { View, Text, Pressable, RefreshControl } from "react-native";
 import { Stack } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FlashList } from "@shopify/flash-list";
@@ -65,7 +60,9 @@ export default function LinkedDevicesScreen() {
   const deleteSessionMutation = useMutation({
     mutationFn: (sessionId: string) => AuthService.deleteSession(sessionId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: AuthService.queryKeys.sessions });
+      void queryClient.invalidateQueries({
+        queryKey: AuthService.queryKeys.sessions,
+      });
       setSessionToDelete(null);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({
@@ -90,7 +87,9 @@ export default function LinkedDevicesScreen() {
       await AuthService.revokeOtherSessions(deviceId);
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: AuthService.queryKeys.sessions });
+      void queryClient.invalidateQueries({
+        queryKey: AuthService.queryKeys.sessions,
+      });
       setRevokeOthersModalVisible(false);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({
@@ -142,7 +141,13 @@ export default function LinkedDevicesScreen() {
     }
   }, []);
 
-  const renderSessionItem = ({ item, index }: { item: ISession; index: number }) => {
+  const renderSessionItem = ({
+    item,
+    index,
+  }: {
+    item: ISession;
+    index: number;
+  }) => {
     const isCurrent = item.deviceId === currentDeviceId;
     const isLast = index === (sessions?.length ?? 0) - 1;
     const canDeleteThis = !isCurrent && canRevokeOthers;
@@ -174,9 +179,7 @@ export default function LinkedDevicesScreen() {
         {canDeleteThis && (
           <Pressable
             onPress={() => {
-              void Haptics.impactAsync(
-                Haptics.ImpactFeedbackStyle.Light,
-              );
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setSessionToDelete(item);
             }}
             disabled={deleteSessionMutation.isPending}
@@ -189,8 +192,7 @@ export default function LinkedDevicesScreen() {
     );
   };
 
-  const wasRevoked =
-    hasOthers && !!currentDeviceId && !isCurrentInList;
+  const wasRevoked = hasOthers && !!currentDeviceId && !isCurrentInList;
 
   const listHeader = (
     <>
@@ -200,15 +202,15 @@ export default function LinkedDevicesScreen() {
             Tu sesión fue cerrada desde otro dispositivo
           </Text>
           <Text className="text-xs font-sans text-amber-700 dark:text-amber-300 mt-1">
-            Vas a ser redirigido al login en breve. No podés cerrar sesión en otros dispositivos.
+            Vas a ser redirigido al login en breve. No podés cerrar sesión en
+            otros dispositivos.
           </Text>
         </View>
       )}
       <View className="mb-6">
         <Text className="text-sm font-sans text-slate-600 dark:text-slate-400 leading-relaxed">
           Acá podés ver en qué dispositivos está iniciada tu sesión y cerrar
-          sesión en cualquiera de ellos si no los reconocés o ya no los
-          usás.
+          sesión en cualquiera de ellos si no los reconocés o ya no los usás.
         </Text>
       </View>
       <SectionTitle>Dispositivos activos</SectionTitle>

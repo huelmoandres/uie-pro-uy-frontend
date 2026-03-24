@@ -15,7 +15,7 @@ export function filterTributos(items: ITributo[], query: string): ITributo[] {
   return items.filter(
     (item) =>
       item.processType.toLowerCase().includes(q) ||
-      (item.searchTerms?.toLowerCase().includes(q) ?? false)
+      (item.searchTerms?.toLowerCase().includes(q) ?? false),
   );
 }
 

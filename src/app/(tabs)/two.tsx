@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, Text, View, ScrollView } from "react-native";
-import { router } from "expo-router";
-import {
-  APP_NAME_SHORT,
-  APP_NAME_VERSION,
-} from "@/constants/app.constants";
+import { router, type Href } from "expo-router";
+import { APP_NAME_SHORT, APP_NAME_VERSION } from "@/constants/app.constants";
 import { formatDateShort } from "@utils/formatters";
 import { useAuth } from "@context/AuthContext";
 import { useSubscription } from "@context/SubscriptionContext";
@@ -31,7 +28,8 @@ import { INFO_HINTS } from "@/constants/InfoHints";
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { isPro, isInTrial } = useSubscription();
-  const { isExpiringSoon, daysRemaining, expirationDate } = useSubscriptionExpiry();
+  const { isExpiringSoon, daysRemaining, expirationDate } =
+    useSubscriptionExpiry();
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
   const badgeLabel = isInTrial
@@ -44,13 +42,16 @@ export default function ProfileScreen() {
     router.push({
       pathname: "/paywall",
       params: { entry: "profile" },
-    } as any);
+    } as Href);
   };
 
   const menuItems = [
     {
       icon: Crown,
-      label: isPro || isInTrial ? `${APP_NAME_SHORT} - Activo` : `${APP_NAME_SHORT} - Suscribirse`,
+      label:
+        isPro || isInTrial
+          ? `${APP_NAME_SHORT} - Activo`
+          : `${APP_NAME_SHORT} - Suscribirse`,
       color: "#B89146",
       route: null as null,
       onPress: handlePaywallPress,
@@ -133,9 +134,13 @@ export default function ProfileScreen() {
                 <View className="mt-3 px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30">
                   <Text className="text-xs font-sans-semi text-amber-700 dark:text-amber-400 text-center">
                     {daysRemaining === 0
-                      ? isInTrial ? "Tu prueba vence hoy" : "Tu acceso Pro vence hoy"
+                      ? isInTrial
+                        ? "Tu prueba vence hoy"
+                        : "Tu acceso Pro vence hoy"
                       : daysRemaining === 1
-                        ? isInTrial ? "Tu prueba vence mañana" : "Tu acceso Pro vence mañana"
+                        ? isInTrial
+                          ? "Tu prueba vence mañana"
+                          : "Tu acceso Pro vence mañana"
                         : isInTrial
                           ? `Tu prueba vence en ${daysRemaining} días`
                           : `Tu acceso Pro vence en ${daysRemaining} días`}

@@ -18,10 +18,13 @@ export class ReminderService {
     lists: () => [...ReminderService.queryKeys.all, "list"] as const,
     list: (params: IRemindersQuery) =>
       [...ReminderService.queryKeys.lists(), params] as const,
-    detail: (id: string) => [...ReminderService.queryKeys.all, "detail", id] as const,
+    detail: (id: string) =>
+      [...ReminderService.queryKeys.all, "detail", id] as const,
   };
 
-  static async getAll(params: IRemindersQuery): Promise<IRemindersListResponse> {
+  static async getAll(
+    params: IRemindersQuery,
+  ): Promise<IRemindersListResponse> {
     return getReminders(params);
   }
 

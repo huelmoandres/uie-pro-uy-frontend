@@ -22,7 +22,9 @@ export function useBiometric(isAuthenticated: boolean): UseBiometricReturn {
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
   const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
-  const [biometricType, setBiometricType] = useState<"faceid" | "fingerprint" | "iris" | null>(null);
+  const [biometricType, setBiometricType] = useState<
+    "faceid" | "fingerprint" | "iris" | null
+  >(null);
 
   const backgroundedAt = useRef<number | null>(null);
   const appState = useRef<AppStateStatus>(AppState.currentState);
@@ -38,10 +40,17 @@ export function useBiometric(isAuthenticated: boolean): UseBiometricReturn {
     setIsBiometricAvailable(hasHardware && isEnrolled);
 
     if (hasHardware && isEnrolled) {
-      const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
-      if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+      const types =
+        await LocalAuthentication.supportedAuthenticationTypesAsync();
+      if (
+        types.includes(
+          LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION,
+        )
+      ) {
         setBiometricType("faceid");
-      } else if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+      } else if (
+        types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)
+      ) {
         setBiometricType("fingerprint");
       } else if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
         setBiometricType("iris");
@@ -50,27 +59,32 @@ export function useBiometric(isAuthenticated: boolean): UseBiometricReturn {
   }
 
   async function loadPreference() {
-    const value = await SecureStore.getItemAsync(SECURE_STORE_KEYS.BIOMETRIC_ENABLED);
+    const value = await SecureStore.getItemAsync(
+      SECURE_STORE_KEYS.BIOMETRIC_ENABLED,
+    );
     setIsBiometricEnabled(value === "true");
   }
 
-  const handleAppStateChange = useCallback((nextState: AppStateStatus) => {
-    if (appState.current === "active" && nextState === "background") {
-      backgroundedAt.current = Date.now();
-    }
+  const handleAppStateChange = useCallback(
+    (nextState: AppStateStatus) => {
+      if (appState.current === "active" && nextState === "background") {
+        backgroundedAt.current = Date.now();
+      }
 
-    if (
-      appState.current === "background" &&
-      nextState === "active" &&
-      isBiometricEnabled &&
-      backgroundedAt.current !== null &&
-      Date.now() - backgroundedAt.current >= LOCK_TIMEOUT_MS
-    ) {
-      setIsLocked(true);
-    }
+      if (
+        appState.current === "background" &&
+        nextState === "active" &&
+        isBiometricEnabled &&
+        backgroundedAt.current !== null &&
+        Date.now() - backgroundedAt.current >= LOCK_TIMEOUT_MS
+      ) {
+        setIsLocked(true);
+      }
 
-    appState.current = nextState;
-  }, [isBiometricEnabled]);
+      appState.current = nextState;
+    },
+    [isBiometricEnabled],
+  );
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -78,7 +92,10 @@ export function useBiometric(isAuthenticated: boolean): UseBiometricReturn {
       return;
     }
 
-    const subscription = AppState.addEventListener("change", handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange,
+    );
     return () => subscription.remove();
   }, [isAuthenticated, isBiometricEnabled, handleAppStateChange]);
 
@@ -95,7 +112,10 @@ export function useBiometric(isAuthenticated: boolean): UseBiometricReturn {
   const enableBiometric = useCallback(async (): Promise<boolean> => {
     const ok = await authenticate();
     if (ok) {
-      await SecureStore.setItemAsync(SECURE_STORE_KEYS.BIOMETRIC_ENABLED, "true");
+      await SecureStore.setItemAsync(
+        SECURE_STORE_KEYS.BIOMETRIC_ENABLED,
+        "true",
+      );
       setIsBiometricEnabled(true);
     }
     return ok;

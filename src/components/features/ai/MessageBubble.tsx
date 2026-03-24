@@ -50,8 +50,8 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       entering={FadeIn.duration(200)}
       className={`px-4 py-1.5 ${isUser ? "items-end" : "items-start"}`}
     >
-      {!isUser && (
-        isRateLimit ? (
+      {!isUser &&
+        (isRateLimit ? (
           <RateLimitBubble message={message} />
         ) : (
           <View className="flex-row items-end gap-2">
@@ -66,8 +66,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               />
             </View>
           </View>
-        )
-      )}
+        ))}
 
       {isUser && (
         <View className="max-w-[82%] bg-primary dark:bg-accent/90 rounded-2xl rounded-br-sm px-4 py-3 shadow-sm">

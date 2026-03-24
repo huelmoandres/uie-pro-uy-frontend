@@ -216,11 +216,11 @@ export default function NotificationsScreen() {
         <SectionCard disabled={!masterEnabled}>
           <View className="p-4 gap-3">
             <Text className="text-[12px] font-sans text-slate-500 dark:text-slate-400 leading-relaxed">
-              Elegí cómo recibís las notificaciones cuando hay novedades en varios expedientes al mismo tiempo.
+              Elegí cómo recibís las notificaciones cuando hay novedades en
+              varios expedientes al mismo tiempo.
             </Text>
             {PUSH_MODE_OPTIONS.map((option, index) => {
-              const currentMode =
-                prefs?.pushNotificationMode ?? "INDIVIDUAL";
+              const currentMode = prefs?.pushNotificationMode ?? "INDIVIDUAL";
               const isSelected = currentMode === option.value;
               const isLast = index === PUSH_MODE_OPTIONS.length - 1;
 
@@ -361,7 +361,8 @@ export default function NotificationsScreen() {
                   Toast.show({
                     type: "success",
                     text1: "Token registrado",
-                    text2: "Las notificaciones deberían funcionar correctamente.",
+                    text2:
+                      "Las notificaciones deberían funcionar correctamente.",
                   });
                 } else {
                   Toast.show({

@@ -23,7 +23,11 @@ export async function streamChat(
   request: StreamChatRequest,
   onToken: (token: string) => void,
   onDone: (conversationId: string) => void,
-  onError: (message: string, status?: number, rateLimitMeta?: RateLimitMeta) => void,
+  onError: (
+    message: string,
+    status?: number,
+    rateLimitMeta?: RateLimitMeta,
+  ) => void,
   signal?: AbortSignal,
 ): Promise<void> {
   let processedLength = 0;

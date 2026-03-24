@@ -135,10 +135,7 @@ export default function CompareExpedientesScreen() {
               <View key={iues[idx] ?? idx} className="flex-1 min-w-0">
                 <CompareExpedientePanel
                   expediente={exp}
-                  plazosOpen={filterPlazosByIues(
-                    agendaItems,
-                    iues[idx] ?? "",
-                  )}
+                  plazosOpen={filterPlazosByIues(agendaItems, iues[idx] ?? "")}
                   fillWidth
                 />
               </View>
@@ -163,10 +160,7 @@ export default function CompareExpedientesScreen() {
               >
                 <CompareExpedientePanel
                   expediente={exp}
-                  plazosOpen={filterPlazosByIues(
-                    agendaItems,
-                    iues[idx] ?? "",
-                  )}
+                  plazosOpen={filterPlazosByIues(agendaItems, iues[idx] ?? "")}
                 />
               </View>
             ))}

@@ -11,7 +11,8 @@ export const LEGAL_URLS = {
   /** Términos de Uso (EULA) — obligatorio para suscripciones */
   TERMS_OF_USE: `${WEB_BASE}/terminos`,
   /** EULA estándar de Apple — solo iOS, si usás el EULA de Apple */
-  APPLE_EULA: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
+  APPLE_EULA:
+    "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
 } as const;
 
 /** URLs de la web para Soporte, Contacto y descarga de la app */

@@ -7,7 +7,11 @@ import React, {
   useRef,
 } from "react";
 import Purchases, { CustomerInfo } from "react-native-purchases";
-import { getProStatusDebug, parseProFromCustomerInfo, getExpirationDateFromCustomerInfo } from "@utils/subscription";
+import {
+  getProStatusDebug,
+  parseProFromCustomerInfo,
+  getExpirationDateFromCustomerInfo,
+} from "@utils/subscription";
 import { isSimulateCancelledTrialEnabled } from "@utils/debugSubscription";
 import {
   isBypassEmail,
@@ -210,7 +214,8 @@ export function SubscriptionProvider({
         const debugSimulate = await isSimulateCancelledTrialEnabled();
         if (debugSimulate) {
           setBypassAccess(setIsLoading, setIsPro, setIsInTrial);
-          __DEV__ && console.log("[Debug] Simulando trial cancelado con acceso");
+          __DEV__ &&
+            console.log("[Debug] Simulando trial cancelado con acceso");
           return;
         }
       }
@@ -269,7 +274,9 @@ export function SubscriptionProvider({
   // y exponemos la fecha del backend para que la UI la pueda mostrar.
   useEffect(() => {
     if (isLoading || isPro || !backendIsPro) return;
-    const backendExpiry = backendProExpiresAt ? new Date(backendProExpiresAt) : null;
+    const backendExpiry = backendProExpiresAt
+      ? new Date(backendProExpiresAt)
+      : null;
     const isStillValid = !backendExpiry || backendExpiry > new Date();
     if (!isStillValid) return;
 
@@ -283,7 +290,14 @@ export function SubscriptionProvider({
     if (!proExpiresAt && backendExpiry) {
       setProExpiresAt(backendExpiry);
     }
-  }, [isLoading, isPro, backendIsPro, backendProExpiresAt, userId, proExpiresAt]);
+  }, [
+    isLoading,
+    isPro,
+    backendIsPro,
+    backendProExpiresAt,
+    userId,
+    proExpiresAt,
+  ]);
 
   return (
     <SubscriptionContext.Provider

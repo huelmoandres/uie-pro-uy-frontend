@@ -22,9 +22,7 @@ export const CompareExpedientePanel = React.memo(
   ({ expediente, plazosOpen, isLoading, fillWidth }: Props) => {
     const handlePress = () => {
       if (expediente) {
-        router.push(
-          `/expedientes/${expediente.iue.replace("/", ":")}`,
-        );
+        router.push(`/expedientes/${expediente.iue.replace("/", ":")}`);
       }
     };
 

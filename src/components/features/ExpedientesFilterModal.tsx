@@ -308,4 +308,3 @@ export const ExpedientesFilterModal = React.memo(
   },
 );
 ExpedientesFilterModal.displayName = "ExpedientesFilterModal";
-

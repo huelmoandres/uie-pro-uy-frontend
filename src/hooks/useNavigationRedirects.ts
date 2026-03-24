@@ -14,11 +14,7 @@ const AUTH_PATHNAMES = [
   "/reset-password",
 ];
 
-export type RedirectTarget =
-  | "/(auth)/login"
-  | "/onboarding"
-  | "/(tabs)"
-  | null;
+export type RedirectTarget = "/(auth)/login" | "/onboarding" | "/(tabs)" | null;
 
 export interface NavigationRedirectsState {
   inAuthGroup: boolean;
@@ -57,9 +53,12 @@ export function useNavigationRedirects(): NavigationRedirectsState {
     AUTH_PATHNAMES.some((p) => pathname === p || pathname.startsWith(p + "/"));
   // Robusto: pathname puede variar en prod (ej. con base path). Incluir "paywall" en la ruta.
   const inPaywall =
-    (pathname != null && (pathname === "/paywall" || pathname.includes("/paywall"))) ?? false;
+    (pathname != null &&
+      (pathname === "/paywall" || pathname.includes("/paywall"))) ??
+    false;
   const inOnboarding =
-    (pathname === "/onboarding" || pathname?.startsWith("/onboarding")) ?? false;
+    (pathname === "/onboarding" || pathname?.startsWith("/onboarding")) ??
+    false;
   // Un solo destino de redirección para evitar loops por Redirects competidores
   const redirectTarget: RedirectTarget = (() => {
     if (!isAuthenticated && !inAuthGroup) return "/(auth)/login";
@@ -108,7 +107,10 @@ export function useNavigationRedirects(): NavigationRedirectsState {
   const alreadyAtTarget =
     (redirectTarget === "/(auth)/login" && inAuthGroup) ||
     (redirectTarget === "/onboarding" && inOnboarding) ||
-    (redirectTarget === "/(tabs)" && !inAuthGroup && !inPaywall && !inOnboarding);
+    (redirectTarget === "/(tabs)" &&
+      !inAuthGroup &&
+      !inPaywall &&
+      !inOnboarding);
 
   return {
     inAuthGroup,
@@ -136,6 +138,7 @@ function getLoadingMessage({
 }): string | undefined {
   if (isLoading) return undefined;
   if (pathname == null) return "Cargando...";
-  if (isAuthenticated && isSubscriptionLoading) return "Verificando suscripción...";
+  if (isAuthenticated && isSubscriptionLoading)
+    return "Verificando suscripción...";
   return "Redirigiendo...";
 }

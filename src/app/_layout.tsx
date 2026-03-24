@@ -6,7 +6,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Stack, type Href } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState, useCallback } from "react";
 import { Platform, StyleSheet, Pressable } from "react-native";
@@ -14,9 +14,7 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/components/base/useColorScheme";
 import { AuthProvider, useAuth } from "@context/AuthContext";
-import {
-  SubscriptionProvider,
-} from "@context/SubscriptionContext";
+import { SubscriptionProvider } from "@context/SubscriptionContext";
 import { QueryProvider } from "@providers/QueryProvider";
 import { PostHogProvider } from "@providers/PostHogProvider";
 import {
@@ -126,17 +124,14 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, signOut } = useAuth();
   const [, setEmergencyTapCount] = useState(0);
-  const { isLocked, biometricType, authenticate, unlock } = useBiometric(isAuthenticated);
+  const { isLocked, biometricType, authenticate, unlock } =
+    useBiometric(isAuthenticated);
 
   useNotifications(isAuthenticated);
 
   const redirects = useNavigationRedirects();
-  const {
-    showLoadingOverlay,
-    loadingMessage,
-    redirectTarget,
-    shouldRedirect,
-  } = redirects;
+  const { showLoadingOverlay, loadingMessage, redirectTarget, shouldRedirect } =
+    redirects;
 
   const isDark = colorScheme === "dark";
 
@@ -214,7 +209,7 @@ function RootLayoutNav() {
 
       {/* Un solo Redirect para evitar loops por competencia entre múltiples Redirects */}
       {shouldRedirect && redirectTarget && (
-        <Redirect href={redirectTarget as any} />
+        <Redirect href={redirectTarget as Href} />
       )}
 
       <Toast config={toastConfig} topOffset={Platform.OS === "ios" ? 60 : 40} />

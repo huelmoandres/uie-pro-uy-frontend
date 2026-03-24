@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import { InfoButton } from "@components/ui";
 import { formatDate, stripHtml } from "@utils/formatters";
@@ -100,7 +100,7 @@ export function DormantRow({ item }: { item: IDormantExpediente }) {
     <Pressable
       className="flex-row items-center justify-between rounded-[16px] border border-slate-100 dark:border-white/5 bg-white dark:bg-white/5 p-3 mb-2 active:opacity-70"
       onPress={() =>
-        router.push(`/expedientes/${item.iue.replace("/", ":")}` as any)
+        router.push(`/expedientes/${item.iue.replace("/", ":")}` as Href)
       }
     >
       <View className="flex-1 mr-3">
@@ -138,7 +138,7 @@ export function RecentMovementRow({ item }: { item: IRecentMovement }) {
       className="flex-row items-start gap-3 rounded-[16px] border border-slate-100 dark:border-white/5 bg-white dark:bg-white/5 p-3 mb-2 active:opacity-70"
       onPress={() =>
         router.push(
-          `/expedientes/${item.expedienteIue.replace("/", ":")}` as any,
+          `/expedientes/${item.expedienteIue.replace("/", ":")}` as Href,
         )
       }
     >

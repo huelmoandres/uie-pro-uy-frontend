@@ -12,7 +12,16 @@ import {
 import { Stack } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
-import { Copy, Share2, CheckCircle, Gift, Users, Info, CalendarClock, Sparkles } from "lucide-react-native";
+import {
+  Copy,
+  Share2,
+  CheckCircle,
+  Gift,
+  Users,
+  Info,
+  CalendarClock,
+  Sparkles,
+} from "lucide-react-native";
 import { useController, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Toast from "react-native-toast-message";
@@ -44,7 +53,12 @@ export default function ReferralsScreen() {
   // pero referralType='PARTNER'. Verificamos ambos para cubrir los dos casos.
   const alreadyHasReferrer = !!(user?.referredById || user?.referralType);
 
-  const proAccessInfo = getProAccessInfo(customerInfo, user ?? null, isPro, isInTrial);
+  const proAccessInfo = getProAccessInfo(
+    customerInfo,
+    user ?? null,
+    isPro,
+    isInTrial,
+  );
 
   const {
     control,
@@ -69,7 +83,9 @@ export default function ReferralsScreen() {
 
   const handleShare = async () => {
     if (!data?.code) return;
-    const result = await Share.share({ message: getReferralShareMessage(data.code) });
+    const result = await Share.share({
+      message: getReferralShareMessage(data.code),
+    });
     if (result.action === Share.sharedAction) {
       trackEvent("referral_code_shared");
     }
@@ -84,7 +100,10 @@ export default function ReferralsScreen() {
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <Stack.Screen options={{ title: "Referidos" }} />
-      <KeyboardAvoidingView {...KEYBOARD_AVOIDING_VIEW_PROPS} className="flex-1">
+      <KeyboardAvoidingView
+        {...KEYBOARD_AVOIDING_VIEW_PROPS}
+        className="flex-1"
+      >
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ paddingBottom: 40 }}
@@ -92,7 +111,6 @@ export default function ReferralsScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="p-4 pt-6">
-
             {/* Tu acceso Pro — solo se muestra si hay datos reales de RevenueCat */}
             {proAccessInfo.isActive && proAccessInfo.source !== null && (
               <>
@@ -154,45 +172,66 @@ export default function ReferralsScreen() {
             <View className="rounded-3xl bg-white border border-slate-100 dark:bg-slate-900/50 dark:border-white/5 p-5 mb-6">
               <View className="flex-row items-start gap-3 mb-3">
                 <View className="h-7 w-7 rounded-full bg-violet-100 dark:bg-violet-500/20 items-center justify-center mt-0.5">
-                  <Text className="text-xs font-sans-bold text-violet-600">1</Text>
+                  <Text className="text-xs font-sans-bold text-violet-600">
+                    1
+                  </Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">Compartís tu código</Text>
+                  <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">
+                    Compartís tu código
+                  </Text>
                   <Text className="text-xs font-sans text-slate-500 dark:text-slate-400 mt-0.5 leading-5">
-                    Enviá tu código a colegas abogados. Ellos lo ingresan al registrarse en {APP_NAME}.
+                    Enviá tu código a colegas abogados. Ellos lo ingresan al
+                    registrarse en {APP_NAME}.
                   </Text>
                 </View>
               </View>
               <View className="flex-row items-start gap-3 mb-3">
                 <View className="h-7 w-7 rounded-full bg-violet-100 dark:bg-violet-500/20 items-center justify-center mt-0.5">
-                  <Text className="text-xs font-sans-bold text-violet-600">2</Text>
+                  <Text className="text-xs font-sans-bold text-violet-600">
+                    2
+                  </Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">Tu colega arranca con días gratis</Text>
+                  <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">
+                    Tu colega arranca con días gratis
+                  </Text>
                   <Text className="text-xs font-sans text-slate-500 dark:text-slate-400 mt-0.5 leading-5">
-                    Al registrarse con tu código, recibe días de acceso Pro completamente gratis para explorar la app.
+                    Al registrarse con tu código, recibe días de acceso Pro
+                    completamente gratis para explorar la app.
                   </Text>
                 </View>
               </View>
               <View className="flex-row items-start gap-3 mb-3">
                 <View className="h-7 w-7 rounded-full bg-violet-100 dark:bg-violet-500/20 items-center justify-center mt-0.5">
-                  <Text className="text-xs font-sans-bold text-violet-600">3</Text>
+                  <Text className="text-xs font-sans-bold text-violet-600">
+                    3
+                  </Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">Tu colega se suscribe</Text>
+                  <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">
+                    Tu colega se suscribe
+                  </Text>
                   <Text className="text-xs font-sans text-slate-500 dark:text-slate-400 mt-0.5 leading-5">
-                    Cuando la persona que invitaste activa su suscripción Pro, el sistema lo detecta automáticamente.
+                    Cuando la persona que invitaste activa su suscripción Pro,
+                    el sistema lo detecta automáticamente.
                   </Text>
                 </View>
               </View>
               <View className="flex-row items-start gap-3">
                 <View className="h-7 w-7 rounded-full bg-violet-100 dark:bg-violet-500/20 items-center justify-center mt-0.5">
-                  <Text className="text-xs font-sans-bold text-violet-600">4</Text>
+                  <Text className="text-xs font-sans-bold text-violet-600">
+                    4
+                  </Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">Ganás 1 mes Pro</Text>
+                  <Text className="text-sm font-sans-bold text-slate-900 dark:text-white">
+                    Ganás 1 mes Pro
+                  </Text>
                   <Text className="text-xs font-sans text-slate-500 dark:text-slate-400 mt-0.5 leading-5">
-                    {'Recibís 30 días extra de acceso Pro que se suman al final de tu período actual. Son acumulables: si invitás a 4 personas, tenés 4 meses extra "en el banco".'}
+                    {
+                      'Recibís 30 días extra de acceso Pro que se suman al final de tu período actual. Son acumulables: si invitás a 4 personas, tenés 4 meses extra "en el banco".'
+                    }
                   </Text>
                 </View>
               </View>
@@ -201,7 +240,10 @@ export default function ReferralsScreen() {
               <View className="flex-row items-start gap-2 bg-amber-50 dark:bg-amber-500/10 rounded-2xl px-4 py-3 mt-4">
                 <Info size={15} color="#d97706" className="mt-0.5" />
                 <Text className="flex-1 text-xs font-sans text-amber-800 dark:text-amber-300 leading-5">
-                  Los meses no reducen el cobro actual de Apple. Se acreditan como una extensión de tu acceso Pro: cuando tu suscripción venza o la canceles, seguís siendo Pro durante los meses acumulados.
+                  Los meses no reducen el cobro actual de Apple. Se acreditan
+                  como una extensión de tu acceso Pro: cuando tu suscripción
+                  venza o la canceles, seguís siendo Pro durante los meses
+                  acumulados.
                 </Text>
               </View>
             </View>

@@ -113,7 +113,10 @@ export const ContactSupportModal: React.FC<ContactSupportModalProps> = ({
           <View style={styles.backdropDim} />
         </Pressable>
 
-        <KeyboardAvoidingView {...KEYBOARD_AVOIDING_VIEW_PROPS} className="w-full">
+        <KeyboardAvoidingView
+          {...KEYBOARD_AVOIDING_VIEW_PROPS}
+          className="w-full"
+        >
           <View className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-surface-dark border border-b-0 border-slate-200 dark:border-white/5 shadow-2xl px-6 pt-6 pb-10">
             {/* Handle */}
             <View className="items-center mb-5">

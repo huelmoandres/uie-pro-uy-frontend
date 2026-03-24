@@ -127,13 +127,26 @@ export function useAiChat(): UseAiChatReturn {
               limit: rateLimitMeta?.limit ?? 0,
             });
           }
-          finalizeMessage(assistantMsgId, undefined, errorMsg, status, rateLimitMeta);
+          finalizeMessage(
+            assistantMsgId,
+            undefined,
+            errorMsg,
+            status,
+            rateLimitMeta,
+          );
         },
         abortControllerRef.current.signal,
         conversationId ?? undefined,
       );
     },
-    [isStreaming, messages, conversationId, appendToken, finalizeMessage, trackEvent],
+    [
+      isStreaming,
+      messages,
+      conversationId,
+      appendToken,
+      finalizeMessage,
+      trackEvent,
+    ],
   );
 
   const loadConversation = useCallback(

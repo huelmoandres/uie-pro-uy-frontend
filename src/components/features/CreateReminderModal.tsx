@@ -12,11 +12,17 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { BlurView } from "expo-blur";
-import { Bell, X, CalendarClock, ChevronLeft, AlertTriangle } from "lucide-react-native";
+import {
+  Bell,
+  X,
+  CalendarClock,
+  ChevronLeft,
+  AlertTriangle,
+} from "lucide-react-native";
 import DateTimePicker, {
   DateTimePickerAndroid,
 } from "@react-native-community/datetimepicker";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { useCreateReminder } from "@hooks/useReminderMutations";
 import { useNotificationPreferences } from "@hooks/useNotificationPreferences";
 import {
@@ -74,17 +80,11 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
   const scrollRef = useRef<ScrollView>(null);
 
   const scrollToInput = useCallback((y: number) => {
-    setTimeout(
-      () => scrollRef.current?.scrollTo({ y, animated: true }),
-      100,
-    );
+    setTimeout(() => scrollRef.current?.scrollTo({ y, animated: true }), 100);
   }, []);
 
   const scrollToEnd = useCallback(() => {
-    setTimeout(
-      () => scrollRef.current?.scrollToEnd({ animated: true }),
-      100,
-    );
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
   }, []);
 
   const iue = agendaItem?.iue ?? iueProp ?? null;
@@ -93,7 +93,9 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
 
   const [viewMode, setViewMode] = useState<ViewMode>("simple");
   const [selectedOffset, setSelectedOffset] = useState(DEFAULT_REMINDER_OFFSET);
-  const [remindAt, setRemindAt] = useState<Date>(() => getDefaultReminderDate());
+  const [remindAt, setRemindAt] = useState<Date>(() =>
+    getDefaultReminderDate(),
+  );
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [title, setTitle] = useState("");
@@ -160,15 +162,23 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
 
   const handleCreateSimple = () => {
     if (!agendaItem || agendaItem.status !== "OPEN") return;
-    createReminder.mutate(buildCreateReminderPayload(agendaItem, selectedOffset), {
-      onSuccess: onClose,
-    });
+    createReminder.mutate(
+      buildCreateReminderPayload(agendaItem, selectedOffset),
+      {
+        onSuccess: onClose,
+      },
+    );
   };
 
   const handleCreateFull = () => {
     if (!iue) return;
     createReminder.mutate(
-      buildCreateFixedReminderPayload(iue, remindAt, title || null, body || null),
+      buildCreateFixedReminderPayload(
+        iue,
+        remindAt,
+        title || null,
+        body || null,
+      ),
       { onSuccess: onClose },
     );
   };
@@ -184,250 +194,268 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
 
   const displayCaratula = caratula ? stripHtml(caratula) : null;
 
-  const Content = viewMode === "simple" ? (
-    <View className="px-6 py-5">
-      {iue && (
-        <>
-          <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
-            Expediente
-          </Text>
-          <Text className="text-[13px] font-sans-semi text-slate-700 dark:text-slate-300 mb-4">
-            {iue}
-          </Text>
+  const Content =
+    viewMode === "simple" ? (
+      <View className="px-6 py-5">
+        {iue && (
+          <>
+            <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
+              Expediente
+            </Text>
+            <Text className="text-[13px] font-sans-semi text-slate-700 dark:text-slate-300 mb-4">
+              {iue}
+            </Text>
 
-          <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-3">
-            Recordarme
-          </Text>
-          <View className="flex-row flex-wrap gap-2 mb-6">
-            {REMINDER_OFFSET_OPTIONS.map((opt) => (
-              <Pressable
-                key={opt.value}
-                onPress={() => setSelectedOffset(opt.value)}
-                className={`px-4 py-2.5 rounded-xl border ${
-                  selectedOffset === opt.value
-                    ? "bg-accent border-accent"
-                    : "bg-slate-50 border-slate-200 dark:bg-white/5 dark:border-white/10"
-                }`}
-              >
-                <Text
-                  className={`text-[13px] font-sans-semi ${
+            <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-3">
+              Recordarme
+            </Text>
+            <View className="flex-row flex-wrap gap-2 mb-6">
+              {REMINDER_OFFSET_OPTIONS.map((opt) => (
+                <Pressable
+                  key={opt.value}
+                  onPress={() => setSelectedOffset(opt.value)}
+                  className={`px-4 py-2.5 rounded-xl border ${
                     selectedOffset === opt.value
-                      ? "text-white"
-                      : "text-slate-600 dark:text-slate-400"
+                      ? "bg-accent border-accent"
+                      : "bg-slate-50 border-slate-200 dark:bg-white/5 dark:border-white/10"
                   }`}
                 >
-                  {opt.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <Text className="text-[11px] font-sans text-slate-500 dark:text-slate-400 mb-4">
-            Recibirás una notificación push el día indicado a las{" "}
-            {String(DEFAULT_REMINDER_HOUR).padStart(2, "0")}:00.
-          </Text>
-
-          <Pressable
-            onPress={() => setViewMode("full")}
-            className="mb-6 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 active:opacity-70"
-          >
-            <Text className="text-center text-[13px] font-sans-semi text-slate-600 dark:text-slate-400">
-              Personalizar fecha y hora
-            </Text>
-          </Pressable>
-
-          {!hasDeviceToken && (
-            <Pressable
-              onPress={() => { onClose(); router.push("/notifications" as any); }}
-              className="flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-4 py-3 mb-4"
-            >
-              <AlertTriangle size={16} color="#D97706" />
-              <Text className="flex-1 text-[12px] font-sans-semi text-amber-700 dark:text-amber-400 leading-relaxed">
-                No tenés el dispositivo registrado para push.{" "}
-                <Text className="underline">Ir a Notificaciones</Text> para configurarlo.
-              </Text>
-            </Pressable>
-          )}
-
-          <Pressable
-            onPress={handleCreateSimple}
-            disabled={createReminder.isPending}
-            className="w-full py-3.5 rounded-xl bg-accent items-center justify-center active:opacity-80 disabled:opacity-50"
-          >
-            {createReminder.isPending ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text className="text-[14px] font-sans-bold text-white">
-                Crear recordatorio
-              </Text>
-            )}
-          </Pressable>
-        </>
-      )}
-    </View>
-  ) : (
-    <ScrollView
-      ref={scrollRef}
-      className="flex-1 px-6"
-      contentContainerStyle={{ paddingTop: 20, paddingBottom: 16, flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      {iue && (
-        <>
-          <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
-            Expediente
-          </Text>
-          <Text className="text-[13px] font-sans-semi text-slate-700 dark:text-slate-300 mb-1">
-            {iue}
-          </Text>
-          {displayCaratula && (
-            <Text
-              className="text-[12px] font-sans text-slate-500 dark:text-slate-400 mb-4"
-              numberOfLines={2}
-            >
-              {displayCaratula}
-            </Text>
-          )}
-          {!displayCaratula && <View className="mb-4" />}
-
-          <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
-            Recordarme
-          </Text>
-          <View className="flex-row flex-wrap gap-2 mb-4">
-            {REMINDER_FIXED_DATE_PRESETS.map((opt) => (
-              <Pressable
-                key={opt.value}
-                onPress={() => handlePresetPress(opt.value)}
-                className={`px-4 py-2.5 rounded-xl border ${
-                  selectedPreset === opt.value
-                    ? "bg-accent border-accent"
-                    : "bg-slate-50 border-slate-200 dark:bg-white/5 dark:border-white/10"
-                }`}
-              >
-                <Text
-                  className={`text-[13px] font-sans-semi ${
-                    selectedPreset === opt.value
-                      ? "text-white"
-                      : "text-slate-600 dark:text-slate-400"
-                  }`}
-                >
-                  {opt.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2 mt-2">
-            Fecha y hora
-          </Text>
-          <Pressable
-            onPress={() => {
-              if (Platform.OS === "android") {
-                openAndroidDateTimePicker();
-              } else {
-                setShowPicker(true);
-                setTimeout(
-                  () => scrollRef.current?.scrollTo?.({ y: 260, animated: true }),
-                  100,
-                );
-              }
-            }}
-            className="flex-row items-center gap-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 mb-4"
-          >
-            <CalendarClock size={18} color="#B89146" />
-            <Text className="flex-1 font-sans-semi text-[14px] text-slate-700 dark:text-slate-200 capitalize">
-              {formattedDate}
-            </Text>
-          </Pressable>
-
-          {showPicker && Platform.OS === "ios" && (
-            <View className="mt-2 mb-2" style={{ height: 270 }}>
-              <DateTimePicker
-                value={remindAt}
-                mode="datetime"
-                display="spinner"
-                themeVariant={themeVariant}
-                onChange={(_, date) => {
-                  if (date) handlePickerChange(date);
-                }}
-                minimumDate={new Date()}
-                locale="es"
-                timeZoneName={APP_TIMEZONE}
-                style={{ height: 300 }}
-              />
-              <Pressable
-                onPress={() => setShowPicker(false)}
-                className="mt-2 py-2.5 rounded-xl bg-slate-100 dark:bg-white/10"
-              >
-                <Text className="text-center font-sans-semi text-slate-600 dark:text-slate-300">
-                  Listo
-                </Text>
-              </Pressable>
+                  <Text
+                    className={`text-[13px] font-sans-semi ${
+                      selectedOffset === opt.value
+                        ? "text-white"
+                        : "text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
-          )}
 
-          <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
-            Título (opcional)
-          </Text>
-          <TextInput
-            value={title}
-            onChangeText={setTitle}
-            onFocus={() => scrollToInput(300)}
-            placeholder={`Ej: Recordatorio: ${iue}`}
-            placeholderTextColor="#94A3B8"
-            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 font-sans text-[14px] text-slate-700 dark:text-slate-200 mb-4"
-          />
+            <Text className="text-[11px] font-sans text-slate-500 dark:text-slate-400 mb-4">
+              Recibirás una notificación push el día indicado a las{" "}
+              {String(DEFAULT_REMINDER_HOUR).padStart(2, "0")}:00.
+            </Text>
 
-          <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
-            Descripción (opcional)
-          </Text>
-          <TextInput
-            value={body}
-            onChangeText={(t) => setBody(t.slice(0, REMINDER_BODY_MAX_LENGTH))}
-            onFocus={scrollToEnd}
-            placeholder="Ej: Revisar documentación antes de la audiencia"
-            placeholderTextColor="#94A3B8"
-            multiline
-            numberOfLines={3}
-            maxLength={REMINDER_BODY_MAX_LENGTH}
-            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 font-sans text-[14px] text-slate-700 dark:text-slate-200 mb-1 min-h-[80px]"
-            style={{ textAlignVertical: "top" }}
-          />
-          <Text className={`text-right text-[11px] font-sans mb-5 ${body.length >= REMINDER_BODY_MAX_LENGTH ? "text-red-400" : "text-slate-400"}`}>
-            {body.length}/{REMINDER_BODY_MAX_LENGTH}
-          </Text>
-
-          {!hasDeviceToken && (
             <Pressable
-              onPress={() => { onClose(); router.push("/notifications" as any); }}
-              className="flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-4 py-3 mb-4"
+              onPress={() => setViewMode("full")}
+              className="mb-6 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 active:opacity-70"
             >
-              <AlertTriangle size={16} color="#D97706" />
-              <Text className="flex-1 text-[12px] font-sans-semi text-amber-700 dark:text-amber-400 leading-relaxed">
-                No tenés el dispositivo registrado para push.{" "}
-                <Text className="underline">Ir a Notificaciones</Text> para configurarlo.
+              <Text className="text-center text-[13px] font-sans-semi text-slate-600 dark:text-slate-400">
+                Personalizar fecha y hora
               </Text>
             </Pressable>
-          )}
 
-          <Pressable
-            onPress={handleCreateFull}
-            disabled={createReminder.isPending}
-            className="w-full py-3.5 rounded-xl bg-accent items-center justify-center active:opacity-80 disabled:opacity-50"
-          >
-            {createReminder.isPending ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text className="text-[14px] font-sans-bold text-white">
-                Crear recordatorio
+            {!hasDeviceToken && (
+              <Pressable
+                onPress={() => {
+                  onClose();
+                  router.push("/notifications" as Href);
+                }}
+                className="flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-4 py-3 mb-4"
+              >
+                <AlertTriangle size={16} color="#D97706" />
+                <Text className="flex-1 text-[12px] font-sans-semi text-amber-700 dark:text-amber-400 leading-relaxed">
+                  No tenés el dispositivo registrado para push.{" "}
+                  <Text className="underline">Ir a Notificaciones</Text> para
+                  configurarlo.
+                </Text>
+              </Pressable>
+            )}
+
+            <Pressable
+              onPress={handleCreateSimple}
+              disabled={createReminder.isPending}
+              className="w-full py-3.5 rounded-xl bg-accent items-center justify-center active:opacity-80 disabled:opacity-50"
+            >
+              {createReminder.isPending ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text className="text-[14px] font-sans-bold text-white">
+                  Crear recordatorio
+                </Text>
+              )}
+            </Pressable>
+          </>
+        )}
+      </View>
+    ) : (
+      <ScrollView
+        ref={scrollRef}
+        className="flex-1 px-6"
+        contentContainerStyle={{
+          paddingTop: 20,
+          paddingBottom: 16,
+          flexGrow: 1,
+        }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {iue && (
+          <>
+            <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
+              Expediente
+            </Text>
+            <Text className="text-[13px] font-sans-semi text-slate-700 dark:text-slate-300 mb-1">
+              {iue}
+            </Text>
+            {displayCaratula && (
+              <Text
+                className="text-[12px] font-sans text-slate-500 dark:text-slate-400 mb-4"
+                numberOfLines={2}
+              >
+                {displayCaratula}
               </Text>
             )}
-          </Pressable>
-        </>
-      )}
-    </ScrollView>
-  );
+            {!displayCaratula && <View className="mb-4" />}
+
+            <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
+              Recordarme
+            </Text>
+            <View className="flex-row flex-wrap gap-2 mb-4">
+              {REMINDER_FIXED_DATE_PRESETS.map((opt) => (
+                <Pressable
+                  key={opt.value}
+                  onPress={() => handlePresetPress(opt.value)}
+                  className={`px-4 py-2.5 rounded-xl border ${
+                    selectedPreset === opt.value
+                      ? "bg-accent border-accent"
+                      : "bg-slate-50 border-slate-200 dark:bg-white/5 dark:border-white/10"
+                  }`}
+                >
+                  <Text
+                    className={`text-[13px] font-sans-semi ${
+                      selectedPreset === opt.value
+                        ? "text-white"
+                        : "text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2 mt-2">
+              Fecha y hora
+            </Text>
+            <Pressable
+              onPress={() => {
+                if (Platform.OS === "android") {
+                  openAndroidDateTimePicker();
+                } else {
+                  setShowPicker(true);
+                  setTimeout(
+                    () =>
+                      scrollRef.current?.scrollTo?.({ y: 260, animated: true }),
+                    100,
+                  );
+                }
+              }}
+              className="flex-row items-center gap-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 mb-4"
+            >
+              <CalendarClock size={18} color="#B89146" />
+              <Text className="flex-1 font-sans-semi text-[14px] text-slate-700 dark:text-slate-200 capitalize">
+                {formattedDate}
+              </Text>
+            </Pressable>
+
+            {showPicker && Platform.OS === "ios" && (
+              <View className="mt-2 mb-2" style={{ height: 270 }}>
+                <DateTimePicker
+                  value={remindAt}
+                  mode="datetime"
+                  display="spinner"
+                  themeVariant={themeVariant}
+                  onChange={(_, date) => {
+                    if (date) handlePickerChange(date);
+                  }}
+                  minimumDate={new Date()}
+                  locale="es"
+                  timeZoneName={APP_TIMEZONE}
+                  style={{ height: 300 }}
+                />
+                <Pressable
+                  onPress={() => setShowPicker(false)}
+                  className="mt-2 py-2.5 rounded-xl bg-slate-100 dark:bg-white/10"
+                >
+                  <Text className="text-center font-sans-semi text-slate-600 dark:text-slate-300">
+                    Listo
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+
+            <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
+              Título (opcional)
+            </Text>
+            <TextInput
+              value={title}
+              onChangeText={setTitle}
+              onFocus={() => scrollToInput(300)}
+              placeholder={`Ej: Recordatorio: ${iue}`}
+              placeholderTextColor="#94A3B8"
+              className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 font-sans text-[14px] text-slate-700 dark:text-slate-200 mb-4"
+            />
+
+            <Text className="text-[12px] font-sans-bold uppercase tracking-wider text-slate-400 mb-2">
+              Descripción (opcional)
+            </Text>
+            <TextInput
+              value={body}
+              onChangeText={(t) =>
+                setBody(t.slice(0, REMINDER_BODY_MAX_LENGTH))
+              }
+              onFocus={scrollToEnd}
+              placeholder="Ej: Revisar documentación antes de la audiencia"
+              placeholderTextColor="#94A3B8"
+              multiline
+              numberOfLines={3}
+              maxLength={REMINDER_BODY_MAX_LENGTH}
+              className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 font-sans text-[14px] text-slate-700 dark:text-slate-200 mb-1 min-h-[80px]"
+              style={{ textAlignVertical: "top" }}
+            />
+            <Text
+              className={`text-right text-[11px] font-sans mb-5 ${body.length >= REMINDER_BODY_MAX_LENGTH ? "text-red-400" : "text-slate-400"}`}
+            >
+              {body.length}/{REMINDER_BODY_MAX_LENGTH}
+            </Text>
+
+            {!hasDeviceToken && (
+              <Pressable
+                onPress={() => {
+                  onClose();
+                  router.push("/notifications" as Href);
+                }}
+                className="flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-4 py-3 mb-4"
+              >
+                <AlertTriangle size={16} color="#D97706" />
+                <Text className="flex-1 text-[12px] font-sans-semi text-amber-700 dark:text-amber-400 leading-relaxed">
+                  No tenés el dispositivo registrado para push.{" "}
+                  <Text className="underline">Ir a Notificaciones</Text> para
+                  configurarlo.
+                </Text>
+              </Pressable>
+            )}
+
+            <Pressable
+              onPress={handleCreateFull}
+              disabled={createReminder.isPending}
+              className="w-full py-3.5 rounded-xl bg-accent items-center justify-center active:opacity-80 disabled:opacity-50"
+            >
+              {createReminder.isPending ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text className="text-[14px] font-sans-bold text-white">
+                  Crear recordatorio
+                </Text>
+              )}
+            </Pressable>
+          </>
+        )}
+      </ScrollView>
+    );
 
   return (
     <Modal
@@ -452,40 +480,40 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
               viewMode === "full" ? "flex-1 max-h-[90%] pb-4" : "pb-10"
             }`}
           >
-          <View className="items-center pt-4 pb-2">
-            <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />
-          </View>
-
-          <View className="flex-row items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-white/5">
-            <View className="flex-row items-center gap-3">
-              {viewMode === "full" && isPlazoContext && (
-                <Pressable
-                  onPress={() => setViewMode("simple")}
-                  className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
-                >
-                  <ChevronLeft size={18} color="#64748B" />
-                </Pressable>
-              )}
-              <View className="h-9 w-9 items-center justify-center rounded-[14px] bg-accent/10">
-                <Bell size={18} color="#B89146" />
-              </View>
-              <Text className="text-lg font-sans-bold text-slate-900 dark:text-white">
-                Agregar recordatorio
-              </Text>
+            <View className="items-center pt-4 pb-2">
+              <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />
             </View>
-            <Pressable
-              onPress={onClose}
-              className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
-            >
-              <X size={15} color="#94A3B8" />
-            </Pressable>
-          </View>
 
-          {viewMode === "full" ? (
-            <View className="flex-1 min-h-0">{Content}</View>
-          ) : (
-            Content
-          )}
+            <View className="flex-row items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-white/5">
+              <View className="flex-row items-center gap-3">
+                {viewMode === "full" && isPlazoContext && (
+                  <Pressable
+                    onPress={() => setViewMode("simple")}
+                    className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
+                  >
+                    <ChevronLeft size={18} color="#64748B" />
+                  </Pressable>
+                )}
+                <View className="h-9 w-9 items-center justify-center rounded-[14px] bg-accent/10">
+                  <Bell size={18} color="#B89146" />
+                </View>
+                <Text className="text-lg font-sans-bold text-slate-900 dark:text-white">
+                  Agregar recordatorio
+                </Text>
+              </View>
+              <Pressable
+                onPress={onClose}
+                className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
+              >
+                <X size={15} color="#94A3B8" />
+              </Pressable>
+            </View>
+
+            {viewMode === "full" ? (
+              <View className="flex-1 min-h-0">{Content}</View>
+            ) : (
+              Content
+            )}
           </View>
         </KeyboardAvoidingView>
       </View>

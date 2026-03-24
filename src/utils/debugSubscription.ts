@@ -16,7 +16,9 @@ export async function isSimulateCancelledTrialEnabled(): Promise<boolean> {
   }
 }
 
-export async function setSimulateCancelledTrial(enabled: boolean): Promise<void> {
+export async function setSimulateCancelledTrial(
+  enabled: boolean,
+): Promise<void> {
   if (!__DEV__) return;
   try {
     if (enabled) {

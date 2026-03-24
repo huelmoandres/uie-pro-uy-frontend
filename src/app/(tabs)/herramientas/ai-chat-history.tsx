@@ -92,11 +92,14 @@ function ConversationItem({
             <View className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             <View className="flex-row items-center gap-1">
               <Clock size={11} color={COLORS.slate[400]} />
-              <Text className="text-[11px] font-sans text-slate-400">{timeAgo}</Text>
+              <Text className="text-[11px] font-sans text-slate-400">
+                {timeAgo}
+              </Text>
             </View>
             <View className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             <Text className="text-[11px] font-sans text-slate-400">
-              {item.messageCount} {item.messageCount === 1 ? "mensaje" : "mensajes"}
+              {item.messageCount}{" "}
+              {item.messageCount === 1 ? "mensaje" : "mensajes"}
             </Text>
           </View>
         </Pressable>
@@ -118,9 +121,8 @@ export default function AiChatHistoryScreen() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<ChatConversationSummary | null>(
-    null,
-  );
+  const [deleteTarget, setDeleteTarget] =
+    useState<ChatConversationSummary | null>(null);
 
   const {
     data: conversations,
@@ -229,7 +231,8 @@ export default function AiChatHistoryScreen() {
                 Sin conversaciones aún
               </Text>
               <Text className="mt-2 text-[13px] font-sans text-slate-400 text-center leading-5">
-                Iniciá un chat con el asistente y tus conversaciones quedarán guardadas acá.
+                Iniciá un chat con el asistente y tus conversaciones quedarán
+                guardadas acá.
               </Text>
               <Pressable
                 onPress={() => router.push("/herramientas/ai-chat")}

@@ -67,8 +67,7 @@ export function useExpedienteNotes(iue: string) {
       // Keep the dedicated follow query in sync
       queryClient.setQueryData(
         followQueryKey(iue, userId),
-        (old: typeof followData) =>
-          old ? { ...old, notes: newNotes } : old,
+        (old: typeof followData) => (old ? { ...old, notes: newNotes } : old),
       );
 
       // Keep all list caches in sync so the list screen stays accurate

@@ -100,7 +100,9 @@ export function ExpedienteSelectionBar({
               )}
               <Text
                 className={`text-[11px] font-sans-semi ${
-                  hasPremiumAccess ? "text-white" : "text-amber-700 dark:text-amber-400"
+                  hasPremiumAccess
+                    ? "text-white"
+                    : "text-amber-700 dark:text-amber-400"
                 }`}
               >
                 Agendar
@@ -125,8 +127,7 @@ export function ExpedienteSelectionBar({
 
   if (paginationMeta && hasExpedientes) {
     const loadedCount = paginationMeta.loadedCount ?? paginationMeta.totalItems;
-    const showLoadMore =
-      hasNextPage && onLoadMore && !isFetchingNextPage;
+    const showLoadMore = hasNextPage && onLoadMore && !isFetchingNextPage;
 
     return (
       <View className="pt-1 gap-2">

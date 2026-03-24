@@ -67,9 +67,7 @@ export function BiometricLockScreen({
         />
 
         <View className="items-center gap-2">
-          <Text className="text-2xl font-sans-bold text-white">
-            {APP_NAME}
-          </Text>
+          <Text className="text-2xl font-sans-bold text-white">{APP_NAME}</Text>
           <Text className="text-sm font-sans text-white/60 text-center">
             Verificá tu identidad para continuar
           </Text>

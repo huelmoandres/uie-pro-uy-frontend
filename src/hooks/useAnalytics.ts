@@ -1,5 +1,8 @@
 import { useCallback } from "react";
-import { usePostHog } from "posthog-react-native";
+import { usePostHog, type PostHog } from "posthog-react-native";
+
+/** Props de evento alineadas al SDK PostHog (JsonType / PostHogEventProperties). */
+type PostHogEventPayload = Parameters<PostHog["capture"]>[1];
 
 /** Propiedades seguras para eventos de analytics (sin datos judiciales sensibles). */
 export type AnalyticsProperties = Record<
@@ -19,14 +22,17 @@ export function useAnalytics() {
 
   const trackEvent = useCallback(
     (event: string, properties?: AnalyticsProperties) => {
-      posthog?.capture(event, properties as any);
+      posthog?.capture(event, properties as PostHogEventPayload);
     },
     [posthog],
   );
 
   const identifyUser = useCallback(
     (userId: string, properties?: AnalyticsProperties) => {
-      posthog?.identify(userId, properties as any);
+      posthog?.identify(
+        userId,
+        properties as Parameters<PostHog["identify"]>[1],
+      );
     },
     [posthog],
   );

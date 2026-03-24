@@ -39,10 +39,10 @@ export async function verifyLoginOtp(
   tempToken: string,
   otp: string,
 ): Promise<IAuthTokens> {
-  const { data } = await apiClient.post<IAuthTokens>(
-    "/auth/login/verify-otp",
-    { tempToken, otp },
-  );
+  const { data } = await apiClient.post<IAuthTokens>("/auth/login/verify-otp", {
+    tempToken,
+    otp,
+  });
   return data;
 }
 
@@ -150,12 +150,8 @@ export async function deleteAccount(): Promise<void> {
 /**
  * Lista las sesiones (dispositivos) donde el usuario está logueado.
  */
-export async function getSessions(): Promise<
-  ISession[]
-> {
-  const { data } = await apiClient.get<ISession[]>(
-    "/auth/sessions",
-  );
+export async function getSessions(): Promise<ISession[]> {
+  const { data } = await apiClient.get<ISession[]>("/auth/sessions");
   return data;
 }
 

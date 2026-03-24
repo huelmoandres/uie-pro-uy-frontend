@@ -49,7 +49,9 @@ export const FEATURE_PARAM_TO_LABEL: Record<string, string> = {
 };
 
 /** Texto dinámico para PaywallHero cuando viene con ?feature= (mejora conversión). */
-export function getPaywallHeroSubtitle(featureParam: string | string[] | undefined): string {
+export function getPaywallHeroSubtitle(
+  featureParam: string | string[] | undefined,
+): string {
   if (!featureParam || Array.isArray(featureParam)) return "";
   const label = FEATURE_PARAM_TO_LABEL[String(featureParam).toLowerCase()];
   if (!label) return "";

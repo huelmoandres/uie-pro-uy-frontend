@@ -70,7 +70,7 @@ export function usePaywallActions() {
       const customerInfo = await Purchases.restorePurchases();
       const { isPro } = parseProFromCustomerInfo(customerInfo);
       applyCustomerInfo(customerInfo, { forcePro: isPro });
-      
+
       if (isPro) {
         // Invalidar todas las queries
         void queryClient.invalidateQueries();

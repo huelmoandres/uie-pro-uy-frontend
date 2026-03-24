@@ -26,7 +26,8 @@ type LoginVerifyOtpFormData = z.infer<typeof loginVerifyOtpSchema>;
 export default function LoginVerifyOtpScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const params = useLocalSearchParams<{ tempToken?: string }>();
-  const tempToken = typeof params.tempToken === "string" ? params.tempToken : "";
+  const tempToken =
+    typeof params.tempToken === "string" ? params.tempToken : "";
 
   const { mutateAsync: verifyOtpMutation, isPending: isLoading } =
     useVerifyLoginOtpMutation();

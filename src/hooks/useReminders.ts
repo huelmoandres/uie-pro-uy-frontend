@@ -38,10 +38,13 @@ export function useRemindersInfinite(
   const { hasPremiumAccess } = useAccessPolicy();
 
   return useInfiniteQuery({
-    queryKey: [...ReminderService.queryKeys.lists(), "infinite", params, userId],
-    queryFn: async ({
-      pageParam = 1,
-    }): Promise<IRemindersListResponse> => {
+    queryKey: [
+      ...ReminderService.queryKeys.lists(),
+      "infinite",
+      params,
+      userId,
+    ],
+    queryFn: async ({ pageParam = 1 }): Promise<IRemindersListResponse> => {
       return ReminderService.getAll({
         ...params,
         page: pageParam,

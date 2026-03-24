@@ -60,11 +60,7 @@ export function ContextualTooltip({
 
   return (
     <>
-      <View
-        ref={wrapperRef}
-        onLayout={measure}
-        collapsable={false}
-      >
+      <View ref={wrapperRef} onLayout={measure} collapsable={false}>
         {children}
       </View>
       {visible && (

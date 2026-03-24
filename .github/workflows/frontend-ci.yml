@@ -1,0 +1,93 @@
+# =============================================================================
+# CI: Frontend (Expo / React Native)
+# =============================================================================
+# Pensado para un repo cuya raíz ES este paquete (package.json en la raíz).
+# Si usás monorepo con frontend/ dentro de otro repo, usá el workflow de la
+# raíz del monorepo (.github/workflows) con paths: frontend/** y working-directory.
+#
+# Se ejecuta en:
+#   - Push a staging (merge o push directo)
+#   - PR hacia staging (feat/xxx → staging)
+#   - PR hacia main (solo staging → main permitido)
+#
+# Protege main exigiendo que los PRs provengan exclusivamente de staging.
+# Flujo: feature → staging (QA) → main (producción).
+# =============================================================================
+
+name: CI Frontend
+
+on:
+  push:
+    branches: [staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # HARD BLOCK: Validación de rama de origen
+  # ---------------------------------------------------------------------------
+  validate-branch:
+    name: Validar rama de origen
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar rama de origen del PR
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "✅ Push a staging: validación omitida"
+            exit 0
+          fi
+
+          BASE="${{ github.base_ref }}"
+          HEAD="${{ github.head_ref }}"
+
+          if [ "$BASE" = "main" ]; then
+            if [ "$HEAD" != "staging" ]; then
+              echo "::error::❌ PR rechazado: Solo se permiten Pull Requests desde 'staging' hacia 'main'."
+              echo "Rama de origen: $HEAD"
+              exit 1
+            fi
+            echo "✅ PR main: origen staging válido"
+            exit 0
+          fi
+
+          if [ "$BASE" = "staging" ]; then
+            if [ "$HEAD" = "main" ]; then
+              echo "::error::❌ PR rechazado: No se permite merge de 'main' hacia 'staging'."
+              exit 1
+            fi
+            echo "✅ PR staging: origen $HEAD válido"
+            exit 0
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Lint, typecheck y build
+  # ---------------------------------------------------------------------------
+  build:
+    name: Lint, Typecheck y Build
+    runs-on: ubuntu-latest
+    needs: validate-branch
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint:ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build (expo export)
+        env:
+          APP_ENV: development
+          EXPO_PUBLIC_API_URL: https://placeholder.example.com
+          EXPO_PUBLIC_REVENUECAT_API_KEY_IOS: appl_placeholder
+          EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID: goog_placeholder
+        run: npm run build:ci

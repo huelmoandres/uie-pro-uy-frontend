@@ -41,9 +41,7 @@ export function useExpedientesInfinite(
       params,
       userId,
     ],
-    queryFn: async ({
-      pageParam = 1,
-    }): Promise<IPaginatedExpedientes> => {
+    queryFn: async ({ pageParam = 1 }): Promise<IPaginatedExpedientes> => {
       return ExpedienteService.getAll({
         ...params,
         page: pageParam,
@@ -77,9 +75,7 @@ export function useTodayMovementsExpedientesInfinite(
       params,
       userId,
     ],
-    queryFn: async ({
-      pageParam = 1,
-    }): Promise<IPaginatedExpedientes> => {
+    queryFn: async ({ pageParam = 1 }): Promise<IPaginatedExpedientes> => {
       return ExpedienteService.getTodayMovements({
         ...params,
         page: pageParam,

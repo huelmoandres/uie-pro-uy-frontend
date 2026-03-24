@@ -12,7 +12,14 @@
  * load time when the TurboModule is missing (Expo Go).
  */
 
-import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  useEffect,
+  type ElementRef,
+} from "react";
 import {
   View,
   Text,
@@ -51,7 +58,8 @@ const AGENDA_BASE_URL = "https://agenda.poderjudicial.gub.uy";
  * In Expo Go the TurboModule won't exist, so require() throws — we catch it
  * and return null, which triggers the expo-web-browser fallback below.
  */
-let NativeWebView: typeof import("react-native-webview").WebView | null = null;
+type NativeWebViewComponent = typeof import("react-native-webview").WebView;
+let NativeWebView: NativeWebViewComponent | null = null;
 try {
   NativeWebView = require("react-native-webview").WebView;
 } catch {
@@ -86,8 +94,7 @@ export function AgendaWebView({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-   
-  const webViewRef = useRef<any>(null);
+  const webViewRef = useRef<ElementRef<NativeWebViewComponent> | null>(null);
 
   const handleFormSubmitted = useCallback(
     (payload: FormSubmittedPayload) => {
@@ -113,7 +120,8 @@ export function AgendaWebView({
     [user?.cedula, user?.phone],
   );
 
-  const [showProfileWarning, setShowProfileWarning] = useState(lacksCedulaOrPhone);
+  const [showProfileWarning, setShowProfileWarning] =
+    useState(lacksCedulaOrPhone);
 
   useEffect(() => {
     if (!lacksCedulaOrPhone) setShowProfileWarning(false);

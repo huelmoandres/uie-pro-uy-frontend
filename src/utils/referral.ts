@@ -50,7 +50,9 @@ export function getProAccessInfo(
 }
 
 /** Determina el origen del referido del usuario (null si no fue referido). */
-export function getReferralOrigin(user: IUser | null | undefined): ReferralOrigin {
+export function getReferralOrigin(
+  user: IUser | null | undefined,
+): ReferralOrigin {
   if (!user) return null;
   if (user.referralType === "PARTNER") return "partner";
   if (user.referralType === "USER" || user.referredById) return "user";
@@ -82,8 +84,9 @@ function resolveProSource(
     customerInfo.entitlements.active[ENTITLEMENT_PRO_ACCESS] ??
     customerInfo.entitlements.all[ENTITLEMENT_PRO_ACCESS];
 
-  const periodType = (ent as { periodType?: string } | undefined)?.periodType
-    ?.toUpperCase();
+  const periodType = (
+    ent as { periodType?: string } | undefined
+  )?.periodType?.toUpperCase();
 
   if (periodType === "PROMOTIONAL") return "promotional";
   if (periodType === "TRIAL") return "trial";

@@ -5,7 +5,6 @@ import {
   PRODUCT_ID_MONTHLY,
 } from "@/constants/revenuecat";
 
-
 /**
  * Obtiene la fecha de expiración de la suscripción/trial desde CustomerInfo.
  * Devuelve null si no hay fecha de expiración o no es válida.
@@ -18,8 +17,8 @@ export function getExpirationDateFromCustomerInfo(
     (info.entitlements.all[ENTITLEMENT_PRO_ACCESS]?.isActive
       ? info.entitlements.all[ENTITLEMENT_PRO_ACCESS]
       : null);
-  let exp: string | Date | undefined =
-    (ent as { expirationDate?: string })?.expirationDate;
+  let exp: string | Date | undefined = (ent as { expirationDate?: string })
+    ?.expirationDate;
 
   if (!exp) {
     const allExpDates =
@@ -86,13 +85,12 @@ export function getProStatusDebug(info: CustomerInfo): ProStatusDebug {
   };
   const allExpDates =
     infoExt.allExpirationDatesByProduct ?? infoExt.allExpirationDates;
-  const hasProFromExpiration =
-    (() => {
-      const exp = allExpDates?.[PRODUCT_ID_MONTHLY];
-      if (!exp) return false;
-      const expDate = typeof exp === "string" ? parseISO(exp) : exp;
-      return isValid(expDate) && isAfter(expDate, new Date());
-    })();
+  const hasProFromExpiration = (() => {
+    const exp = allExpDates?.[PRODUCT_ID_MONTHLY];
+    if (!exp) return false;
+    const expDate = typeof exp === "string" ? parseISO(exp) : exp;
+    return isValid(expDate) && isAfter(expDate, new Date());
+  })();
 
   const entFromAll = info.entitlements.all[ENTITLEMENT_PRO_ACCESS];
   const hasProFromEntitlementExpiration =
@@ -113,7 +111,8 @@ export function getProStatusDebug(info: CustomerInfo): ProStatusDebug {
 
   // Trial: activo o cancelado con acceso hasta expiry (RevenueCat puede mover a all cuando cancela)
   const isInTrial =
-    (ent?.periodType === "TRIAL" || ent?.periodType === "trial") ||
+    ent?.periodType === "TRIAL" ||
+    ent?.periodType === "trial" ||
     (!!hasProFromEntitlementExpiration &&
       ((entFromAll as { periodType?: string })?.periodType === "TRIAL" ||
         (entFromAll as { periodType?: string })?.periodType === "trial"));

@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useEffect, useState } from "react";
 import { Modal, Pressable, Text, TextInput, View } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import {
@@ -22,7 +22,10 @@ import {
   PremiumGateModal,
   TagPickerModal,
 } from "@components/features";
-import type { IExpediente, IExpedientesQuery } from "@app-types/expediente.types";
+import type {
+  IExpediente,
+  IExpedientesQuery,
+} from "@app-types/expediente.types";
 
 type TabFilter = "all" | "pinned";
 
@@ -66,7 +69,7 @@ export default function ExpedientesUpdatesScreen() {
       trackEvent("today_movements_viewed");
     }
   }, [isTodayScope, trackEvent]);
-  
+
   const legacyIues = useMemo(() => {
     const raw = params.iues ?? "";
     return raw
@@ -81,13 +84,13 @@ export default function ExpedientesUpdatesScreen() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showBulkAgenda, setShowBulkAgenda] = useState(false);
   const [selectedIues, setSelectedIues] = useState<string[]>([]);
-  const [queryParams, setQueryParams] = useState<Omit<IExpedientesQuery, "page">>(
-    {
-      limit: 20,
-      order: "desc",
-      orderBy: "lastSyncAt",
-    },
-  );
+  const [queryParams, setQueryParams] = useState<
+    Omit<IExpedientesQuery, "page">
+  >({
+    limit: 20,
+    order: "desc",
+    orderBy: "lastSyncAt",
+  });
   const [tagPickerIue, setTagPickerIue] = useState<string | null>(null);
   const [reminderModalItem, setReminderModalItem] =
     useState<IExpediente | null>(null);
@@ -137,7 +140,9 @@ export default function ExpedientesUpdatesScreen() {
   }, [activeQuery.data?.pages, expedientes.length]);
 
   const hasActiveFilters =
-    !!queryParams.sede || !!queryParams.anio || (queryParams.tagIds?.length ?? 0) > 0;
+    !!queryParams.sede ||
+    !!queryParams.anio ||
+    (queryParams.tagIds?.length ?? 0) > 0;
   const canCompare = selectedIues.length >= 2 && selectedIues.length <= 3;
 
   const handleRefresh = useCallback(() => {
@@ -162,7 +167,9 @@ export default function ExpedientesUpdatesScreen() {
       const isSelected = prev.includes(iue);
       if (isSelected) return prev.filter((id) => id !== iue);
       if (prev.length >= 5) {
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Warning,
+        );
         Toast.show({
           type: "info",
           text1: "Límite alcanzado",
@@ -235,7 +242,7 @@ export default function ExpedientesUpdatesScreen() {
           Esta sección muestra los expedientes que tuvieron movimientos hoy.
         </Text>
         <Pressable
-          onPress={() => router.replace("/(tabs)" as any)}
+          onPress={() => router.replace("/(tabs)" as Href)}
           className="mt-5 rounded-full bg-accent px-6 py-2.5 active:opacity-70"
         >
           <Text className="font-sans-semi text-sm text-white">
@@ -374,7 +381,9 @@ export default function ExpedientesUpdatesScreen() {
         visible={!!tagPickerIue}
         iue={tagPickerIue ?? ""}
         assignedTagIds={
-          expedientes.find((e) => e.iue === tagPickerIue)?.tags?.map((t) => t.id) ?? []
+          expedientes
+            .find((e) => e.iue === tagPickerIue)
+            ?.tags?.map((t) => t.id) ?? []
         }
         onClose={() => setTagPickerIue(null)}
       />

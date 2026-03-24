@@ -35,7 +35,8 @@ export function useSubscriptionExpiry(): SubscriptionExpiryInfo {
     }
 
     const daysRemaining = differenceInCalendarDays(proExpiresAt, new Date());
-    const isExpiringSoon = daysRemaining >= 0 && daysRemaining <= EXPIRING_SOON_DAYS;
+    const isExpiringSoon =
+      daysRemaining >= 0 && daysRemaining <= EXPIRING_SOON_DAYS;
 
     return {
       expirationDate: proExpiresAt,

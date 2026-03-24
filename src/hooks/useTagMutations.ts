@@ -6,7 +6,7 @@ import {
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useAuth } from "@context/AuthContext";
-import { TagService , ExpedienteService } from "@services";
+import { TagService, ExpedienteService } from "@services";
 import { useAnalytics } from "@hooks/useAnalytics";
 import type {
   ITag,
@@ -19,7 +19,9 @@ import type { IPaginatedExpedientes } from "@app-types/expediente.types";
 type QuerySnapshot = [QueryKey, IPaginatedExpedientes | undefined][];
 
 const tagsListKey = (userId: string | null) =>
-  userId ? [...TagService.queryKeys.lists(), userId] : TagService.queryKeys.lists();
+  userId
+    ? [...TagService.queryKeys.lists(), userId]
+    : TagService.queryKeys.lists();
 
 /**
  * Provides CRUD mutations for tags and assign/unassign operations.
@@ -37,10 +39,8 @@ export function useTagMutations() {
     onSuccess: (newTag) => {
       if (!userId) return;
       trackEvent("tag_created");
-      queryClient.setQueryData<ITag[]>(
-        listKey,
-        (old = []) =>
-          [...old, newTag].sort((a, b) => a.name.localeCompare(b.name)),
+      queryClient.setQueryData<ITag[]>(listKey, (old = []) =>
+        [...old, newTag].sort((a, b) => a.name.localeCompare(b.name)),
       );
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({
@@ -68,12 +68,10 @@ export function useTagMutations() {
       await queryClient.cancelQueries({ queryKey: TagService.queryKeys.all });
       const previous = queryClient.getQueryData<ITag[]>(listKey);
 
-      queryClient.setQueryData<ITag[]>(
-        listKey,
-        (old = []) =>
-          old
-            .map((t) => (t.id === tagId ? { ...t, ...payload } : t))
-            .sort((a, b) => a.name.localeCompare(b.name)),
+      queryClient.setQueryData<ITag[]>(listKey, (old = []) =>
+        old
+          .map((t) => (t.id === tagId ? { ...t, ...payload } : t))
+          .sort((a, b) => a.name.localeCompare(b.name)),
       );
 
       return { previous };
@@ -101,9 +99,8 @@ export function useTagMutations() {
       await queryClient.cancelQueries({ queryKey: TagService.queryKeys.all });
       const previous = queryClient.getQueryData<ITag[]>(listKey);
 
-      queryClient.setQueryData<ITag[]>(
-        listKey,
-        (old = []) => old.filter((t) => t.id !== tagId),
+      queryClient.setQueryData<ITag[]>(listKey, (old = []) =>
+        old.filter((t) => t.id !== tagId),
       );
 
       // Remove from all expediente caches too

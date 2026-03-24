@@ -1,15 +1,9 @@
 import React from "react";
-import {
-  Modal,
-  Pressable,
-  Text,
-  View,
-  StyleSheet,
-} from "react-native";
+import { Modal, Pressable, Text, View, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { BlurView } from "expo-blur";
 import { Lock, X } from "lucide-react-native";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { FEATURE_PARAM_TO_LABEL } from "@constants/premiumFeatures";
 import { useAnalytics } from "@hooks/useAnalytics";
 import { APP_NAME_SHORT } from "@/constants/app.constants";
@@ -38,7 +32,7 @@ export function PremiumGateModal({
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onClose();
     router.push(
-      `/paywall?entry=gate&feature=${encodeURIComponent(feature)}` as any,
+      `/paywall?entry=gate&feature=${encodeURIComponent(feature)}` as Href,
     );
   };
 
@@ -76,7 +70,8 @@ export function PremiumGateModal({
             </Text>
 
             <Text className="mt-3 text-center text-[14px] leading-5 text-slate-500 dark:text-slate-400 px-1">
-              Para usar {featureName} necesitás {APP_NAME_SHORT}. ¿Querés ver los planes?
+              Para usar {featureName} necesitás {APP_NAME_SHORT}. ¿Querés ver
+              los planes?
             </Text>
           </View>
 

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, type DimensionValue } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -42,7 +42,11 @@ export const Skeleton = ({
   return (
     <View
       className={`overflow-hidden bg-slate-200 dark:bg-slate-700/50 ${className || ""}`}
-      style={{ width: width as any, height: height as any, borderRadius }}
+      style={{
+        width: width as DimensionValue,
+        height: height as DimensionValue,
+        borderRadius,
+      }}
     >
       <Animated.View
         style={[

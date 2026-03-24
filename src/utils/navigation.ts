@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 
 /**
  * Convierte una IUE ("40-91/2018") al formato seguro para Expo Router ("40-91:2018").
@@ -10,7 +10,7 @@ export function iueToRouteParam(iue: string): string {
 
 /** Navega al detalle de un expediente a partir de su IUE. */
 export function navigateToExpediente(iue: string): void {
-  router.push(`/expedientes/${iueToRouteParam(iue)}` as any);
+  router.push(`/expedientes/${iueToRouteParam(iue)}` as Href);
 }
 
 /**
@@ -19,7 +19,7 @@ export function navigateToExpediente(iue: string): void {
  * (evita el "bucle" de tener que ir atrás por cada notificación).
  */
 export function navigateToExpedienteFromNotification(iue: string): void {
-  const href = `/expedientes/${iueToRouteParam(iue)}` as any;
+  const href = `/expedientes/${iueToRouteParam(iue)}` as Href;
   if (typeof router.dismissTo === "function") {
     router.dismissTo("/(tabs)");
     setTimeout(() => router.push(href), 50);

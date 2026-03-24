@@ -45,7 +45,11 @@ interface MarkdownTextProps {
  * Soporta: **bold**, listas con `- ` o `* `, párrafos y saltos de línea.
  * No requiere dependencias externas.
  */
-export function MarkdownText({ content, isStreaming, textClass }: MarkdownTextProps) {
+export function MarkdownText({
+  content,
+  isStreaming,
+  textClass,
+}: MarkdownTextProps) {
   const normalized = normalizeContent(content);
   const lines = normalized.split("\n");
 

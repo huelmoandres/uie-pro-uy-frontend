@@ -17,22 +17,31 @@ function iueToPathParam(iue: string): string {
   return encodeURIComponent(iue.replace("/", ":"));
 }
 
+/** Serializa arrays a string comma-separated para query params del backend. */
+function toExpedientesParams(
+  params: IExpedientesQuery,
+): Record<string, string | number | boolean | undefined> {
+  const { tagIds, iues, ...rest } = params;
+  const out: Record<string, string | number | boolean | undefined> = {
+    ...rest,
+  };
+  if (Array.isArray(tagIds)) {
+    out.tagIds = tagIds.join(",");
+  }
+  if (Array.isArray(iues)) {
+    out.iues = iues.join(",");
+  }
+  return out;
+}
+
 /**
  * Fetches a paginated and filtered list of followed expedientes.
  */
 export async function getExpedientes(
   params: IExpedientesQuery = {},
 ): Promise<IPaginatedExpedientes> {
-  const queryParams = { ...params };
-  // Axios serializa arrays como tagIds[]=a&tagIds[]=b. NestJS espera tagIds=a,b (por nuestro Custom Transform).
-  if (queryParams.tagIds && Array.isArray(queryParams.tagIds)) {
-    queryParams.tagIds = queryParams.tagIds.join(",") as any;
-  }
-  if (queryParams.iues && Array.isArray(queryParams.iues)) {
-    queryParams.iues = queryParams.iues.join(",") as any;
-  }
   const { data } = await apiClient.get<IPaginatedExpedientes>("/expedientes", {
-    params: queryParams,
+    params: toExpedientesParams(params),
   });
   return data;
 }
@@ -44,14 +53,10 @@ export async function getExpedientes(
 export async function getTodayMovementExpedientes(
   params: IExpedientesQuery = {},
 ): Promise<IPaginatedExpedientes> {
-  const queryParams = { ...params };
-  if (queryParams.tagIds && Array.isArray(queryParams.tagIds)) {
-    queryParams.tagIds = queryParams.tagIds.join(",") as any;
-  }
   const { data } = await apiClient.get<IPaginatedExpedientes>(
     "/expedientes/today-movements",
     {
-      params: queryParams,
+      params: toExpedientesParams(params),
     },
   );
   return data;

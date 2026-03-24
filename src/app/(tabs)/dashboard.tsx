@@ -164,7 +164,10 @@ export default function DashboardScreen() {
                   info={INFO_HINTS.recentMovements}
                 />
                 {data.recentHighPriorityMovements.map((m) => (
-                  <RecentMovementRow key={`${m.expedienteIue}-${m.fecha}`} item={m} />
+                  <RecentMovementRow
+                    key={`${m.expedienteIue}-${m.fecha}`}
+                    item={m}
+                  />
                 ))}
               </>
             )}

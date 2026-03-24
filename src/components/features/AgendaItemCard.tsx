@@ -110,80 +110,80 @@ export const AgendaItemCard = React.memo(
         onPress={() => navigateToExpediente(item.iue)}
         className={`rounded-[18px] border p-4 mb-2.5 active:opacity-75 ${config.bg} ${config.border}`}
       >
-      {/* Header row */}
-      <View className="flex-row items-start justify-between gap-3">
-        <View className="flex-1">
-          <Text className="text-[10px] font-sans-bold uppercase tracking-wide text-accent mb-0.5">
-            {item.iue}
-          </Text>
-          <Text
-            className="text-[13px] font-sans-semi text-slate-700 dark:text-slate-300 leading-tight"
-            numberOfLines={2}
-          >
-            {caratula || "Sin carátula disponible"}
-          </Text>
-        </View>
-        <View className="items-end gap-1.5">
-          {canAddReminder && (
-            <Pressable
-              onPress={(e) => {
-                e.stopPropagation();
-                onAddReminder(item);
-              }}
-              className="flex-row items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 active:opacity-70 mb-1.5"
+        {/* Header row */}
+        <View className="flex-row items-start justify-between gap-3">
+          <View className="flex-1">
+            <Text className="text-[10px] font-sans-bold uppercase tracking-wide text-accent mb-0.5">
+              {item.iue}
+            </Text>
+            <Text
+              className="text-[13px] font-sans-semi text-slate-700 dark:text-slate-300 leading-tight"
+              numberOfLines={2}
             >
-              <Bell size={15} color="#B89146" />
-              <Text className="text-[11px] font-sans-semi text-accent">
-                Recordatorio
-              </Text>
-              {!hasPremiumAccess && (
-                <Lock size={12} color="#94A3B8" />
-              )}
-            </Pressable>
-          )}
-          <View
-            className={`flex-row items-center gap-1 rounded-full px-2.5 py-1 shrink-0 ${config.badge}`}
-          >
-            <IconComponent size={11} color={config.iconColor} />
-            <Text className={`text-[11px] font-sans-bold ${config.badgeText}`}>
-              {config.label}
+              {caratula || "Sin carátula disponible"}
             </Text>
           </View>
+          <View className="items-end gap-1.5">
+            {canAddReminder && (
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onAddReminder(item);
+                }}
+                className="flex-row items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 active:opacity-70 mb-1.5"
+              >
+                <Bell size={15} color="#B89146" />
+                <Text className="text-[11px] font-sans-semi text-accent">
+                  Recordatorio
+                </Text>
+                {!hasPremiumAccess && <Lock size={12} color="#94A3B8" />}
+              </Pressable>
+            )}
+            <View
+              className={`flex-row items-center gap-1 rounded-full px-2.5 py-1 shrink-0 ${config.badge}`}
+            >
+              <IconComponent size={11} color={config.iconColor} />
+              <Text
+                className={`text-[11px] font-sans-bold ${config.badgeText}`}
+              >
+                {config.label}
+              </Text>
+            </View>
+          </View>
         </View>
-      </View>
 
-      {/* Detected text snippet */}
-      <View className="mt-3 rounded-xl bg-white/60 dark:bg-white/5 px-3 py-2">
-        <Text
-          className="text-[11px] font-sans text-slate-500 dark:text-slate-400 leading-relaxed"
-          numberOfLines={2}
-        >
-          {item.detectedText}
-        </Text>
-      </View>
-
-      {/* Footer row */}
-      <View className="mt-2.5 flex-row items-center justify-between">
-        <View className="flex-row items-center gap-1">
-          <View
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: 3,
-              backgroundColor: config.dot,
-            }}
-          />
-          <Text className="text-[10px] font-sans-semi text-slate-400">
-            {item.days} {typeLabel}
+        {/* Detected text snippet */}
+        <View className="mt-3 rounded-xl bg-white/60 dark:bg-white/5 px-3 py-2">
+          <Text
+            className="text-[11px] font-sans text-slate-500 dark:text-slate-400 leading-relaxed"
+            numberOfLines={2}
+          >
+            {item.detectedText}
           </Text>
         </View>
-        <View className="flex-row items-center gap-1">
-          <Text className="text-[10px] font-sans text-slate-400">
-            Vence {formatDate(item.dueDate)}
-          </Text>
-          <ChevronRight size={10} color="#CBD5E1" />
+
+        {/* Footer row */}
+        <View className="mt-2.5 flex-row items-center justify-between">
+          <View className="flex-row items-center gap-1">
+            <View
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: config.dot,
+              }}
+            />
+            <Text className="text-[10px] font-sans-semi text-slate-400">
+              {item.days} {typeLabel}
+            </Text>
+          </View>
+          <View className="flex-row items-center gap-1">
+            <Text className="text-[10px] font-sans text-slate-400">
+              Vence {formatDate(item.dueDate)}
+            </Text>
+            <ChevronRight size={10} color="#CBD5E1" />
+          </View>
         </View>
-      </View>
       </Pressable>
     );
   },

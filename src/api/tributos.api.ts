@@ -10,7 +10,7 @@ export interface ITributosParams {
  * Sin year: año actual (o el más reciente si no hay).
  */
 export async function getTributos(
-  params: ITributosParams = {}
+  params: ITributosParams = {},
 ): Promise<ITributo[]> {
   const { data } = await apiClient.get<ITributo[]>("/tributos", { params });
   return data;

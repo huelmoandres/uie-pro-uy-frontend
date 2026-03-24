@@ -18,7 +18,11 @@ import type { ChatMessage, ChatMode } from "@app-types/ai.types";
 import { useAiChat } from "@hooks/useAiChat";
 import { useAnalytics } from "@hooks/useAnalytics";
 import { AiService } from "@services/AiService";
-import { ChatModeTabs, MessageBubble, TypingIndicator } from "@components/features";
+import {
+  ChatModeTabs,
+  MessageBubble,
+  TypingIndicator,
+} from "@components/features";
 
 export default function AiChatScreen() {
   const params = useLocalSearchParams<{
@@ -34,8 +38,15 @@ export default function AiChatScreen() {
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
   const { trackEvent } = useAnalytics();
 
-  const { messages, isStreaming, conversationId, sendMessage, loadConversation, clearMessages, abort } =
-    useAiChat();
+  const {
+    messages,
+    isStreaming,
+    conversationId,
+    sendMessage,
+    loadConversation,
+    clearMessages,
+    abort,
+  } = useAiChat();
 
   const activeMode = CHAT_MODES.find((m) => m.mode === mode)!;
 
@@ -62,7 +73,9 @@ export default function AiChatScreen() {
   }, [params.conversationId]);
 
   useEffect(() => {
-    return () => { abort(); };
+    return () => {
+      abort();
+    };
   }, [abort]);
 
   useEffect(() => {
@@ -123,7 +136,10 @@ export default function AiChatScreen() {
       <View className="border-b border-slate-100 bg-white px-5 pb-3 pt-14 dark:bg-primary dark:border-white/5">
         <View className="flex-row items-center justify-between">
           <Pressable
-            onPress={() => { abort(); router.back(); }}
+            onPress={() => {
+              abort();
+              router.back();
+            }}
             className="mr-3 h-9 w-9 items-center justify-center rounded-full active:bg-slate-100 dark:active:bg-white/10"
           >
             <ArrowLeft size={20} color={COLORS.slate[500]} />
@@ -160,7 +176,11 @@ export default function AiChatScreen() {
           </View>
         </View>
 
-        <ChatModeTabs selected={mode} onSelect={handleModeChange} disabled={isStreaming} />
+        <ChatModeTabs
+          selected={mode}
+          onSelect={handleModeChange}
+          disabled={isStreaming}
+        />
       </View>
 
       {/* Messages */}
@@ -189,7 +209,9 @@ export default function AiChatScreen() {
             </View>
           }
           ListFooterComponent={
-            isStreaming && messages.at(-1)?.content === "" ? <TypingIndicator /> : null
+            isStreaming && messages.at(-1)?.content === "" ? (
+              <TypingIndicator />
+            ) : null
           }
           onContentSizeChange={() =>
             flatListRef.current?.scrollToEnd({ animated: true })
@@ -240,7 +262,9 @@ export default function AiChatScreen() {
             <Send
               size={18}
               color={
-                inputText.trim() && !isStreaming ? COLORS.white : COLORS.slate[400]
+                inputText.trim() && !isStreaming
+                  ? COLORS.white
+                  : COLORS.slate[400]
               }
             />
           </Pressable>

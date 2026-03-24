@@ -2,7 +2,13 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { Search, RefreshCw, MapPin, SlidersHorizontal, ArrowLeft } from "lucide-react-native";
+import {
+  Search,
+  RefreshCw,
+  MapPin,
+  SlidersHorizontal,
+  ArrowLeft,
+} from "lucide-react-native";
 import { PageContainer, Paginator, Skeleton, InfoButton } from "@components/ui";
 import { INFO_HINTS } from "@/constants/InfoHints";
 import { VenueCard, SedesFilterModal } from "@components/features";

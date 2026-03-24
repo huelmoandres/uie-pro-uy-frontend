@@ -59,7 +59,8 @@ export async function requestAndRegisterNotifications(): Promise<RegisterNotific
   if (isExpoGo) {
     return {
       ok: false,
-      reason: "Las notificaciones no funcionan en Expo Go. Usá un development build.",
+      reason:
+        "Las notificaciones no funcionan en Expo Go. Usá un development build.",
     };
   }
   if (!Notifications || !Device.isDevice) {
@@ -83,7 +84,8 @@ export async function requestAndRegisterNotifications(): Promise<RegisterNotific
   if (status !== "granted") {
     return {
       ok: false,
-      reason: "Permisos denegados. Activá las notificaciones en Configuración del dispositivo y volvé a la app.",
+      reason:
+        "Permisos denegados. Activá las notificaciones en Configuración del dispositivo y volvé a la app.",
     };
   }
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
@@ -230,7 +232,10 @@ function handleNotificationResponse(response: any) {
     const iues = Array.isArray(iuesPayload)
       ? iuesPayload
       : typeof iuesPayload === "string"
-        ? iuesPayload.split(",").map((s) => s.trim()).filter(Boolean)
+        ? iuesPayload
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
         : [];
     if (
       grouped &&

@@ -63,7 +63,7 @@ export default function TributosScreen() {
 
   const filteredTributos = useMemo(
     () => filterTributos(tributos, searchQuery),
-    [tributos, searchQuery]
+    [tributos, searchQuery],
   );
 
   const displayYear = tributos[0]?.year ?? getTributosDefaultYear();
@@ -81,7 +81,7 @@ export default function TributosScreen() {
         onToggle={() => handleToggleExpand(item.id)}
       />
     ),
-    [expandedId, handleToggleExpand]
+    [expandedId, handleToggleExpand],
   );
 
   const fixedFooter = (
@@ -110,7 +110,7 @@ export default function TributosScreen() {
         </Text>
       </View>
     ),
-    []
+    [],
   );
 
   const headerSection = (

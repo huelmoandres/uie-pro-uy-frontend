@@ -137,12 +137,14 @@ export default function RegisterScreen() {
             <View className="flex-row items-center gap-1.5 -mt-2 ml-1 mb-4">
               <Gift size={13} color="#059669" />
               <Text className="text-xs font-sans-bold text-emerald-600 dark:text-emerald-400">
-                ¡Código listo! Arrancás con días de Pro gratis al crear tu cuenta.
+                ¡Código listo! Arrancás con días de Pro gratis al crear tu
+                cuenta.
               </Text>
             </View>
           ) : (
             <Text className="text-xs font-sans text-slate-400 dark:text-slate-500 -mt-2 ml-1 mb-4">
-              Si te compartieron un código, ingresalo y arrancás con días de Pro gratis.
+              Si te compartieron un código, ingresalo y arrancás con días de Pro
+              gratis.
             </Text>
           )}
 

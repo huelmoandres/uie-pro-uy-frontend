@@ -3,10 +3,7 @@ import { View, Text } from "react-native";
 import { Stack } from "expo-router";
 import { HelpCircle, MessageSquare } from "lucide-react-native";
 import { PageContainer } from "@components/ui";
-import {
-  ContactSupportModal,
-  FaqAccordion,
-} from "@components/features";
+import { ContactSupportModal, FaqAccordion } from "@components/features";
 import { InfoBanner } from "@components/shared/InfoBanner";
 import { FAQS } from "@constants/faqs";
 

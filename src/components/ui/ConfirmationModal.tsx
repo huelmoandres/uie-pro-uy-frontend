@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Modal,
-  Pressable,
-  Text,
-  View,
-  StyleSheet
-} from "react-native";
+import { Modal, Pressable, Text, View, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { BlurView } from "expo-blur";
 import { AlertTriangle, Info, X } from "lucide-react-native";

@@ -15,7 +15,8 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
- ScrollView } from "react-native";
+  ScrollView,
+} from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import {
   useExpedienteDetail,
@@ -381,9 +382,7 @@ export default function ExpedienteDetailScreen() {
                 {item.iue}
               </Text>
             </View>
-            {prediction && (
-              <ActivityStatusBadge status={prediction.status} />
-            )}
+            {prediction && <ActivityStatusBadge status={prediction.status} />}
           </View>
 
           {/* Carátula */}
@@ -391,7 +390,8 @@ export default function ExpedienteDetailScreen() {
             className="mb-3 font-sans text-[13px] leading-snug text-slate-600 dark:text-slate-300"
             numberOfLines={4}
           >
-            {stripHtml(item.caratula) || "Sin carátula registrada en el sistema."}
+            {stripHtml(item.caratula) ||
+              "Sin carátula registrada en el sistema."}
           </Text>
 
           {/* Parties — inline compacto */}

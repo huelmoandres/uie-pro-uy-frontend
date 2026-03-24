@@ -144,122 +144,122 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
               entering={SlideInDown.duration(280).springify()}
               className="bg-white dark:bg-surface-dark rounded-t-[28px] overflow-hidden"
             >
-            {/* Handle */}
-            <View className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-700 self-center mt-3" />
+              {/* Handle */}
+              <View className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-700 self-center mt-3" />
 
-            {/* Header */}
-            <View className="flex-row items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100 dark:border-white/5">
-              <View className="flex-row items-center gap-2">
-                <Tag size={16} color="#B89146" />
-                <Text className="text-[15px] font-sans-bold text-slate-900 dark:text-white">
-                  Mis etiquetas
-                </Text>
-              </View>
-              <Pressable
-                onPress={onClose}
-                hitSlop={10}
-                className="active:opacity-60"
-              >
-                <X size={18} color="#94A3B8" />
-              </Pressable>
-            </View>
-
-            <ScrollView
-              className="max-h-80"
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingVertical: 16,
-                gap: 8,
-              }}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              {/* Lista de tags existentes */}
-              {isLoading ? (
-                <ActivityIndicator
-                  size="small"
-                  color="#B89146"
-                  className="py-6"
-                />
-              ) : (
-                tags.map((tag) => {
-                  if (editingId === tag.id) {
-                    return (
-                      <InlineTagForm
-                        key={tag.id}
-                        name={name}
-                        selectedColor={selectedColor}
-                        onChangeName={setName}
-                        onChangeColor={setSelectedColor}
-                        onSave={handleSave}
-                        onCancel={resetForm}
-                        isSaving={isSaving}
-                      />
-                    );
-                  }
-                  return (
-                    <View
-                      key={tag.id}
-                      className="flex-row items-center justify-between px-3 py-2 rounded-xl border border-slate-100 dark:border-white/5"
-                    >
-                      <TagBadge tag={tag} size="sm" />
-                      <View className="flex-row items-center gap-3">
-                        <Pressable
-                          onPress={() => handleStartEdit(tag)}
-                          hitSlop={8}
-                          className="active:opacity-60"
-                        >
-                          <Pencil size={14} color="#94A3B8" />
-                        </Pressable>
-                        <Pressable
-                          onPress={() => setTagToDelete(tag)}
-                          hitSlop={8}
-                          className="active:opacity-60"
-                        >
-                          <Trash2 size={14} color="#ef4444" />
-                        </Pressable>
-                      </View>
-                    </View>
-                  );
-                })
-              )}
-
-              {/* Formulario de creación */}
-              {isCreating && (
-                <InlineTagForm
-                  name={name}
-                  selectedColor={selectedColor}
-                  onChangeName={setName}
-                  onChangeColor={setSelectedColor}
-                  onSave={handleSave}
-                  onCancel={resetForm}
-                  isSaving={isSaving}
-                />
-              )}
-
-              {/* Botón de nueva etiqueta */}
-              {!isCreating && !editingId && tags.length < 20 && (
-                <Pressable
-                  onPress={handleStartCreate}
-                  className="flex-row items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-white/10 active:opacity-60"
-                >
-                  <Plus size={14} color="#B89146" />
-                  <Text className="text-[13px] font-sans-semi text-accent">
-                    Nueva etiqueta
+              {/* Header */}
+              <View className="flex-row items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100 dark:border-white/5">
+                <View className="flex-row items-center gap-2">
+                  <Tag size={16} color="#B89146" />
+                  <Text className="text-[15px] font-sans-bold text-slate-900 dark:text-white">
+                    Mis etiquetas
                   </Text>
+                </View>
+                <Pressable
+                  onPress={onClose}
+                  hitSlop={10}
+                  className="active:opacity-60"
+                >
+                  <X size={18} color="#94A3B8" />
                 </Pressable>
-              )}
+              </View>
 
-              {tags.length >= 20 && (
-                <Text className="text-[11px] font-sans text-slate-400 text-center mt-1">
-                  Límite de 20 etiquetas alcanzado.
-                </Text>
-              )}
-            </ScrollView>
+              <ScrollView
+                className="max-h-80"
+                contentContainerStyle={{
+                  paddingHorizontal: 20,
+                  paddingVertical: 16,
+                  gap: 8,
+                }}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+              >
+                {/* Lista de tags existentes */}
+                {isLoading ? (
+                  <ActivityIndicator
+                    size="small"
+                    color="#B89146"
+                    className="py-6"
+                  />
+                ) : (
+                  tags.map((tag) => {
+                    if (editingId === tag.id) {
+                      return (
+                        <InlineTagForm
+                          key={tag.id}
+                          name={name}
+                          selectedColor={selectedColor}
+                          onChangeName={setName}
+                          onChangeColor={setSelectedColor}
+                          onSave={handleSave}
+                          onCancel={resetForm}
+                          isSaving={isSaving}
+                        />
+                      );
+                    }
+                    return (
+                      <View
+                        key={tag.id}
+                        className="flex-row items-center justify-between px-3 py-2 rounded-xl border border-slate-100 dark:border-white/5"
+                      >
+                        <TagBadge tag={tag} size="sm" />
+                        <View className="flex-row items-center gap-3">
+                          <Pressable
+                            onPress={() => handleStartEdit(tag)}
+                            hitSlop={8}
+                            className="active:opacity-60"
+                          >
+                            <Pencil size={14} color="#94A3B8" />
+                          </Pressable>
+                          <Pressable
+                            onPress={() => setTagToDelete(tag)}
+                            hitSlop={8}
+                            className="active:opacity-60"
+                          >
+                            <Trash2 size={14} color="#ef4444" />
+                          </Pressable>
+                        </View>
+                      </View>
+                    );
+                  })
+                )}
 
-            {/* Bottom safe area */}
-            <View className="h-6" />
-          </Animated.View>
+                {/* Formulario de creación */}
+                {isCreating && (
+                  <InlineTagForm
+                    name={name}
+                    selectedColor={selectedColor}
+                    onChangeName={setName}
+                    onChangeColor={setSelectedColor}
+                    onSave={handleSave}
+                    onCancel={resetForm}
+                    isSaving={isSaving}
+                  />
+                )}
+
+                {/* Botón de nueva etiqueta */}
+                {!isCreating && !editingId && tags.length < 20 && (
+                  <Pressable
+                    onPress={handleStartCreate}
+                    className="flex-row items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-white/10 active:opacity-60"
+                  >
+                    <Plus size={14} color="#B89146" />
+                    <Text className="text-[13px] font-sans-semi text-accent">
+                      Nueva etiqueta
+                    </Text>
+                  </Pressable>
+                )}
+
+                {tags.length >= 20 && (
+                  <Text className="text-[11px] font-sans text-slate-400 text-center mt-1">
+                    Límite de 20 etiquetas alcanzado.
+                  </Text>
+                )}
+              </ScrollView>
+
+              {/* Bottom safe area */}
+              <View className="h-6" />
+            </Animated.View>
           </KeyboardAvoidingView>
         </Animated.View>
       </Modal>

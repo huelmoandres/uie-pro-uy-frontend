@@ -12,7 +12,11 @@ import type { INotificationPreferences } from "@app-types/notification-preferenc
 export const NOTIFICATION_TYPES: {
   key: keyof Omit<
     INotificationPreferences,
-    "pushEnabled" | "emailWeeklyDigest" | "digestDay" | "pushNotificationMode" | "hasDeviceToken"
+    | "pushEnabled"
+    | "emailWeeklyDigest"
+    | "digestDay"
+    | "pushNotificationMode"
+    | "hasDeviceToken"
   >;
   icon: typeof FileSearch;
   title: string;
@@ -61,19 +65,21 @@ export const NOTIFICATION_TYPES: {
 
 /** Opciones del selector de modo de agrupación de notificaciones push. */
 export const PUSH_MODE_OPTIONS: {
-  value: 'INDIVIDUAL' | 'GROUPED';
+  value: "INDIVIDUAL" | "GROUPED";
   label: string;
   description: string;
 }[] = [
   {
-    value: 'INDIVIDUAL',
-    label: 'Una por expediente',
-    description: 'Recibís una alerta separada por cada expediente con novedades. Se agrupan automáticamente en tu celular.',
+    value: "INDIVIDUAL",
+    label: "Una por expediente",
+    description:
+      "Recibís una alerta separada por cada expediente con novedades. Se agrupan automáticamente en tu celular.",
   },
   {
-    value: 'GROUPED',
-    label: 'Resumen diario',
-    description: 'Recibís una sola notificación con todos los expedientes que tuvieron movimientos.',
+    value: "GROUPED",
+    label: "Resumen diario",
+    description:
+      "Recibís una sola notificación con todos los expedientes que tuvieron movimientos.",
   },
 ];
 

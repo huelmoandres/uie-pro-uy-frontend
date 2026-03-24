@@ -29,7 +29,9 @@ function TypingDot({ delay }: { delay: number }) {
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
     transform: [
-      { translateY: withTiming(opacity.value > 0.6 ? -2 : 0, { duration: 200 }) },
+      {
+        translateY: withTiming(opacity.value > 0.6 ? -2 : 0, { duration: 200 }),
+      },
     ],
   }));
 

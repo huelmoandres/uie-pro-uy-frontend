@@ -14,11 +14,9 @@ interface ProfileDataWarningModalProps {
  * Modal informativo cuando el usuario intenta agendar sin tener cédula/teléfono.
  * No bloquea el proceso: "Entendido" continúa, "Ir a Configuración" navega a settings.
  */
-export const ProfileDataWarningModal: React.FC<ProfileDataWarningModalProps> = ({
-  visible,
-  onEntendido,
-  onIrAConfiguracion,
-}) => {
+export const ProfileDataWarningModal: React.FC<
+  ProfileDataWarningModalProps
+> = ({ visible, onEntendido, onIrAConfiguracion }) => {
   const handleEntendido = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onEntendido();
@@ -40,11 +38,7 @@ export const ProfileDataWarningModal: React.FC<ProfileDataWarningModalProps> = (
       onRequestClose={handleEntendido}
     >
       <View style={styles.overlay}>
-        <BlurView
-          intensity={25}
-          tint="dark"
-          style={StyleSheet.absoluteFill}
-        />
+        <BlurView intensity={25} tint="dark" style={StyleSheet.absoluteFill} />
         <Pressable style={StyleSheet.absoluteFill} onPress={handleEntendido}>
           <View style={styles.backdropDim} />
         </Pressable>

@@ -1,7 +1,13 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
-import { Bot, MapPin, Calculator, ChevronRight, Lock } from "lucide-react-native";
+import {
+  Bot,
+  MapPin,
+  Calculator,
+  ChevronRight,
+  Lock,
+} from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { PageContainer } from "@components/ui";
 import { PremiumGateModal } from "@components/features";

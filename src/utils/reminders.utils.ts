@@ -1,7 +1,10 @@
 import { addDays } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import { APP_TIMEZONE } from "@constants/timezone";
-import { DEFAULT_REMINDER_HOUR, DEFAULT_REMINDER_MINUTE } from "@constants/reminders";
+import {
+  DEFAULT_REMINDER_HOUR,
+  DEFAULT_REMINDER_MINUTE,
+} from "@constants/reminders";
 import type { IAgendaItem } from "@app-types/deadline-agenda.types";
 import type {
   ICreateReminderPayload,
@@ -57,7 +60,7 @@ export function buildCreateFixedReminderPayload(
     remindAt: remindAtIso,
     expedienteIue: iue,
     timezone: APP_TIMEZONE,
-    title: (title?.trim() || `Recordatorio: ${iue}`) || undefined,
+    title: title?.trim() || `Recordatorio: ${iue}` || undefined,
     body: body?.trim() || undefined,
     data: {
       screen: "ExpedienteDetail",

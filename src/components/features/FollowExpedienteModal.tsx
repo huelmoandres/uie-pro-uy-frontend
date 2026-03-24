@@ -22,7 +22,11 @@ import {
 } from "@schemas/auth.schema";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
-import { extractApiErrorMessage, extractApiErrorCode, DOMAIN_ERROR_CODES } from "@utils/apiError";
+import {
+  extractApiErrorMessage,
+  extractApiErrorCode,
+  DOMAIN_ERROR_CODES,
+} from "@utils/apiError";
 import { ExpedienteService } from "@services";
 import { useAnalytics } from "@hooks/useAnalytics";
 
@@ -110,7 +114,10 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
           <View style={styles.backdropDim} />
         </Pressable>
 
-        <KeyboardAvoidingView {...KEYBOARD_AVOIDING_VIEW_PROPS} className="w-full">
+        <KeyboardAvoidingView
+          {...KEYBOARD_AVOIDING_VIEW_PROPS}
+          className="w-full"
+        >
           <View className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 shadow-2xl pb-10 px-6 pt-6">
             {/* Handle */}
             <View className="items-center mb-6">

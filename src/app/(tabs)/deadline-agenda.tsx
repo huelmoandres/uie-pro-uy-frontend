@@ -205,8 +205,7 @@ export default function DeadlineAgendaScreen() {
     [data],
   );
 
-  const scheduledReminders =
-    remindersData?.pages.flatMap((p) => p.data) ?? [];
+  const scheduledReminders = remindersData?.pages.flatMap((p) => p.data) ?? [];
   const remindersTotal = remindersData?.pages[0]?.total ?? 0;
 
   const toggleSection = useCallback((key: string) => {
@@ -341,7 +340,8 @@ export default function DeadlineAgendaScreen() {
                 Los recordatorios son una función IUE Pro
               </Text>
               <Text className="mt-1 text-[12px] font-sans text-slate-500 dark:text-slate-400 text-center">
-                Suscribite para programar alertas antes del vencimiento de plazos.
+                Suscribite para programar alertas antes del vencimiento de
+                plazos.
               </Text>
               <Pressable
                 onPress={() => showPremiumModal("reminders")}
@@ -380,7 +380,8 @@ export default function DeadlineAgendaScreen() {
                 No tenés recordatorios programados
               </Text>
               <Text className="mt-1 text-[12px] font-sans text-slate-500 dark:text-slate-400 text-center">
-                Creálos desde la campana en un plazo abierto o desde cualquier expediente.
+                Creálos desde la campana en un plazo abierto o desde cualquier
+                expediente.
               </Text>
             </View>
           )}
@@ -407,7 +408,8 @@ export default function DeadlineAgendaScreen() {
                   Recordatorios
                 </Text>
                 <Text className="text-[11px] font-sans text-slate-500 dark:text-slate-400 mt-0.5">
-                  Tocá la campana en cada plazo abierto para recibir una notificación antes del vencimiento.
+                  Tocá la campana en cada plazo abierto para recibir una
+                  notificación antes del vencimiento.
                 </Text>
               </View>
             </View>

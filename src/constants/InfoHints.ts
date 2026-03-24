@@ -59,7 +59,7 @@ export const INFO_HINTS = {
   recordatorios: {
     title: "Recordatorios",
     description:
-      "Podés crear recordatorios de dos formas:\n\n• Desde la Agenda: tocá la campana en un plazo abierto para recibir una notificación X días antes del vencimiento.\n\n• Desde cualquier expediente: tocá \"Agregar recordatorio\" en el detalle o la campana en la lista. Elegí fecha, hora, título y descripción personalizados.\n\nPara ver y eliminar recordatorios: en esta misma pantalla (Agenda), arriba aparece \"Recordatorios programados\". Tocá el ícono de papelera en cada uno para darlo de baja.",
+      'Podés crear recordatorios de dos formas:\n\n• Desde la Agenda: tocá la campana en un plazo abierto para recibir una notificación X días antes del vencimiento.\n\n• Desde cualquier expediente: tocá "Agregar recordatorio" en el detalle o la campana en la lista. Elegí fecha, hora, título y descripción personalizados.\n\nPara ver y eliminar recordatorios: en esta misma pantalla (Agenda), arriba aparece "Recordatorios programados". Tocá el ícono de papelera en cada uno para darlo de baja.',
   },
 
   // ── Agenda Procesal ────────────────────────────────────────────────────

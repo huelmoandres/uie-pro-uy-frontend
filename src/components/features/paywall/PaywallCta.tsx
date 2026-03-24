@@ -29,7 +29,9 @@ export function PaywallCta({
       <View className="mt-10">
         <Pressable
           className="flex-row items-center justify-center gap-2.5 rounded-2xl bg-accent py-5 shadow-lg shadow-accent/25 active:scale-[0.98]"
-          onPress={() => router.replace("/(tabs)" as import("expo-router").Href)}
+          onPress={() =>
+            router.replace("/(tabs)" as import("expo-router").Href)
+          }
         >
           <Check size={20} color="#FFFFFF" strokeWidth={2.5} />
           <Text className="text-sm font-sans-bold uppercase tracking-[2px] text-white">
