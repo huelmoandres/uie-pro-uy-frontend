@@ -1,3 +1,4 @@
+export * from "./MarkdownText";
 export * from "./ConfirmationModal";
 export * from "./InfoButton";
 export * from "./ProfileDataWarningModal";

@@ -65,7 +65,7 @@ export function PremiumGateModal({
           <View style={styles.backdropDim} />
         </Pressable>
 
-        <View className="w-[88%] max-w-[360px] overflow-hidden rounded-[32px] bg-white dark:bg-[#0B1120] border border-slate-100 dark:border-white/5 shadow-2xl">
+        <View className="w-[88%] max-w-[360px] overflow-hidden rounded-[32px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-2xl">
           <View className="p-8 items-center">
             <View className="mb-6 h-16 w-16 items-center justify-center rounded-[22px] bg-accent/10">
               <Lock size={32} color="#C5A059" />

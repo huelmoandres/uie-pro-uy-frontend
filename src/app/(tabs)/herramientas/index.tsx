@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
-import { MapPin, Calculator, ChevronRight, Lock } from "lucide-react-native";
+import { Bot, MapPin, Calculator, ChevronRight, Lock } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { PageContainer } from "@components/ui";
 import { PremiumGateModal } from "@components/features";
@@ -9,11 +9,20 @@ import { usePremiumGate } from "@hooks";
 
 const TOOLS = [
   {
+    id: "ai-chat",
+    title: "Asistente IA",
+    description: "Consultá tus expedientes, plazos y derecho procesal",
+    icon: Bot,
+    href: "/herramientas/ai-chat",
+    requiresPro: false,
+  },
+  {
     id: "sedes",
     title: "Sedes Judiciales",
     description: "Directorio de juzgados y tribunales",
     icon: MapPin,
     href: "/herramientas/sedes",
+    requiresPro: true,
   },
   {
     id: "tributos",
@@ -21,6 +30,7 @@ const TOOLS = [
     description: "Vademécum de tasas e impuestos",
     icon: Calculator,
     href: "/herramientas/tributos",
+    requiresPro: true,
   },
 ] as const;
 
@@ -56,7 +66,7 @@ export default function HerramientasScreen() {
                 key={tool.id}
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  if (!hasPremiumAccess) {
+                  if (tool.requiresPro && !hasPremiumAccess) {
                     showPremiumModal(tool.id);
                     return;
                   }
@@ -65,7 +75,7 @@ export default function HerramientasScreen() {
                 className="flex-row items-center overflow-hidden rounded-[24px] bg-white p-4 border border-slate-100 shadow-premium dark:bg-slate-900/40 dark:border-white/5 active:scale-[0.98] active:bg-slate-50 dark:active:bg-slate-900/60"
               >
                 <View className="mr-4 h-12 w-12 items-center justify-center rounded-xl bg-primary/10 dark:bg-accent/10">
-                  {hasPremiumAccess ? (
+                  {!tool.requiresPro || hasPremiumAccess ? (
                     <Icon size={22} color="#B89146" />
                   ) : (
                     <Lock size={18} color="#B89146" />
@@ -76,7 +86,7 @@ export default function HerramientasScreen() {
                     <Text className="text-[15px] font-sans-bold text-slate-900 dark:text-white">
                       {tool.title}
                     </Text>
-                    {!hasPremiumAccess && (
+                    {tool.requiresPro && !hasPremiumAccess && (
                       <Lock size={12} color="#B89146" />
                     )}
                   </View>

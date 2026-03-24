@@ -77,7 +77,8 @@ export function NotificationPermissionModal({ onRequestPermission }: Props) {
     await AsyncStorage.setItem(STORAGE_KEY, "dismissed");
   }
 
-  const bg = isDark ? "#0B1120" : "#FFFFFF";
+  // surface.dark = #211C17 (Warm Charcoal), surface.light = #FFFFFF
+  const bg = isDark ? "#211C17" : "#FFFFFF";
   const textPrimary = isDark ? "#F8FAFC" : "#0F172A";
   const textSecondary = isDark ? "#94A3B8" : "#64748B";
   const border = isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9";
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#1E3A5F",
+    backgroundColor: "#B89146",
     borderRadius: 16,
     paddingVertical: 15,
     marginBottom: 12,

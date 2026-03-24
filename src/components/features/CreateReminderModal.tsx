@@ -448,7 +448,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
           style={{ flex: 1, width: "100%", justifyContent: "flex-end" }}
         >
           <View
-            className={`w-full rounded-t-[32px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden ${
+            className={`w-full rounded-t-[32px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden ${
               viewMode === "full" ? "flex-1 max-h-[90%] pb-4" : "pb-10"
             }`}
           >

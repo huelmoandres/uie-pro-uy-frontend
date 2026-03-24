@@ -11,6 +11,8 @@ export default function HerramientasLayout() {
       }}
     >
       <Stack.Screen name="index" />
+      <Stack.Screen name="ai-chat" />
+      <Stack.Screen name="ai-chat-history" />
       <Stack.Screen name="sedes" />
       <Stack.Screen name="tributos" />
     </Stack>

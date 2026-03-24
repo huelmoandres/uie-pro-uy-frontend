@@ -142,7 +142,7 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
           >
             <Animated.View
               entering={SlideInDown.duration(280).springify()}
-              className="bg-white dark:bg-slate-900 rounded-t-[28px] overflow-hidden"
+              className="bg-white dark:bg-surface-dark rounded-t-[28px] overflow-hidden"
             >
             {/* Handle */}
             <View className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-700 self-center mt-3" />
@@ -241,7 +241,7 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
               {!isCreating && !editingId && tags.length < 20 && (
                 <Pressable
                   onPress={handleStartCreate}
-                  className="flex-row items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 active:opacity-60"
+                  className="flex-row items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-white/10 active:opacity-60"
                 >
                   <Plus size={14} color="#B89146" />
                   <Text className="text-[13px] font-sans-semi text-accent">
@@ -301,7 +301,7 @@ const InlineTagForm = ({
   onCancel,
   isSaving,
 }: InlineTagFormProps) => (
-  <View className="gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40">
+  <View className="gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5">
     {/* Input de nombre */}
     <TextInput
       value={name}
@@ -309,7 +309,7 @@ const InlineTagForm = ({
       placeholder="Nombre de la etiqueta..."
       placeholderTextColor="#94A3B8"
       maxLength={40}
-      className="text-[13px] font-sans text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900"
+      className="text-[13px] font-sans text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 bg-white dark:bg-surface-dark"
     />
 
     {/* Picker de color */}
@@ -330,7 +330,7 @@ const InlineTagForm = ({
     <View className="flex-row gap-2 justify-end">
       <Pressable
         onPress={onCancel}
-        className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 active:opacity-60"
+        className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 active:opacity-60"
       >
         <Text className="text-[12px] font-sans-semi text-slate-500">
           Cancelar

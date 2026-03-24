@@ -5,3 +5,4 @@ export * from "./ReferralService";
 export * from "./VenueService";
 export * from "./ReminderService";
 export * from "./TributoService";
+export * from "./AiService";

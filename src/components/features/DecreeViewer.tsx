@@ -124,7 +124,7 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
           </Pressable>
 
           {/* Sheet */}
-          <View className="w-full max-h-[88%] rounded-t-[32px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden">
+          <View className="w-full max-h-[88%] rounded-t-[32px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden">
             {/* Handle */}
             <View className="items-center pt-4 pb-2">
               <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />

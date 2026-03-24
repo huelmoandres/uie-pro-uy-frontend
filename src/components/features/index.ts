@@ -25,3 +25,6 @@ export * from "./FaqAccordion";
 export * from "./TributoCard";
 export * from "./PremiumGateModal";
 export * from "./DashboardSharedComponents";
+export * from "./ai/TypingIndicator";
+export * from "./ai/MessageBubble";
+export * from "./ai/ChatModeTabs";

@@ -77,7 +77,7 @@ export const SedesFilterModal = React.memo(
             <View style={modalBottomSheetStyles.backdrop} />
           </Pressable>
 
-          <View className="w-full h-[95%] rounded-t-[32px] bg-white dark:bg-[#0B1120] border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden flex-col">
+          <View className="w-full h-[95%] rounded-t-[32px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden flex-col">
             <View className="items-center pt-4 pb-2">
               <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />
             </View>
@@ -222,7 +222,7 @@ export const SedesFilterModal = React.memo(
                 onPress={handleClear}
                 className="px-5 py-3 active:opacity-70"
               >
-                <Text className="text-sm font-sans-semi text-slate-500">
+                <Text className="text-sm font-sans-semi text-slate-500 dark:text-slate-400">
                   Limpiar
                 </Text>
               </Pressable>

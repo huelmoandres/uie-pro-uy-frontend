@@ -68,7 +68,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         </Pressable>
 
         {/* Modal Container */}
-        <View className="w-[88%] max-w-[360px] overflow-hidden rounded-[32px] bg-white dark:bg-[#0B1120] border border-slate-100 dark:border-white/5 shadow-2xl">
+        <View className="w-[88%] max-w-[360px] overflow-hidden rounded-[32px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-2xl">
           <View className="p-8 items-center">
             {/* Status Icon Wrapper */}
             <View
@@ -96,7 +96,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               className="flex-1 items-center justify-center py-5 active:bg-slate-50 dark:active:bg-white/5"
               onPress={onCancel}
             >
-              <Text className="font-sans-semi text-sm text-slate-400 uppercase tracking-wider">
+              <Text className="font-sans-semi text-sm text-slate-400 dark:text-slate-300 uppercase tracking-wider">
                 {cancelText}
               </Text>
             </Pressable>

@@ -49,7 +49,7 @@ export const ProfileDataWarningModal: React.FC<ProfileDataWarningModalProps> = (
           <View style={styles.backdropDim} />
         </Pressable>
 
-        <View className="w-[88%] max-w-[360px] overflow-hidden rounded-[24px] bg-white dark:bg-[#0B1120] border border-slate-100 dark:border-white/5 shadow-2xl">
+        <View className="w-[88%] max-w-[360px] overflow-hidden rounded-[24px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-2xl">
           <View className="p-6">
             <View className="mb-4 h-12 w-12 items-center justify-center rounded-[16px] bg-accent/10">
               <Info size={24} color="#B89146" />

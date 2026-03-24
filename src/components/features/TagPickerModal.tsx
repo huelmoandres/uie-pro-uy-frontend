@@ -88,7 +88,7 @@ export const TagPickerModal = React.memo(
           />
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
-          <View className="bg-white dark:bg-slate-900 rounded-t-[28px] overflow-hidden shadow-2xl">
+          <View className="bg-white dark:bg-surface-dark rounded-t-[28px] overflow-hidden shadow-2xl">
             {/* Handle */}
             <View className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-700 self-center mt-3" />
 
@@ -124,7 +124,7 @@ export const TagPickerModal = React.memo(
               ) : tags.length === 0 ? (
                 <View className="items-center py-8 gap-2">
                   <Tag size={28} color="#CBD5E1" />
-                  <Text className="text-[13px] font-sans text-slate-400 text-center">
+                  <Text className="text-[13px] font-sans text-slate-400 dark:text-slate-300 text-center">
                     Todavía no creaste etiquetas.{"\n"}Creá una desde
                     Configuración.
                   </Text>
@@ -139,8 +139,8 @@ export const TagPickerModal = React.memo(
                       disabled={isPending}
                       className={`flex-row items-center justify-between px-3 py-2.5 rounded-xl border active:opacity-70 ${
                         isAssigned
-                          ? "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
-                          : "border-slate-100 dark:border-slate-800"
+                          ? "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10"
+                          : "border-slate-100 dark:border-white/5"
                       }`}
                     >
                       <View className="flex-row items-center gap-3">
@@ -160,7 +160,7 @@ export const TagPickerModal = React.memo(
             </ScrollView>
 
             {/* Footer / Botón Aplicar */}
-            <View className="px-5 py-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-800/20">
+            <View className="px-5 py-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5">
               <Pressable
                 onPress={handleApply}
                 disabled={isPending}
