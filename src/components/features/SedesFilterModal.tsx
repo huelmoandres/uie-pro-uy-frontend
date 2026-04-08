@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { BlurView } from "expo-blur";
 import { X, SlidersHorizontal } from "lucide-react-native";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
 import { modalBottomSheetStyles } from "@utils/modalStyles";
+import { dismissKeyboard } from "@utils/keyboard";
 import type { IVenuesQuery, IVenueFilters } from "@app-types/venue.types";
 
 interface Props {
@@ -34,6 +35,11 @@ export const SedesFilterModal = React.memo(
 
     useModalKeyboardDismiss(visible);
 
+    const closeModal = useCallback(() => {
+      dismissKeyboard();
+      onClose();
+    }, [onClose]);
+
     const updateDraft = (key: keyof IVenuesQuery, value: unknown) => {
       setDraft((prev) => ({ ...prev, [key]: value }));
     };
@@ -44,6 +50,7 @@ export const SedesFilterModal = React.memo(
         search: draft.search?.trim() || undefined,
         page: 1,
       });
+      dismissKeyboard();
       onClose();
     };
 
@@ -65,7 +72,7 @@ export const SedesFilterModal = React.memo(
         visible={visible}
         animationType="slide"
         statusBarTranslucent
-        onRequestClose={onClose}
+        onRequestClose={closeModal}
       >
         <View style={modalBottomSheetStyles.overlay}>
           <BlurView
@@ -73,11 +80,17 @@ export const SedesFilterModal = React.memo(
             tint="dark"
             style={StyleSheet.absoluteFill}
           />
-          <Pressable style={StyleSheet.absoluteFill} onPress={onClose}>
+          <Pressable
+            style={[StyleSheet.absoluteFill, { zIndex: 0 }]}
+            onPress={closeModal}
+          >
             <View style={modalBottomSheetStyles.backdrop} />
           </Pressable>
 
-          <View className="w-full h-[95%] rounded-t-[32px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden flex-col">
+          <View
+            style={{ zIndex: 1 }}
+            className="w-full h-[95%] rounded-t-[32px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden flex-col"
+          >
             <View className="items-center pt-4 pb-2">
               <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />
             </View>
@@ -92,7 +105,7 @@ export const SedesFilterModal = React.memo(
                 </Text>
               </View>
               <Pressable
-                onPress={onClose}
+                onPress={closeModal}
                 className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
               >
                 <X size={15} color="#94A3B8" />

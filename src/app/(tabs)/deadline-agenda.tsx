@@ -43,6 +43,7 @@ import {
   LoadMoreButton,
 } from "@components/ui";
 import { INFO_HINTS } from "@/constants/InfoHints";
+import { scrollContentBottomPadding } from "@utils/safeAreaLayout";
 import { useColorScheme } from "@/components/base/useColorScheme";
 import type {
   IAgendaItem,
@@ -475,7 +476,10 @@ export default function DeadlineAgendaScreen() {
   return (
     <PageContainer withHeader={false}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 48 }}
+        contentContainerStyle={{
+          // PageContainer ya aplica insets.bottom; solo aire interno al scroll.
+          paddingBottom: scrollContentBottomPadding(0, 36),
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

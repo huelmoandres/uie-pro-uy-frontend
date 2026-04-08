@@ -10,6 +10,7 @@ import {
   Switch,
 } from "react-native";
 import { Stack, router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppColorScheme } from "@hooks/useAppColorScheme";
 import { useBiometric } from "@hooks/useBiometric";
 import {
@@ -45,6 +46,7 @@ import { ManageTagsModal, PremiumGateModal } from "@components/features";
 import { usePremiumGate, useUpdateProfile, useDeleteAccount } from "@hooks";
 import { InfoButton, ConfirmationModal } from "@components/ui";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
+import { scrollContentBottomPadding } from "@utils/safeAreaLayout";
 import { INFO_HINTS } from "@constants/InfoHints";
 import {
   isSimulateCancelledTrialEnabled,
@@ -79,6 +81,7 @@ export default function SettingsScreen() {
   const deleteAccountMutation = useDeleteAccount();
   const [debugSimulateEnabled, setDebugSimulateEnabled] = useState(false);
   const [debugSimulateLoading, setDebugSimulateLoading] = useState(false);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (__DEV__) {
@@ -137,7 +140,9 @@ export default function SettingsScreen() {
       >
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{
+            paddingBottom: scrollContentBottomPadding(insets.bottom, 20),
+          }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >

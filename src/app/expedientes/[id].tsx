@@ -14,7 +14,6 @@ import {
   Modal,
   TextInput,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -60,6 +59,7 @@ import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
 import { stripHtml, getYearInAppTimezone } from "@utils/formatters";
 import { flattenTimeline } from "@app-types/expediente.types";
+import { useKeyboardAvoidingViewProps } from "@hooks/useKeyboardAvoidingViewProps";
 
 // ── Notes editor ──────────────────────────────────────────────────────────────
 function NotesEditor({
@@ -105,6 +105,8 @@ function NotesEditor({
 
   const hasChanges = draft.trim() !== (savedNotes ?? initialNotes ?? "").trim();
 
+  const notesKeyboardProps = useKeyboardAvoidingViewProps("screen");
+
   return (
     <View className="mb-8">
       <View className="flex-row items-center justify-between mb-3">
@@ -130,9 +132,7 @@ function NotesEditor({
         )}
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+      <KeyboardAvoidingView {...notesKeyboardProps}>
         <View
           className={`rounded-2xl border overflow-hidden ${
             editing
@@ -244,14 +244,14 @@ export default function ExpedienteDetailScreen() {
 
   const availableYears = useMemo(() => {
     if (!data) return [];
-    const flat = flattenTimeline(data.movements);
+    const flat = flattenTimeline(data.movements ?? []);
     const years = new Set(flat.map((m) => getYearInAppTimezone(m.fecha)));
     return Array.from(years).sort((a, b) => b - a);
   }, [data]);
 
   const filteredMovements = useMemo(() => {
     if (!data) return [];
-    return flattenTimeline(data.movements).filter((m) => {
+    return flattenTimeline(data.movements ?? []).filter((m) => {
       const matchesDecree =
         decreeFilter === "all"
           ? true
@@ -527,7 +527,7 @@ export default function ExpedienteDetailScreen() {
           </ScrollView>
 
           {/* List */}
-          {item.movements.length === 0 ? (
+          {(item.movements?.length ?? 0) === 0 ? (
             <View className="items-center py-10">
               <FileText size={36} color="#94A3B8" />
               <Text className="mt-3 text-sm font-sans-semi text-slate-400">

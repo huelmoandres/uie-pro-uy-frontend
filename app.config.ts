@@ -47,6 +47,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       ...base.android,
       package: isProduction ? "com.iueprouy.app" : "com.iueprouy.dev",
+      softwareKeyboardLayoutMode: "resize",
     },
   };
 };

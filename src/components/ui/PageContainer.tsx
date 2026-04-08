@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
+import { scrollContentBottomPadding } from "@utils/safeAreaLayout";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface PageContainerProps extends ViewProps {
@@ -49,7 +50,7 @@ export const PageContainer = forwardRef<ScrollView, PageContainerProps>(
         ? {
             flexGrow: 1,
             paddingTop: withHeader ? 0 : insets.top,
-            paddingBottom: insets.bottom + 40,
+            paddingBottom: scrollContentBottomPadding(insets.bottom, 28),
           }
         : {
             paddingTop: withHeader ? 0 : insets.top,

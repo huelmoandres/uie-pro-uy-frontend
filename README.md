@@ -65,6 +65,7 @@ xcrun simctl list devices
 
 # Arrancar un simulador específico
 xcrun simctl boot "iPhone 12 Pro Max (Screenshots)"
+xcrun simctl boot "iPad Pro 13-inch (M4)"
 open -a Simulator
 ```
 

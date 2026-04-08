@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useCallback } from "react";
 import {
   Modal,
   Pressable,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { useForm, Controller } from "react-hook-form";
@@ -21,7 +22,13 @@ import {
   type FollowExpedienteFormData,
 } from "@schemas/auth.schema";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
-import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
+import { useAndroidKeyboardScroll } from "@hooks/useAndroidKeyboardScroll";
+import { dismissKeyboard } from "@utils/keyboard";
+import {
+  useKeyboardAvoidingViewProps,
+  useSheetBottomPadding,
+} from "@hooks/useKeyboardAvoidingViewProps";
+import { modalKeyboardSheetLayer } from "@utils/modalStyles";
 import {
   extractApiErrorMessage,
   extractApiErrorCode,
@@ -46,6 +53,18 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
   const queryClient = useQueryClient();
   const { trackEvent } = useAnalytics();
   const inputRef = useRef<TextInput>(null);
+  const formScrollRef = useRef<ScrollView>(null);
+  /** Posición del bloque IUE dentro del ScrollView (para subir el campo con el teclado en Android). */
+  const iueSectionOffsetY = useRef(0);
+
+  const scrollIueIntoView = useCallback(() => {
+    const y = Math.max(0, iueSectionOffsetY.current - 24);
+    requestAnimationFrame(() => {
+      formScrollRef.current?.scrollTo({ y, animated: true });
+    });
+  }, []);
+
+  useAndroidKeyboardScroll(scrollIueIntoView, visible);
 
   const {
     control,
@@ -59,11 +78,15 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
   });
 
   const handleClose = () => {
+    dismissKeyboard();
     reset();
     onClose();
   };
 
   useModalKeyboardDismiss(visible);
+
+  const keyboardAvoidingProps = useKeyboardAvoidingViewProps("modal");
+  const sheetBottomPadding = useSheetBottomPadding(14);
 
   const onSubmit = async ({ iue }: FollowExpedienteFormData) => {
     try {
@@ -110,45 +133,65 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
     >
       <View style={styles.overlay}>
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
-        <Pressable style={StyleSheet.absoluteFill} onPress={handleClose}>
+        <Pressable
+          style={[StyleSheet.absoluteFill, { zIndex: 0 }]}
+          onPress={handleClose}
+        >
           <View style={styles.backdropDim} />
         </Pressable>
 
         <KeyboardAvoidingView
-          {...KEYBOARD_AVOIDING_VIEW_PROPS}
-          className="w-full"
+          {...keyboardAvoidingProps}
+          style={modalKeyboardSheetLayer}
+          pointerEvents="box-none"
         >
-          <View className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 shadow-2xl pb-10 px-6 pt-6">
+          <View
+            pointerEvents="auto"
+            style={{ paddingBottom: sheetBottomPadding }}
+            className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 shadow-2xl px-6 pt-6"
+          >
             {/* Handle */}
             <View className="items-center mb-6">
               <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />
             </View>
 
-            {/* Header */}
-            <View className="flex-row items-center justify-between mb-8">
-              <View className="flex-row items-center gap-3">
-                <View className="h-10 w-10 items-center justify-center rounded-[16px] bg-accent/10">
-                  <PlusCircle size={22} color="#B89146" />
+            <ScrollView
+              ref={formScrollRef}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+              contentContainerStyle={{ paddingBottom: 8 }}
+            >
+              {/* Header */}
+              <View className="flex-row items-center justify-between mb-8">
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-[16px] bg-accent/10">
+                    <PlusCircle size={22} color="#B89146" />
+                  </View>
+                  <View>
+                    <Text className="text-[10px] font-sans-bold uppercase tracking-[2px] text-accent">
+                      Nueva Suscripción
+                    </Text>
+                    <Text className="text-lg font-sans-bold text-slate-900 dark:text-white leading-tight">
+                      Seguir Expediente
+                    </Text>
+                  </View>
                 </View>
-                <View>
-                  <Text className="text-[10px] font-sans-bold uppercase tracking-[2px] text-accent">
-                    Nueva Suscripción
-                  </Text>
-                  <Text className="text-lg font-sans-bold text-slate-900 dark:text-white leading-tight">
-                    Seguir Expediente
-                  </Text>
-                </View>
+                <Pressable
+                  onPress={handleClose}
+                  className="h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
+                >
+                  <X size={16} color="#94A3B8" />
+                </Pressable>
               </View>
-              <Pressable
-                onPress={handleClose}
-                className="h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
-              >
-                <X size={16} color="#94A3B8" />
-              </Pressable>
-            </View>
 
-            {/* IUE Field */}
-            <View className="mb-2">
+              {/* IUE Field */}
+              <View
+                className="mb-2"
+                onLayout={(e) => {
+                  iueSectionOffsetY.current = e.nativeEvent.layout.y;
+                }}
+              >
               <Text className="mb-2 ml-1 text-[10px] font-sans-bold uppercase tracking-[1.5px] text-slate-400">
                 Número de Expediente (IUE)
               </Text>
@@ -175,6 +218,11 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
                         onChange(v.replace(/[^0-9\-\/]/g, ""));
                       }}
                       onBlur={onBlur}
+                      onFocus={() => {
+                        scrollIueIntoView();
+                        setTimeout(scrollIueIntoView, 120);
+                        setTimeout(scrollIueIntoView, 280);
+                      }}
                       autoCapitalize="none"
                       keyboardType="numbers-and-punctuation"
                       returnKeyType="done"
@@ -201,19 +249,20 @@ export const FollowExpedienteModal: React.FC<FollowExpedienteModalProps> = ({
             </Text>
 
             {/* Submit */}
-            <Pressable
-              className="items-center justify-center rounded-2xl bg-accent py-4 shadow-lg shadow-accent/30 active:scale-[0.98] active:bg-[#8C6D2E] disabled:opacity-60"
-              onPress={handleSubmit(onSubmit)}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Text className="text-sm font-sans-bold uppercase tracking-[2px] text-white">
-                  Comenzar a Seguir
-                </Text>
-              )}
-            </Pressable>
+              <Pressable
+                className="items-center justify-center rounded-2xl bg-accent py-4 shadow-lg shadow-accent/30 active:scale-[0.98] active:bg-[#8C6D2E] disabled:opacity-60"
+                onPress={handleSubmit(onSubmit)}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text className="text-sm font-sans-bold uppercase tracking-[2px] text-white">
+                    Comenzar a Seguir
+                  </Text>
+                )}
+              </Pressable>
+            </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </View>

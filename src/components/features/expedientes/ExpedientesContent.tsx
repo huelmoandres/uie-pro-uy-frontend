@@ -175,6 +175,8 @@ export function ExpedientesContent({
         keyExtractor={(item) => item.iue}
         extraData={selectedIues}
         renderItem={renderItem}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={{ paddingTop: 24, paddingBottom: 0 }}
         onRefresh={onRefresh}
         refreshing={isRefetching}

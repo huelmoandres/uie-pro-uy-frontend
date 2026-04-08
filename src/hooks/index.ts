@@ -24,6 +24,8 @@ export * from "./useTagMutations";
 export * from "./useReminders";
 export * from "./useReminderMutations";
 export * from "./useModalKeyboardDismiss";
+export * from "./useAndroidKeyboardScroll";
+export * from "./useKeyboardAvoidingViewProps";
 export * from "./useSubscriptionExpiry";
 export * from "./useTributos";
 export * from "./usePremiumGate";

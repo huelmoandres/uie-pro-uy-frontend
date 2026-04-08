@@ -14,7 +14,7 @@ import { apiClient } from "./client";
  * IueFormatter.format() converts colons back to slashes.
  */
 function iueToPathParam(iue: string): string {
-  return encodeURIComponent(iue.replace("/", ":"));
+  return encodeURIComponent(iue.replace(/\//g, ":"));
 }
 
 /** Serializa arrays a string comma-separated para query params del backend. */

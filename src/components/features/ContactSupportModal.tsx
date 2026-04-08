@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import {
   Modal,
   Pressable,
@@ -22,7 +22,13 @@ import {
 } from "@schemas/support.schema";
 import { useSupportMutation } from "@hooks/useSupportMutation";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
-import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
+import { useAndroidKeyboardScroll } from "@hooks/useAndroidKeyboardScroll";
+import { dismissKeyboard } from "@utils/keyboard";
+import {
+  useKeyboardAvoidingViewProps,
+  useSheetBottomPadding,
+} from "@hooks/useKeyboardAvoidingViewProps";
+import { modalKeyboardSheetLayer } from "@utils/modalStyles";
 import { useAuth } from "@context/AuthContext";
 
 interface ContactSupportModalProps {
@@ -70,7 +76,17 @@ export const ContactSupportModal: React.FC<ContactSupportModalProps> = ({
 
   useModalKeyboardDismiss(visible);
 
+  const supportScrollRef = useRef<ScrollView>(null);
+  const scrollSupportToEnd = useCallback(() => {
+    supportScrollRef.current?.scrollToEnd({ animated: true });
+  }, []);
+  useAndroidKeyboardScroll(scrollSupportToEnd, visible);
+
+  const keyboardAvoidingProps = useKeyboardAvoidingViewProps("modal");
+  const sheetBottomPadding = useSheetBottomPadding(14);
+
   const handleClose = () => {
+    dismissKeyboard();
     reset({ name: user?.name ?? "", email: user?.email ?? "", message: "" });
     onClose();
   };
@@ -109,15 +125,23 @@ export const ContactSupportModal: React.FC<ContactSupportModalProps> = ({
     >
       <View style={styles.overlay}>
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
-        <Pressable style={StyleSheet.absoluteFill} onPress={handleClose}>
+        <Pressable
+          style={[StyleSheet.absoluteFill, { zIndex: 0 }]}
+          onPress={handleClose}
+        >
           <View style={styles.backdropDim} />
         </Pressable>
 
         <KeyboardAvoidingView
-          {...KEYBOARD_AVOIDING_VIEW_PROPS}
-          className="w-full"
+          {...keyboardAvoidingProps}
+          style={modalKeyboardSheetLayer}
+          pointerEvents="box-none"
         >
-          <View className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-surface-dark border border-b-0 border-slate-200 dark:border-white/5 shadow-2xl px-6 pt-6 pb-10">
+          <View
+            pointerEvents="auto"
+            style={{ paddingBottom: sheetBottomPadding }}
+            className="w-full overflow-hidden rounded-t-[36px] bg-white dark:bg-surface-dark border border-b-0 border-slate-200 dark:border-white/5 shadow-2xl px-6 pt-6"
+          >
             {/* Handle */}
             <View className="items-center mb-5">
               <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />
@@ -147,6 +171,7 @@ export const ContactSupportModal: React.FC<ContactSupportModalProps> = ({
             </View>
 
             <ScrollView
+              ref={supportScrollRef}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ paddingBottom: 24 }}

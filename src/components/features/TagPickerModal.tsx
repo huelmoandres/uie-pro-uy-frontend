@@ -12,6 +12,7 @@ import { BlurView } from "expo-blur";
 import { X, Tag, CheckCircle2, Circle } from "lucide-react-native";
 import { useTags } from "@hooks/useTags";
 import { useTagMutations } from "@hooks/useTagMutations";
+import { dismissKeyboard } from "@utils/keyboard";
 import { TagBadge } from "@components/ui/TagBadge";
 
 interface Props {
@@ -67,8 +68,14 @@ export const TagPickerModal = React.memo(
       toAssign.forEach((tagId) => assignTag.mutate({ iue, tagId }));
       toRemove.forEach((tagId) => unassignTag.mutate({ iue, tagId }));
 
+      dismissKeyboard();
       onClose();
     }, [iue, draftTagIds, assignedTagIds, assignTag, unassignTag, onClose]);
+
+    const closeModal = useCallback(() => {
+      dismissKeyboard();
+      onClose();
+    }, [onClose]);
 
     const isPending = assignTag.isPending || unassignTag.isPending;
 
@@ -77,7 +84,7 @@ export const TagPickerModal = React.memo(
         visible={visible}
         transparent
         animationType="slide"
-        onRequestClose={onClose}
+        onRequestClose={closeModal}
         statusBarTranslucent
       >
         <View style={styles.overlay}>
@@ -86,9 +93,15 @@ export const TagPickerModal = React.memo(
             tint="dark"
             style={StyleSheet.absoluteFill}
           />
-          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+          <Pressable
+            style={[StyleSheet.absoluteFill, { zIndex: 0 }]}
+            onPress={closeModal}
+          />
 
-          <View className="bg-white dark:bg-surface-dark rounded-t-[28px] overflow-hidden shadow-2xl">
+          <View
+            style={{ zIndex: 1 }}
+            className="bg-white dark:bg-surface-dark rounded-t-[28px] overflow-hidden shadow-2xl"
+          >
             {/* Handle */}
             <View className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-700 self-center mt-3" />
 
@@ -101,7 +114,7 @@ export const TagPickerModal = React.memo(
                 </Text>
               </View>
               <Pressable
-                onPress={onClose}
+                onPress={closeModal}
                 hitSlop={10}
                 className="active:opacity-60"
               >

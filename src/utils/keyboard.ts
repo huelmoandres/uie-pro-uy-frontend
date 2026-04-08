@@ -1,14 +1,20 @@
-import { Platform } from "react-native";
+import { Keyboard } from "react-native";
 import type { KeyboardAvoidingViewProps } from "react-native";
 
+/** Cierra el IME (útil antes de cerrar modales o al tocar fuera en Android). */
+export function dismissKeyboard(): void {
+  Keyboard.dismiss();
+}
+
 /**
- * Props comunes para KeyboardAvoidingView.
- * Centraliza behavior y keyboardVerticalOffset para facilitar ajustes futuros.
+ * Props estáticas para KeyboardAvoidingView (pantallas sin hook).
  *
- * - iOS: 'padding' suele funcionar mejor; offset 0 para pantallas sin header (auth).
- * - Android: 'height'; offset 20 para ajuste fino.
+ * Preferí `useKeyboardAvoidingViewProps('screen' | 'modal')`: en Android modales, offset + fondo
+ * en `modalKeyboardSheetLayer` (ver `modalStyles.ts`).
+ *
+ * @see https://reactnative.dev/docs/keyboardavoidingview
  */
 export const KEYBOARD_AVOIDING_VIEW_PROPS: KeyboardAvoidingViewProps = {
-  behavior: Platform.OS === "ios" ? "padding" : "height",
-  keyboardVerticalOffset: Platform.OS === "ios" ? 0 : 20,
+  behavior: "padding",
+  keyboardVerticalOffset: 0,
 };

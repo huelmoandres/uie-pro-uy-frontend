@@ -9,6 +9,8 @@ export const DOMAIN_ERROR_CODES = {
   PAY_001: "PAY_001",
   /** Límite de expediente gratuito */
   EXP_007: "EXP_007",
+  /** Seguimiento inexistente al pin/notas (lista desactualizada u otro dispositivo) */
+  EXP_008: "EXP_008",
   /** Token inválido o expirado */
   AUTH_001: "AUTH_001",
 } as const;

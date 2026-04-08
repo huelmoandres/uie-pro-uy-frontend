@@ -7,6 +7,7 @@ import { router, type Href } from "expo-router";
 import { FEATURE_PARAM_TO_LABEL } from "@constants/premiumFeatures";
 import { useAnalytics } from "@hooks/useAnalytics";
 import { APP_NAME_SHORT } from "@/constants/app.constants";
+import { dismissKeyboard } from "@utils/keyboard";
 
 interface PremiumGateModalProps {
   visible: boolean;
@@ -30,6 +31,7 @@ export function PremiumGateModal({
 
   const handleGoToPaywall = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    dismissKeyboard();
     onClose();
     router.push(
       `/paywall?entry=gate&feature=${encodeURIComponent(feature)}` as Href,
@@ -45,21 +47,32 @@ export function PremiumGateModal({
 
   if (!visible) return null;
 
+  const closeModal = () => {
+    dismissKeyboard();
+    onClose();
+  };
+
   return (
     <Modal
       transparent
       visible={visible}
       animationType="fade"
       statusBarTranslucent={true}
-      onRequestClose={onClose}
+      onRequestClose={closeModal}
     >
       <View style={styles.overlay}>
         <BlurView intensity={25} tint="dark" style={StyleSheet.absoluteFill} />
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose}>
+        <Pressable
+          style={[StyleSheet.absoluteFill, { zIndex: 0 }]}
+          onPress={closeModal}
+        >
           <View style={styles.backdropDim} />
         </Pressable>
 
-        <View className="w-[88%] max-w-[360px] overflow-hidden rounded-[32px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-2xl">
+        <View
+          style={{ zIndex: 1 }}
+          className="w-[88%] max-w-[360px] overflow-hidden rounded-[32px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-2xl"
+        >
           <View className="p-8 items-center">
             <View className="mb-6 h-16 w-16 items-center justify-center rounded-[22px] bg-accent/10">
               <Lock size={32} color="#C5A059" />
@@ -78,7 +91,7 @@ export function PremiumGateModal({
           <View className="flex-row border-t border-slate-100 dark:border-white/5">
             <Pressable
               className="flex-1 items-center justify-center py-5 active:bg-slate-50 dark:active:bg-white/5"
-              onPress={onClose}
+              onPress={closeModal}
             >
               <Text className="font-sans-semi text-sm text-slate-400 uppercase tracking-wider">
                 Ahora no
@@ -98,7 +111,7 @@ export function PremiumGateModal({
           </View>
 
           <Pressable
-            onPress={onClose}
+            onPress={closeModal}
             className="absolute right-4 top-4 h-8 w-8 items-center justify-center rounded-full active:bg-slate-100 dark:active:bg-white/10"
           >
             <X size={16} color="#94A3B8" />

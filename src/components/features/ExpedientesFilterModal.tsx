@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { modalBottomSheetStyles } from "@utils/modalStyles";
 import type { IExpedientesQuery } from "@app-types/expediente.types";
 import { useTags } from "@hooks";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
+import { dismissKeyboard } from "@utils/keyboard";
 import { TagBadge } from "@components/ui";
 
 interface Props {
@@ -49,6 +50,11 @@ export const ExpedientesFilterModal = React.memo(
 
     useModalKeyboardDismiss(visible);
 
+    const closeModal = useCallback(() => {
+      dismissKeyboard();
+      onClose();
+    }, [onClose]);
+
     const updateDraft = (
       key: keyof IExpedientesQuery,
       value: IExpedientesQuery[keyof IExpedientesQuery],
@@ -78,6 +84,7 @@ export const ExpedientesFilterModal = React.memo(
         tagIds:
           hasPremiumAccess && draft.tagIds?.length ? draft.tagIds : undefined,
       });
+      dismissKeyboard();
       onClose();
     };
 
@@ -95,7 +102,7 @@ export const ExpedientesFilterModal = React.memo(
         visible={visible}
         animationType="slide"
         statusBarTranslucent
-        onRequestClose={onClose}
+        onRequestClose={closeModal}
       >
         <View style={modalBottomSheetStyles.overlay}>
           <BlurView
@@ -103,12 +110,18 @@ export const ExpedientesFilterModal = React.memo(
             tint="dark"
             style={StyleSheet.absoluteFill}
           />
-          <Pressable style={StyleSheet.absoluteFill} onPress={onClose}>
+          <Pressable
+            style={[StyleSheet.absoluteFill, { zIndex: 0 }]}
+            onPress={closeModal}
+          >
             <View style={modalBottomSheetStyles.backdrop} />
           </Pressable>
 
           {/* Sheet */}
-          <View className="w-full h-[95%] rounded-t-[32px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden flex-col">
+          <View
+            style={{ zIndex: 1 }}
+            className="w-full h-[95%] rounded-t-[32px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden flex-col"
+          >
             {/* Handle */}
             <View className="items-center pt-4 pb-2">
               <View className="h-1 w-10 rounded-full bg-slate-200 dark:bg-white/10" />
@@ -125,7 +138,7 @@ export const ExpedientesFilterModal = React.memo(
                 </Text>
               </View>
               <Pressable
-                onPress={onClose}
+                onPress={closeModal}
                 className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
               >
                 <X size={15} color="#94A3B8" />

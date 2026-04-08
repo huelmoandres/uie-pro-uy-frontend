@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react-native";
 import { INFO_HINTS } from "@/constants/InfoHints";
+import { scrollContentBottomPadding } from "@utils/safeAreaLayout";
 
 /**
  * Premium Profile Screen (Tab Two)
@@ -92,7 +93,11 @@ export default function ProfileScreen() {
   return (
     <PageContainer withHeader={false}>
       <ScrollView
-        contentContainerStyle={{ paddingTop: 64, paddingBottom: 40 }}
+        contentContainerStyle={{
+          paddingTop: 64,
+          // PageContainer ya aplica insets.bottom al contenedor; no duplicar.
+          paddingBottom: scrollContentBottomPadding(0, 28),
+        }}
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Header */}

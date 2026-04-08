@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text, ScrollView } from "react-native";
 import { Stack } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scrollContentBottomPadding } from "@utils/safeAreaLayout";
 import {
   ShieldAlert,
   Lock,
@@ -75,13 +77,18 @@ function PolicySection({
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function PrivacyScreen() {
+  const insets = useSafeAreaInsets();
+
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <Stack.Screen options={{ title: "Privacidad" }} />
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 20, paddingBottom: 48 }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: scrollContentBottomPadding(insets.bottom, 14),
+        }}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero */}

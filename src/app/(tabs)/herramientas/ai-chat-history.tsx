@@ -21,6 +21,8 @@ import {
   Trash2,
 } from "lucide-react-native";
 import { COLORS } from "@/constants/Colors";
+import { scrollContentBottomPadding } from "@utils/safeAreaLayout";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ChatConversationSummary, ChatMode } from "@app-types/ai.types";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -118,6 +120,7 @@ function ConversationItem({
 }
 
 export default function AiChatHistoryScreen() {
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -214,7 +217,12 @@ export default function AiChatHistoryScreen() {
           data={conversations ?? []}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
-          contentContainerStyle={{ paddingTop: 20, paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={{
+            paddingTop: 20,
+            paddingBottom: scrollContentBottomPadding(insets.bottom, 20),
+          }}
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}

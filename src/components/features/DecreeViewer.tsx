@@ -35,6 +35,8 @@ import type { IDecreePdfContext } from "@utils/pdf-template";
 import { isDecreeQuotaError } from "@utils/apiError";
 import { COLORS } from "@/constants/Colors";
 import { PremiumGateModal } from "./PremiumGateModal";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scrollContentBottomPadding } from "@utils/safeAreaLayout";
 
 interface Props {
   decree: IDecree;
@@ -50,6 +52,7 @@ interface Props {
 const LONG_DECREE_THRESHOLD = 600;
 
 export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
+  const insets = useSafeAreaInsets();
   const [visible, setVisible] = useState(false);
   const [summary, setSummary] = useState<IDecreeSummary | null>(null);
   const { shouldShow: shouldShowAiTooltip, markSeen: markAiTooltipSeen } =
@@ -188,7 +191,9 @@ export const DecreeViewer = React.memo(({ decree, decreeContext }: Props) => {
             {/* Scrollable content */}
             <ScrollView
               className="px-6 py-5"
-              contentContainerStyle={{ paddingBottom: 48 }}
+              contentContainerStyle={{
+                paddingBottom: scrollContentBottomPadding(insets.bottom, 14),
+              }}
               showsVerticalScrollIndicator={false}
             >
               {decree.isReserved && (

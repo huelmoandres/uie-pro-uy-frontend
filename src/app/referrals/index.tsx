@@ -30,6 +30,8 @@ import { APP_NAME } from "@/constants/app.constants";
 import { useAuth } from "@context/AuthContext";
 import { useSubscription } from "@context/SubscriptionContext";
 import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
+import { scrollContentBottomPadding } from "@utils/safeAreaLayout";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { referralCodeSchema } from "@schemas/referral.schema";
 import type { ReferralCodeForm } from "@app-types/referral.types";
 import { useAnalytics } from "@hooks/useAnalytics";
@@ -48,6 +50,7 @@ export default function ReferralsScreen() {
   const { data, isLoading } = useReferralCode();
   const applyMutation = useApplyReferralCode();
   const { trackEvent } = useAnalytics();
+  const insets = useSafeAreaInsets();
   const [copied, setCopied] = useState(false);
   // Para USER: referredById tiene el ID del colega. Para PARTNER: referredById es null
   // pero referralType='PARTNER'. Verificamos ambos para cubrir los dos casos.
@@ -106,7 +109,9 @@ export default function ReferralsScreen() {
       >
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{
+            paddingBottom: scrollContentBottomPadding(insets.bottom, 20),
+          }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >

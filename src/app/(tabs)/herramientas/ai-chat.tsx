@@ -3,12 +3,12 @@ import {
   ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { ArrowLeft, Bot, History, Send, Trash2 } from "lucide-react-native";
@@ -23,8 +23,12 @@ import {
   MessageBubble,
   TypingIndicator,
 } from "@components/features";
+import { bottomInsetPadding } from "@utils/safeAreaLayout";
+import { useKeyboardAvoidingViewProps } from "@hooks/useKeyboardAvoidingViewProps";
+import { useAndroidKeyboardScroll } from "@hooks/useAndroidKeyboardScroll";
 
 export default function AiChatScreen() {
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{
     conversationId?: string;
     mode?: string;
@@ -119,6 +123,14 @@ export default function AiChatScreen() {
 
   const keyExtractor = useCallback((item: ChatMessage) => item.id, []);
 
+  const scrollChatToEnd = useCallback(() => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, []);
+
+  useAndroidKeyboardScroll(scrollChatToEnd, true);
+
+  const keyboardAvoidingProps = useKeyboardAvoidingViewProps("screen");
+
   if (isLoadingConversation) {
     return (
       <View className="flex-1 bg-background-light dark:bg-background-dark items-center justify-center">
@@ -184,16 +196,14 @@ export default function AiChatScreen() {
       </View>
 
       {/* Messages */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={0}
-        className="flex-1"
-      >
+      <KeyboardAvoidingView {...keyboardAvoidingProps} className="flex-1">
         <FlatList
           ref={flatListRef}
           data={messages}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           contentContainerStyle={{ paddingVertical: 16, flexGrow: 1 }}
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center px-8 pt-16">
@@ -237,10 +247,18 @@ export default function AiChatScreen() {
         )}
 
         {/* Input bar */}
-        <View className="flex-row items-end gap-2 border-t border-slate-100 bg-white px-4 pb-8 pt-3 dark:bg-primary dark:border-white/5">
+        <View
+          className="flex-row items-end gap-2 border-t border-slate-100 bg-white px-4 pt-3 dark:bg-primary dark:border-white/5"
+          style={{ paddingBottom: bottomInsetPadding(insets.bottom, 8) }}
+        >
           <TextInput
             value={inputText}
             onChangeText={setInputText}
+            onFocus={() => {
+              scrollChatToEnd();
+              setTimeout(scrollChatToEnd, 120);
+              setTimeout(scrollChatToEnd, 280);
+            }}
             placeholder={`Preguntá sobre ${activeMode.label.toLowerCase()}...`}
             placeholderTextColor={COLORS.slate[400]}
             multiline

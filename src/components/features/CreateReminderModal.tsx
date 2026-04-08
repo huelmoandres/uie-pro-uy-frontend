@@ -32,7 +32,10 @@ import {
   DEFAULT_REMINDER_OFFSET,
   DEFAULT_REMINDER_HOUR,
 } from "@constants/reminders";
-import { modalBottomSheetStyles } from "@utils/modalStyles";
+import {
+  modalBottomSheetStyles,
+  modalKeyboardSheetLayer,
+} from "@utils/modalStyles";
 import {
   buildCreateReminderPayload,
   buildCreateFixedReminderPayload,
@@ -45,7 +48,12 @@ import { es } from "date-fns/locale";
 import { APP_TIMEZONE } from "@constants/timezone";
 import { useColorScheme } from "@/components/base/useColorScheme";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
-import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
+import { useAndroidKeyboardScroll } from "@hooks/useAndroidKeyboardScroll";
+import { dismissKeyboard } from "@utils/keyboard";
+import {
+  useKeyboardAvoidingViewProps,
+  useSheetBottomPadding,
+} from "@hooks/useKeyboardAvoidingViewProps";
 import type { IAgendaItem } from "@app-types/deadline-agenda.types";
 
 type ViewMode = "simple" | "full";
@@ -87,6 +95,12 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
   }, []);
 
+  const nudgeReminderScrollForKeyboard = useCallback(() => {
+    scrollRef.current?.scrollToEnd({ animated: true });
+  }, []);
+
+  useAndroidKeyboardScroll(nudgeReminderScrollForKeyboard, visible);
+
   const iue = agendaItem?.iue ?? iueProp ?? null;
   const caratula = agendaItem?.caratula ?? caratulaProp ?? null;
   const isPlazoContext = agendaItem != null && agendaItem.status === "OPEN";
@@ -114,6 +128,16 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
   }, [visible, isPlazoContext]);
 
   useModalKeyboardDismiss(visible);
+
+  const closeModal = useCallback(() => {
+    dismissKeyboard();
+    onClose();
+  }, [onClose]);
+
+  const keyboardAvoidingProps = useKeyboardAvoidingViewProps("modal");
+  const sheetBottomPadding = useSheetBottomPadding(
+    viewMode === "full" ? 10 : 18,
+  );
 
   const openAndroidDateTimePicker = () => {
     const minDate = new Date();
@@ -165,7 +189,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
     createReminder.mutate(
       buildCreateReminderPayload(agendaItem, selectedOffset),
       {
-        onSuccess: onClose,
+        onSuccess: closeModal,
       },
     );
   };
@@ -179,7 +203,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
         title || null,
         body || null,
       ),
-      { onSuccess: onClose },
+      { onSuccess: closeModal },
     );
   };
 
@@ -250,7 +274,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
             {!hasDeviceToken && (
               <Pressable
                 onPress={() => {
-                  onClose();
+                  closeModal();
                   router.push("/notifications" as Href);
                 }}
                 className="flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-4 py-3 mb-4"
@@ -425,7 +449,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
             {!hasDeviceToken && (
               <Pressable
                 onPress={() => {
-                  onClose();
+                  closeModal();
                   router.push("/notifications" as Href);
                 }}
                 className="flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-4 py-3 mb-4"
@@ -463,21 +487,27 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
       visible={visible}
       animationType="slide"
       statusBarTranslucent
-      onRequestClose={onClose}
+      onRequestClose={closeModal}
     >
       <View style={modalBottomSheetStyles.overlay}>
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose}>
+        <Pressable
+          style={[StyleSheet.absoluteFill, { zIndex: 0 }]}
+          onPress={closeModal}
+        >
           <View style={modalBottomSheetStyles.backdrop} />
         </Pressable>
 
         <KeyboardAvoidingView
-          {...KEYBOARD_AVOIDING_VIEW_PROPS}
-          style={{ flex: 1, width: "100%", justifyContent: "flex-end" }}
+          {...keyboardAvoidingProps}
+          style={modalKeyboardSheetLayer}
+          pointerEvents="box-none"
         >
           <View
+            pointerEvents="auto"
+            style={{ paddingBottom: sheetBottomPadding }}
             className={`w-full rounded-t-[32px] bg-white dark:bg-surface-dark border border-b-0 border-slate-100 dark:border-white/5 overflow-hidden ${
-              viewMode === "full" ? "flex-1 max-h-[90%] pb-4" : "pb-10"
+              viewMode === "full" ? "flex-1 max-h-[90%]" : ""
             }`}
           >
             <View className="items-center pt-4 pb-2">
@@ -502,7 +532,7 @@ export const CreateReminderModal: React.FC<CreateReminderModalProps> = ({
                 </Text>
               </View>
               <Pressable
-                onPress={onClose}
+                onPress={closeModal}
                 className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 active:opacity-70"
               >
                 <X size={15} color="#94A3B8" />

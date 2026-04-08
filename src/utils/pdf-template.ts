@@ -73,7 +73,7 @@ export function buildExpedientePdf(expediente: IExpediente): string {
     { locale: es },
   );
   const caratula = stripHtml(expediente.caratula) || "Sin carátula registrada";
-  const movements = flattenTimeline(expediente.movements);
+  const movements = flattenTimeline(expediente.movements ?? []);
 
   // ── Stats ──────────────────────────────────────────────────────────────
   const stats = expediente.stats;

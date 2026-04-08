@@ -4,6 +4,10 @@ import Toast from "react-native-toast-message";
 import { ExpedienteService } from "@services";
 import type { IPaginatedExpedientes } from "@app-types/expediente.types";
 import type { InfiniteData } from "@tanstack/react-query";
+import {
+  extractApiErrorCode,
+  extractApiErrorMessage,
+} from "@utils/apiError";
 
 function isInfiniteData(
   data: unknown,
@@ -61,17 +65,26 @@ export function usePinExpediente() {
       return { previous };
     },
 
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
       if (context?.previous) {
         context.previous.forEach(([key, value]) =>
           queryClient.setQueryData(key, value),
         );
       }
+      const code = extractApiErrorCode(err);
+      if (code === "EXP_008" || code === "TAG_005") {
+        void queryClient.invalidateQueries({
+          queryKey: ExpedienteService.queryKeys.all,
+        });
+      }
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",
         text1: "No se pudo guardar",
-        text2: "No se pudo marcar como favorito. Intentá de nuevo.",
+        text2: extractApiErrorMessage(
+          err,
+          "No se pudo marcar como favorito. Intentá de nuevo.",
+        ),
       });
     },
   });

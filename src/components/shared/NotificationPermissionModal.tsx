@@ -11,6 +11,7 @@ import { BlurView } from "expo-blur";
 import { Bell, CheckCircle2, RefreshCw, Shield } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColorScheme } from "@/components/base/useColorScheme";
+import { useSheetBottomPadding } from "@hooks/useKeyboardAvoidingViewProps";
 
 const STORAGE_KEY = "notification_permission_prompted";
 
@@ -31,6 +32,7 @@ export function NotificationPermissionModal({ onRequestPermission }: Props) {
   const [visible, setVisible] = useState(false);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const sheetBottomPadding = useSheetBottomPadding(6);
 
   useEffect(() => {
     void checkShouldShow();
@@ -103,7 +105,14 @@ export function NotificationPermissionModal({ onRequestPermission }: Props) {
         </Pressable>
 
         <View
-          style={[styles.sheet, { backgroundColor: bg, borderColor: border }]}
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: bg,
+              borderColor: border,
+              paddingBottom: sheetBottomPadding,
+            },
+          ]}
         >
           {/* Handle */}
           <View style={styles.handle}>
@@ -210,7 +219,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 32,
     borderWidth: 1,
     borderBottomWidth: 0,
-    paddingBottom: 40,
     paddingHorizontal: 24,
     alignItems: "center",
   },

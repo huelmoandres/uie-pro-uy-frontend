@@ -39,7 +39,7 @@ export const CompareExpedientePanel = React.memo(
       );
     }
 
-    const flatMovements = flattenTimeline(expediente.movements);
+    const flatMovements = flattenTimeline(expediente.movements ?? []);
     const lastMovements = flatMovements.slice(-LAST_MOVEMENTS_COUNT).reverse();
 
     return (

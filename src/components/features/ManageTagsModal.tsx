@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   Modal,
   Pressable,
@@ -8,6 +8,7 @@ import {
   View,
   ActivityIndicator,
   KeyboardAvoidingView,
+  StyleSheet,
 } from "react-native";
 import { X, Tag, Plus, Pencil, Trash2, Check } from "lucide-react-native";
 import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
@@ -17,7 +18,13 @@ import { useTagMutations } from "@hooks/useTagMutations";
 import { TagBadge } from "@components/ui/TagBadge";
 import { ConfirmationModal } from "@components/ui";
 import { useModalKeyboardDismiss } from "@hooks/useModalKeyboardDismiss";
-import { KEYBOARD_AVOIDING_VIEW_PROPS } from "@utils/keyboard";
+import { useAndroidKeyboardScroll } from "@hooks/useAndroidKeyboardScroll";
+import { dismissKeyboard } from "@utils/keyboard";
+import {
+  useKeyboardAvoidingViewProps,
+} from "@hooks/useKeyboardAvoidingViewProps";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { modalKeyboardSheetLayer } from "@utils/modalStyles";
 import type { ITag } from "@app-types/tag.types";
 
 // Paleta de colores predefinidos para el picker de color
@@ -119,7 +126,32 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
 
   const isSaving = createTag.isPending || updateTag.isPending;
 
+  const closeModal = useCallback(() => {
+    dismissKeyboard();
+    onClose();
+  }, [onClose]);
+
+  const tagsScrollRef = useRef<ScrollView>(null);
+  const scrollTagsToInput = useCallback(() => {
+    const run = () => tagsScrollRef.current?.scrollToEnd({ animated: true });
+    run();
+    setTimeout(run, 120);
+    setTimeout(run, 280);
+  }, []);
+
+  useAndroidKeyboardScroll(scrollTagsToInput, visible);
+
+  useEffect(() => {
+    if (!visible || (!isCreating && !editingId)) return;
+    const t = setTimeout(scrollTagsToInput, 80);
+    return () => clearTimeout(t);
+  }, [visible, isCreating, editingId, scrollTagsToInput]);
+
   useModalKeyboardDismiss(visible, resetForm);
+
+  const keyboardAvoidingProps = useKeyboardAvoidingViewProps("modal");
+  const { bottom: safeBottom } = useSafeAreaInsets();
+  const modalBottomSpacer = Math.max(safeBottom, 8);
 
   return (
     <>
@@ -127,20 +159,25 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
         visible={visible}
         transparent
         animationType="none"
-        onRequestClose={onClose}
+        onRequestClose={closeModal}
         statusBarTranslucent
       >
         <Animated.View
           entering={FadeIn.duration(200)}
-          className="flex-1 bg-black/50 justify-end"
+          className="flex-1 bg-black/50"
         >
-          <Pressable className="flex-1" onPress={onClose} />
+          <Pressable
+            style={[StyleSheet.absoluteFillObject, { zIndex: 0 }]}
+            onPress={closeModal}
+          />
 
           <KeyboardAvoidingView
-            {...KEYBOARD_AVOIDING_VIEW_PROPS}
-            style={{ width: "100%" }}
+            {...keyboardAvoidingProps}
+            style={modalKeyboardSheetLayer}
+            pointerEvents="box-none"
           >
             <Animated.View
+              pointerEvents="auto"
               entering={SlideInDown.duration(280).springify()}
               className="bg-white dark:bg-surface-dark rounded-t-[28px] overflow-hidden"
             >
@@ -156,7 +193,7 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
                   </Text>
                 </View>
                 <Pressable
-                  onPress={onClose}
+                  onPress={closeModal}
                   hitSlop={10}
                   className="active:opacity-60"
                 >
@@ -165,6 +202,7 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
               </View>
 
               <ScrollView
+                ref={tagsScrollRef}
                 className="max-h-80"
                 contentContainerStyle={{
                   paddingHorizontal: 20,
@@ -194,6 +232,7 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
                           onSave={handleSave}
                           onCancel={resetForm}
                           isSaving={isSaving}
+                          onNameFocus={scrollTagsToInput}
                         />
                       );
                     }
@@ -234,6 +273,7 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
                     onSave={handleSave}
                     onCancel={resetForm}
                     isSaving={isSaving}
+                    onNameFocus={scrollTagsToInput}
                   />
                 )}
 
@@ -257,8 +297,7 @@ export const ManageTagsModal = React.memo(({ visible, onClose }: Props) => {
                 )}
               </ScrollView>
 
-              {/* Bottom safe area */}
-              <View className="h-6" />
+              <View style={{ height: modalBottomSpacer }} />
             </Animated.View>
           </KeyboardAvoidingView>
         </Animated.View>
@@ -290,6 +329,7 @@ interface InlineTagFormProps {
   onSave: () => void;
   onCancel: () => void;
   isSaving: boolean;
+  onNameFocus?: () => void;
 }
 
 const InlineTagForm = ({
@@ -300,12 +340,14 @@ const InlineTagForm = ({
   onSave,
   onCancel,
   isSaving,
+  onNameFocus,
 }: InlineTagFormProps) => (
   <View className="gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5">
     {/* Input de nombre */}
     <TextInput
       value={name}
       onChangeText={onChangeName}
+      onFocus={onNameFocus}
       placeholder="Nombre de la etiqueta..."
       placeholderTextColor="#94A3B8"
       maxLength={40}
